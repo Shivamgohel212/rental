@@ -1,0 +1,620 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VÊTIR — Peer-to-Peer Luxury Clothing Rental</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+</head>
+<body>
+<script src="{% static 'js/script.js' %}"></script>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toast-msg">Item added to cart</span>
+</div>
+
+<!-- MOBILE NAV -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+  <div style="clear:both"></div>
+  <div class="logo" onclick="navigate('home'); closeMobileNav()">VÊT<span>IR</span></div>
+  <ul>
+    <li><a onclick="navigate('shop'); closeMobileNav()">Browse</a></li>
+    <li><a onclick="navigate('shop'); closeMobileNav()">Collections</a></li>
+    <li><a onclick="showToast('Coming soon!'); closeMobileNav()">List Outfit</a></li>
+    <li><a onclick="navigate('auth'); closeMobileNav()">Login / Register</a></li>
+  </ul>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-inner">
+    <a class="logo" onclick="navigate('home')">VÊT<span>IR</span></a>
+    <ul class="nav-links">
+      <li><a onclick="navigate('shop')">Browse</a></li>
+      <li><a onclick="navigate('shop')">Collections</a></li>
+      <li><a onclick="navigate('shop')">New Arrivals</a></li>
+      <li><a onclick="showToast('List your outfit — coming soon!')">List Outfit</a></li>
+      <li><a onclick="navigate('shop')">How It Works</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="cart-btn" onclick="navigate('cart')" title="Cart">
+        🛍️
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+      <button class="btn-primary" onclick="navigate('auth')">Login</button>
+      <button class="hamburger" onclick="openMobileNav()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ HOME PAGE ═══════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-eyebrow">India's Premier Rental Marketplace</div>
+        <h1>Wear <em>Luxury,</em><br>Not the Price Tag</h1>
+        <p class="hero-desc">Rent stunning designer ensembles for every occasion — weddings, galas, parties, and beyond. Sustainably sourced, curated with care.</p>
+        <div class="hero-cta">
+          <button class="btn-gold" onclick="navigate('shop')">Rent Now</button>
+          <button class="btn-outline" onclick="showToast('Listing page coming soon!')">List Your Outfit</button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-num">4,200+</span>
+            <span class="stat-label">Outfits</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">12K+</span>
+            <span class="stat-label">Happy Renters</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">95%</span>
+            <span class="stat-label">5-Star Reviews</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card-grid">
+          <div class="hero-card hc1">
+            <div class="hero-card-placeholder" style="height:100%;font-size:8rem;">👗</div>
+            <div class="label"><h4>Sabyasachi Lehenga</h4><p>₹3,200 / day</p></div>
+          </div>
+          <div class="hero-card hc2">
+            <div class="hero-card-placeholder" style="height:100%;font-size:6rem;">✨</div>
+            <div class="label"><h4>Manish Malhotra</h4><p>₹2,800 / day</p></div>
+          </div>
+          <div class="hero-card hc3">
+            <div class="hero-card-placeholder" style="height:100%;font-size:6rem;">💫</div>
+            <div class="label"><h4>Anita Dongre</h4><p>₹1,900 / day</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-eyebrow">Shop by Occasion</span>
+        <h2>Curated Collections</h2>
+        <p>Every ensemble tells a story. Find yours.</p>
+      </div>
+      <div class="categories-grid">
+        <div class="cat-card" onclick="filterAndShop('Designer')">
+          <div class="cat-img c-designer"><span style="font-size:5rem;opacity:0.6">💎</span></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-info">
+            <h3>Designer</h3>
+            <p>420+ pieces</p>
+          </div>
+        </div>
+        <div class="cat-card" onclick="filterAndShop('Party')">
+          <div class="cat-img c-party"><span style="font-size:5rem;opacity:0.6">🎉</span></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-info">
+            <h3>Party Wear</h3>
+            <p>680+ pieces</p>
+          </div>
+        </div>
+        <div class="cat-card" onclick="filterAndShop('Wedding')">
+          <div class="cat-img c-wedding"><span style="font-size:5rem;opacity:0.6">💍</span></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-info">
+            <h3>Wedding</h3>
+            <p>1,200+ pieces</p>
+          </div>
+        </div>
+        <div class="cat-card" onclick="filterAndShop('Ethnic')">
+          <div class="cat-img c-ethnic"><span style="font-size:5rem;opacity:0.6">🌸</span></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-info">
+            <h3>Ethnic Wear</h3>
+            <p>950+ pieces</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section style="background: var(--cream);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-eyebrow">Hand-picked for You</span>
+        <h2>Featured Pieces</h2>
+        <p>Our most-loved styles this season</p>
+      </div>
+      <div class="products-grid" id="featuredProducts"></div>
+      <div style="text-align:center; margin-top:3rem;">
+        <button class="btn-outline" onclick="navigate('shop')">View All Outfits</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="hiw-section">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-eyebrow">Simple & Seamless</span>
+        <h2>How It Works</h2>
+        <p>Renting has never been this effortless</p>
+      </div>
+      <div class="hiw-grid">
+        <div class="hiw-item">
+          <span class="hiw-num">01</span>
+          <span class="hiw-icon">🔍</span>
+          <h3>Browse & Choose</h3>
+          <p>Explore thousands of curated outfits. Filter by category, size, or budget. Find your perfect look effortlessly.</p>
+        </div>
+        <div class="hiw-item">
+          <span class="hiw-num">02</span>
+          <span class="hiw-icon">📅</span>
+          <h3>Book & Pay</h3>
+          <p>Select your rental dates, choose your size, and complete payment securely. We handle the rest.</p>
+        </div>
+        <div class="hiw-item">
+          <span class="hiw-num">03</span>
+          <span class="hiw-icon">📦</span>
+          <h3>Wear & Return</h3>
+          <p>Your outfit arrives dry-cleaned. After your event, simply schedule a pickup. We'll take it from there.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="logo">VÊT<span>IR</span></span>
+          <p>India's most trusted peer-to-peer luxury clothing rental marketplace. Wear designer, sustainably.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Explore</h5>
+          <ul>
+            <li><a onclick="navigate('shop')">Designer Wear</a></li>
+            <li><a onclick="navigate('shop')">Party Wear</a></li>
+            <li><a onclick="navigate('shop')">Wedding Outfits</a></li>
+            <li><a onclick="navigate('shop')">Ethnic Wear</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Account</h5>
+          <ul>
+            <li><a onclick="navigate('auth')">Login</a></li>
+            <li><a onclick="navigate('auth')">Register</a></li>
+            <li><a onclick="navigate('cart')">My Cart</a></li>
+            <li><a onclick="showToast('Orders page coming soon!')">My Orders</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Support</h5>
+          <ul>
+            <li><a>FAQs</a></li>
+            <li><a>Size Guide</a></li>
+            <li><a>Return Policy</a></li>
+            <li><a>Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 Vêtir. All rights reserved.</span>
+        <span>Privacy Policy · Terms of Use</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════ SHOP PAGE ═══════════════════════ -->
+<div class="page" id="page-shop">
+  <div class="shop-header">
+    <h1>Browse Collection</h1>
+    <div class="breadcrumb">Home <span>/</span> All Outfits</div>
+  </div>
+  <div class="shop-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-block">
+        <h4>Category</h4>
+        <div class="filter-option"><input type="checkbox" id="c1" onchange="applyFilters()"><label for="c1">Designer (420)</label></div>
+        <div class="filter-option"><input type="checkbox" id="c2" onchange="applyFilters()"><label for="c2">Party Wear (680)</label></div>
+        <div class="filter-option"><input type="checkbox" id="c3" onchange="applyFilters()"><label for="c3">Wedding (1,200)</label></div>
+        <div class="filter-option"><input type="checkbox" id="c4" onchange="applyFilters()"><label for="c4">Ethnic (950)</label></div>
+      </div>
+      <div class="sidebar-block">
+        <h4>Price / Day (₹)</h4>
+        <div class="price-range">
+          <input type="number" id="minPrice" placeholder="Min" value="0" onchange="applyFilters()">
+          <span style="color:var(--muted)">—</span>
+          <input type="number" id="maxPrice" placeholder="Max" value="10000" onchange="applyFilters()">
+        </div>
+      </div>
+      <div class="sidebar-block">
+        <h4>Size</h4>
+        <div class="size-grid">
+          <button class="size-btn" onclick="toggleSizeFilter(this)">XS</button>
+          <button class="size-btn" onclick="toggleSizeFilter(this)">S</button>
+          <button class="size-btn" onclick="toggleSizeFilter(this)">M</button>
+          <button class="size-btn" onclick="toggleSizeFilter(this)">L</button>
+          <button class="size-btn" onclick="toggleSizeFilter(this)">XL</button>
+          <button class="size-btn" onclick="toggleSizeFilter(this)">XXL</button>
+        </div>
+      </div>
+      <div class="sidebar-block">
+        <button class="btn-outline" style="width:100%" onclick="clearFilters()">Clear Filters</button>
+      </div>
+    </aside>
+    <!-- Products -->
+    <div class="shop-products">
+      <div class="shop-toolbar">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="shopSearch" placeholder="Search outfits..." oninput="applyFilters()">
+        </div>
+        <span class="results-count" id="resultCount">Loading...</span>
+        <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+          <option value="default">Sort By</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating">Top Rated</option>
+        </select>
+      </div>
+      <div class="shop-grid" id="shopGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PRODUCT DETAIL PAGE ═══════════════════════ -->
+<div class="page" id="page-detail">
+  <div class="detail-page">
+    <div class="detail-inner">
+      <!-- Images -->
+      <div class="detail-images">
+        <div class="main-image" id="mainProductImg"></div>
+        <div class="thumbs" id="productThumbs"></div>
+      </div>
+      <!-- Info -->
+      <div class="detail-info">
+        <div class="detail-breadcrumb" onclick="navigate('shop')">← Back to Browse</div>
+        <span class="product-cat" id="detailCat"></span>
+        <h1 id="detailName"></h1>
+        <div class="detail-rating-row">
+          <div class="product-rating">
+            <span class="stars" id="detailStars"></span>
+            <span id="detailRating"></span>
+          </div>
+          <span class="review-count" id="detailReviewCount"></span>
+        </div>
+        <div class="detail-price" id="detailPrice"></div>
+        <div class="detail-price-note">per day · includes dry cleaning</div>
+        <p class="detail-desc" id="detailDesc"></p>
+
+        <!-- Size -->
+        <span class="detail-section-label">Select Size</span>
+        <div class="size-selector" id="sizeSelector"></div>
+
+        <!-- Duration -->
+        <div class="duration-selector">
+          <span class="detail-section-label">Rental Duration</span>
+          <div class="duration-control">
+            <button class="dur-btn" onclick="changeDuration(-1)">−</button>
+            <div class="dur-val" id="durVal">1</div>
+            <button class="dur-btn" onclick="changeDuration(1)">+</button>
+          </div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:0.4rem;">days (max 7)</div>
+        </div>
+
+        <!-- Price Calc -->
+        <div class="price-calc">
+          <div class="price-calc-row"><span>Base price</span><span id="basePrice">—</span></div>
+          <div class="price-calc-row"><span>Duration</span><span id="durationLabel">1 day</span></div>
+          <div class="price-calc-row"><span>Security deposit</span><span id="depositLabel">—</span></div>
+          <div class="price-calc-row total"><span>Total</span><span class="amount" id="totalPrice">—</span></div>
+        </div>
+
+        <!-- Actions -->
+        <div class="detail-actions">
+          <button class="btn-primary" onclick="addToCartFromDetail()">Add to Cart</button>
+          <button class="btn-outline" onclick="addToCartFromDetail(true)">♡ Wishlist</button>
+        </div>
+
+        <div style="font-size:0.75rem; color:var(--muted); display:flex; gap:1.5rem;">
+          <span>✓ Free delivery & pickup</span>
+          <span>✓ Dry-cleaned</span>
+          <span>✓ Insured</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="reviews-section">
+      <div class="reviews-header">
+        <h3>Customer Reviews</h3>
+        <div class="avg-rating">
+          <span class="big-num" id="avgRatingNum">4.8</span>
+          <div class="stars" style="color:var(--gold)">★★★★★</div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:0.3rem;">Based on 234 reviews</div>
+        </div>
+      </div>
+      <div class="review-grid" id="reviewGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ CART PAGE ═══════════════════════ -->
+<div class="page" id="page-cart">
+  <div class="cart-layout">
+    <div>
+      <h2 class="cart-title">Shopping Cart</h2>
+      <div id="cartItems"></div>
+    </div>
+    <div class="order-summary" id="orderSummary">
+      <h3>Order Summary</h3>
+      <div id="summaryDetails"></div>
+      <div class="promo-row">
+        <input class="promo-input" type="text" placeholder="Promo code">
+        <button class="promo-apply" onclick="showToast('Promo code applied! 10% off')">Apply</button>
+      </div>
+      <button class="checkout-btn" onclick="navigate('checkout')">Proceed to Checkout →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ CHECKOUT PAGE ═══════════════════════ -->
+<div class="page" id="page-checkout">
+  <div class="checkout-layout">
+    <div>
+      <div class="checkout-steps">
+        <div class="step active">1. Details</div>
+        <div class="step">2. Address</div>
+        <div class="step">3. Payment</div>
+      </div>
+
+      <!-- Personal Details -->
+      <div class="form-section">
+        <h3>Personal Details</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" placeholder="Priya">
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" placeholder="Sharma">
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="priya@example.com">
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" placeholder="+91 98765 43210">
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Address -->
+      <div class="form-section">
+        <h3>Delivery Address</h3>
+        <div class="form-grid full">
+          <div class="form-group">
+            <label>Address Line 1</label>
+            <input type="text" placeholder="Flat / Building No.">
+          </div>
+          <div class="form-group">
+            <label>Address Line 2</label>
+            <input type="text" placeholder="Street / Area">
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top:1rem;">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" placeholder="Mumbai">
+          </div>
+          <div class="form-group">
+            <label>PIN Code</label>
+            <input type="text" placeholder="400001">
+          </div>
+          <div class="form-group">
+            <label>State</label>
+            <select>
+              <option>Maharashtra</option>
+              <option>Delhi</option>
+              <option>Karnataka</option>
+              <option>Tamil Nadu</option>
+              <option>Gujarat</option>
+              <option>Rajasthan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Rental Start Date</label>
+            <input type="date">
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment -->
+      <div class="form-section">
+        <h3>Payment Method</h3>
+        <div class="payment-options" id="paymentOptions">
+          <div class="payment-option selected" onclick="selectPayment(this, 'card')">
+            <input type="radio" name="payment" checked>
+            <div class="payment-option-label">
+              <strong>Credit / Debit Card</strong>
+              <span>Visa, Mastercard, RuPay</span>
+            </div>
+            <span style="margin-left:auto;font-size:1.3rem">💳</span>
+          </div>
+          <div class="payment-option" onclick="selectPayment(this, 'upi')">
+            <input type="radio" name="payment">
+            <div class="payment-option-label">
+              <strong>UPI</strong>
+              <span>PhonePe, Google Pay, Paytm</span>
+            </div>
+            <span style="margin-left:auto;font-size:1.3rem">📱</span>
+          </div>
+          <div class="payment-option" onclick="selectPayment(this, 'netbanking')">
+            <input type="radio" name="payment">
+            <div class="payment-option-label">
+              <strong>Net Banking</strong>
+              <span>All major banks</span>
+            </div>
+            <span style="margin-left:auto;font-size:1.3rem">🏦</span>
+          </div>
+          <div class="payment-option" onclick="selectPayment(this, 'cod')">
+            <input type="radio" name="payment">
+            <div class="payment-option-label">
+              <strong>Cash on Delivery</strong>
+              <span>Pay when you receive</span>
+            </div>
+            <span style="margin-left:auto;font-size:1.3rem">💵</span>
+          </div>
+        </div>
+        <div class="card-fields" id="cardFields">
+          <div class="form-group">
+            <label>Card Number</label>
+            <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)">
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Expiry Date</label>
+              <input type="text" placeholder="MM / YY" maxlength="7">
+            </div>
+            <div class="form-group">
+              <label>CVV</label>
+              <input type="password" placeholder="•••" maxlength="3">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Name on Card</label>
+            <input type="text" placeholder="PRIYA SHARMA">
+          </div>
+        </div>
+      </div>
+
+      <button class="confirm-btn" onclick="confirmBooking()">Confirm Booking & Pay →</button>
+    </div>
+
+    <!-- Order summary sidebar -->
+    <div class="order-summary" style="position:sticky; top:90px;">
+      <h3>Your Order</h3>
+      <div id="checkoutSummary"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ AUTH PAGE ═══════════════════════ -->
+<div class="page" id="page-auth">
+  <div class="auth-page">
+    <div class="auth-visual">
+      <div class="auth-visual-content">
+        <span class="auth-visual-icon">✨</span>
+        <h2>Wear the World's Best.</h2>
+        <p>Join 12,000+ renters who've discovered the joy of wearing luxury without the permanent cost.</p>
+      </div>
+    </div>
+    <div class="auth-form-area">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <div class="auth-form active" id="loginForm">
+        <h3>Welcome Back</h3>
+        <p>Sign in to your Vêtir account</p>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="Enter your password">
+        </div>
+        <div style="text-align:right; font-size:0.78rem; color:var(--gold); cursor:pointer; margin: 0.5rem 0 1rem;">Forgot password?</div>
+        <button class="btn-primary" onclick="showToast('Welcome back! Logged in successfully.'); navigate('home')">Sign In</button>
+        <div class="auth-divider">or continue with</div>
+        <div class="social-btns">
+          <button class="social-btn" onclick="showToast('Google login coming soon!')">🔵 Continue with Google</button>
+          <button class="social-btn" onclick="showToast('Facebook login coming soon!')">🔷 Continue with Facebook</button>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div class="auth-form" id="registerForm">
+        <h3>Create Account</h3>
+        <p>Join Vêtir and start renting today</p>
+        <div class="form-grid">
+          <div class="form-group"><label>First Name</label><input type="text" placeholder="Priya"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" placeholder="Sharma"></div>
+        </div>
+        <div class="form-group" style="margin-top:0.8rem;">
+          <label>Email</label>
+          <input type="email" placeholder="priya@example.com">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" placeholder="+91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="Min 8 characters">
+        </div>
+        <div style="font-size:0.75rem; color:var(--muted); margin: 0.5rem 0 1rem;">By registering, you agree to our <span style="color:var(--gold);cursor:pointer">Terms</span> and <span style="color:var(--gold);cursor:pointer">Privacy Policy</span>.</div>
+        <button class="btn-primary" onclick="showToast('Account created! Welcome to Vêtir 🎉'); navigate('home')">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <span class="modal-icon">🎉</span>
+    <h3>Booking Confirmed!</h3>
+    <p>Your outfit is on its way! You'll receive a confirmation email shortly. Expected delivery within 24 hours.</p>
+    <p style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; color:var(--gold); margin-bottom:1.5rem;">Booking ID: VTR-<span id="bookingId"></span></p>
+    <button class="btn-primary" onclick="closeModal()">Back to Home</button>
+  </div>
+</div>
+
+
+</body>
+</html>
