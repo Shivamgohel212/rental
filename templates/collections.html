@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Collections</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<nav>
+    <!-- navbar same as home -->
+</nav>
+
+<section>
+    <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-eyebrow">Shop by Occasion</span>
+        <h2>Curated Collections</h2>
+        <p>Every ensemble tells a story. Find yours.</p>
+      </div>
+      <div class="categories-grid">
+        <div class="cat-card" onclick="filterAndShop('Designer')">
+          <div class="cat-img c-designer"><span style="font-size:5rem;opacity:0.6">💎</span></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-info">
+            <h3>Designer</h3>
+            <p>420+ pieces</p>
+          </div>
+        </div>
+        <div class="cat-card" onclick="filterAndShop('Party')">
+          <div class="cat-img c-party"><span style="font-size:5rem;opacity:0.6">🎉</span></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-info">
+            <h3>Party Wear</h3>
+            <p>680+ pieces</p>
+          </div>
+        </div>
+        <div class="cat-card" onclick="filterAndShop('Wedding')">
+          <div class="cat-img c-wedding"><span style="font-size:5rem;opacity:0.6">💍</span></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-info">
+            <h3>Wedding</h3>
+            <p>1,200+ pieces</p>
+          </div>
+        </div>
+        <div class="cat-card" onclick="filterAndShop('Ethnic')">
+          <div class="cat-img c-ethnic"><span style="font-size:5rem;opacity:0.6">🌸</span></div>
+          <div class="cat-overlay"></div>
+          <div class="cat-info">
+            <h3>Ethnic Wear</h3>
+            <p>950+ pieces</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

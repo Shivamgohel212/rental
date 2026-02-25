@@ -26,23 +26,21 @@
   <div style="clear:both"></div>
   <div class="logo" onclick="navigate('home'); closeMobileNav()">VÊT<span>IR</span></div>
   <ul>
-    <li><a onclick="navigate('shop'); closeMobileNav()">Browse</a></li>
-    <li><a onclick="navigate('shop'); closeMobileNav()">Collections</a></li>
-    <li><a onclick="showToast('Coming soon!'); closeMobileNav()">List Outfit</a></li>
-    <li><a onclick="navigate('auth'); closeMobileNav()">Login / Register</a></li>
+    <li><a href="{% url 'browse' %}">Browse</a></li>
+    <li><a href="{% url 'collections' %}">Collections</a></li>
+    <li><a href="{% url 'how_it_works' %}">How It Works</a></li>
   </ul>
 </div>
 
 <!-- NAVBAR -->
 <nav>
   <div class="nav-inner">
-    <a class="logo" onclick="navigate('home')">VÊT<span>IR</span></a>
+    <a class="logo" href="{% url 'home' %}"></a>
     <ul class="nav-links">
-      <li><a onclick="navigate('shop')">Browse</a></li>
-      <li><a onclick="navigate('shop')">Collections</a></li>
-      <li><a onclick="navigate('shop')">New Arrivals</a></li>
-      <li><a onclick="showToast('List your outfit — coming soon!')">List Outfit</a></li>
-      <li><a onclick="navigate('shop')">How It Works</a></li>
+      <li><a href="{% url 'browse' %}">Browse</a></li>
+      <li><a href="{% url 'collections' %}">Collections</a></li>
+      <li><a href="{% url 'how_it_works' %}">How It Works</a></li>
+      
     </ul>
     <div class="nav-actions">
       <button class="cart-btn" onclick="navigate('cart')" title="Cart">
@@ -243,63 +241,6 @@
 </div>
 
 <!-- ═══════════════════════ SHOP PAGE ═══════════════════════ -->
-<div class="page" id="page-shop">
-  <div class="shop-header">
-    <h1>Browse Collection</h1>
-    <div class="breadcrumb">Home <span>/</span> All Outfits</div>
-  </div>
-  <div class="shop-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-block">
-        <h4>Category</h4>
-        <div class="filter-option"><input type="checkbox" id="c1" onchange="applyFilters()"><label for="c1">Designer (420)</label></div>
-        <div class="filter-option"><input type="checkbox" id="c2" onchange="applyFilters()"><label for="c2">Party Wear (680)</label></div>
-        <div class="filter-option"><input type="checkbox" id="c3" onchange="applyFilters()"><label for="c3">Wedding (1,200)</label></div>
-        <div class="filter-option"><input type="checkbox" id="c4" onchange="applyFilters()"><label for="c4">Ethnic (950)</label></div>
-      </div>
-      <div class="sidebar-block">
-        <h4>Price / Day (₹)</h4>
-        <div class="price-range">
-          <input type="number" id="minPrice" placeholder="Min" value="0" onchange="applyFilters()">
-          <span style="color:var(--muted)">—</span>
-          <input type="number" id="maxPrice" placeholder="Max" value="10000" onchange="applyFilters()">
-        </div>
-      </div>
-      <div class="sidebar-block">
-        <h4>Size</h4>
-        <div class="size-grid">
-          <button class="size-btn" onclick="toggleSizeFilter(this)">XS</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">S</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">M</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">L</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">XL</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">XXL</button>
-        </div>
-      </div>
-      <div class="sidebar-block">
-        <button class="btn-outline" style="width:100%" onclick="clearFilters()">Clear Filters</button>
-      </div>
-    </aside>
-    <!-- Products -->
-    <div class="shop-products">
-      <div class="shop-toolbar">
-        <div class="search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="shopSearch" placeholder="Search outfits..." oninput="applyFilters()">
-        </div>
-        <span class="results-count" id="resultCount">Loading...</span>
-        <select class="sort-select" id="sortSelect" onchange="applyFilters()">
-          <option value="default">Sort By</option>
-          <option value="price-asc">Price: Low to High</option>
-          <option value="price-desc">Price: High to Low</option>
-          <option value="rating">Top Rated</option>
-        </select>
-      </div>
-      <div class="shop-grid" id="shopGrid"></div>
-    </div>
-  </div>
-</div>
 
 <!-- ═══════════════════════ PRODUCT DETAIL PAGE ═══════════════════════ -->
 <div class="page" id="page-detail">
