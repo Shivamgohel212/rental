@@ -4,6 +4,11 @@
 <head>
     <title>Browse</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .shop-header {
+            padding: 90px 0 40px!important;
+        }
+    </style>
 </head>
 <body>
 <div>
@@ -59,7 +64,25 @@
           <option value="rating">Top Rated</option>
         </select>
       </div>
-      <div class="shop-grid" id="shopGrid"></div>
+      <div class="shop-grid">
+    {% for item in clothes %}
+
+        <div class="product-card">
+            <div class="product-img">
+                <img src="{{ item.image.url }}" alt="{{ item.title }}">
+            </div>
+
+            <div class="product-info">
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.brand }}</p>
+                <p>₹{{ item.price_per_day }} / day</p>
+            </div>
+        </div>
+
+    {% empty %}
+        <p>No outfits available.</p>
+    {% endfor %}
+</div>
     </div>
   </div>
   <script src="{% static 'js/script.js' %}"></script>

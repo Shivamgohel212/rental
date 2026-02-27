@@ -35,6 +35,7 @@ class Clothing(models.Model):
     image = models.ImageField(upload_to='clothing/')
     stock = models.IntegerField(default=1)
     is_available = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

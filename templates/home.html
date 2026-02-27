@@ -63,9 +63,16 @@
     <div class="hero-bg"></div>
     <div class="hero-pattern"></div>
     <div class="hero-content">
+        <div class="hero-slide active"></div>
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
       <div class="hero-text">
         <div class="hero-eyebrow">India's Premier Rental Marketplace</div>
-        <h1>Wear <em>Luxury,</em><br>Not the Price Tag</h1>
+        <h1>
+        Rent <span class="highlight">Luxury</span><br>
+        Own the Moment
+        </h1>
         <p class="hero-desc">Rent stunning designer ensembles for every occasion — weddings, galas, parties, and beyond. Sustainably sourced, curated with care.</p>
         <div class="hero-cta">
           <button class="btn-gold" onclick="navigate('shop')">Rent Now</button>
@@ -88,19 +95,16 @@
       </div>
       <div class="hero-visual">
         <div class="hero-card-grid">
-          <div class="hero-card hc1">
-            <div class="hero-card-placeholder" style="height:100%;font-size:8rem;">👗</div>
-            <div class="label"><h4>Sabyasachi Lehenga</h4><p>₹3,200 / day</p></div>
-          </div>
-          <div class="hero-card hc2">
-            <div class="hero-card-placeholder" style="height:100%;font-size:6rem;">✨</div>
-            <div class="label"><h4>Manish Malhotra</h4><p>₹2,800 / day</p></div>
-          </div>
-          <div class="hero-card hc3">
-            <div class="hero-card-placeholder" style="height:100%;font-size:6rem;">💫</div>
-            <div class="label"><h4>Anita Dongre</h4><p>₹1,900 / day</p></div>
-          </div>
+    {% for item in featured %}
+        <div class="hero-card">
+            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+            <div class="label">
+                <h4>{{ item.title }}</h4>
+                <p>₹{{ item.price_per_day }} / day</p>
+            </div>
         </div>
+    {% endfor %}
+</div>
       </div>
     </div>
   </section>
@@ -114,36 +118,22 @@
         <p>Every ensemble tells a story. Find yours.</p>
       </div>
       <div class="categories-grid">
-        <div class="cat-card" onclick="filterAndShop('Designer')">
-          <div class="cat-img c-designer"><span style="font-size:5rem;opacity:0.6">💎</span></div>
-          <div class="cat-overlay"></div>
-          <div class="cat-info">
-            <h3>Designer</h3>
-            <p>420+ pieces</p>
-          </div>
-        </div>
         <div class="cat-card" onclick="filterAndShop('Party')">
-          <div class="cat-img c-party"><span style="font-size:5rem;opacity:0.6">🎉</span></div>
+          <div class="cat-img">
+              <img src="{% static 'images/party2.jpg' %}" alt="party">
+          </div>
           <div class="cat-overlay"></div>
           <div class="cat-info">
             <h3>Party Wear</h3>
-            <p>680+ pieces</p>
           </div>
         </div>
         <div class="cat-card" onclick="filterAndShop('Wedding')">
-          <div class="cat-img c-wedding"><span style="font-size:5rem;opacity:0.6">💍</span></div>
-          <div class="cat-overlay"></div>
-          <div class="cat-info">
-            <h3>Wedding</h3>
-            <p>1,200+ pieces</p>
+          <div class="cat-img">
+              <img src="{% static 'images/wedding2.jpg' %}" alt="Wedding">
           </div>
-        </div>
-        <div class="cat-card" onclick="filterAndShop('Ethnic')">
-          <div class="cat-img c-ethnic"><span style="font-size:5rem;opacity:0.6">🌸</span></div>
           <div class="cat-overlay"></div>
           <div class="cat-info">
-            <h3>Ethnic Wear</h3>
-            <p>950+ pieces</p>
+            <h3>Wedding Wear</h3>
           </div>
         </div>
       </div>
@@ -158,7 +148,15 @@
         <h2>Featured Pieces</h2>
         <p>Our most-loved styles this season</p>
       </div>
-      <div class="products-grid" id="featuredProducts"></div>
+      <div class="products-grid">
+    {% for item in featured %}
+        <div class="product-card">
+            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+            <h3>{{ item.title }}</h3>
+            <p>₹{{ item.price_per_day }} / day</p>
+        </div>
+    {% endfor %}
+</div>
       <div style="text-align:center; margin-top:3rem;">
         <button class="btn-outline" onclick="navigate('shop')">View All Outfits</button>
       </div>
@@ -556,6 +554,16 @@
   </div>
 </div>
 
+<script>
+const slides = document.querySelectorAll(".hero-slide");
+let current = 0;
+
+setInterval(() => {
+    slides[current].classList.remove("active");
+    current = (current + 1) % slides.length;
+    slides[current].classList.add("active");
+}, 4000);
+</script>
 
 </body>
 </html>
