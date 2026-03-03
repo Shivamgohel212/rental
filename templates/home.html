@@ -93,7 +93,7 @@
           </div>
         </div>
       </div>
-      <div class="hero-visual">
+      {% comment %} <div class="hero-visual">
         <div class="hero-card-grid">
     {% for item in featured %}
         <div class="hero-card">
@@ -105,29 +105,33 @@
         </div>
     {% endfor %}
 </div>
-      </div>
+      </div> {% endcomment %}
     </div>
   </section>
 
   <!-- CATEGORIES -->
   <section>
-    <div class="section-inner">
+    <div class="section-inner">   
       <div class="section-header">
         <span class="section-eyebrow">Shop by Occasion</span>
         <h2>Curated Collections</h2>
         <p>Every ensemble tells a story. Find yours.</p>
       </div>
       <div class="categories-grid">
+         <a href="/category/party-wear/" style="text-decoration:none; color:inherit;">
         <div class="cat-card" onclick="filterAndShop('Party')">
           <div class="cat-img">
               <img src="{% static 'images/party2.jpg' %}" alt="party">
+
           </div>
           <div class="cat-overlay"></div>
           <div class="cat-info">
             <h3>Party Wear</h3>
+            
           </div>
         </div>
         <div class="cat-card" onclick="filterAndShop('Wedding')">
+          <a href="/category/wedding-wear/" style="text-decoration:none; color:inherit;">
           <div class="cat-img">
               <img src="{% static 'images/wedding2.jpg' %}" alt="Wedding">
           </div>
@@ -137,6 +141,7 @@
           </div>
         </div>
       </div>
+    </a>
     </div>
   </section>
 
@@ -148,15 +153,24 @@
         <h2>Featured Pieces</h2>
         <p>Our most-loved styles this season</p>
       </div>
-      <div class="products-grid">
-    {% for item in featured %}
-        <div class="product-card">
+  <div class="products-grid">
+  {% for item in featured %}
+    <div class="product-card">
+        
+        <div class="product-img-wrap">
             <img src="{{ item.image.url }}" alt="{{ item.title }}">
-            <h3>{{ item.title }}</h3>
-            <p>₹{{ item.price_per_day }} / day</p>
         </div>
-    {% endfor %}
-</div>
+
+        <div class="product-info">
+            <h4>{{ item.title }}</h4>
+            <div class="product-price">
+                ₹{{ item.price_per_day }} <span>/ day</span>
+            </div>
+        </div>
+
+    </div>
+  {% endfor %}
+  </div>
       <div style="text-align:center; margin-top:3rem;">
         <button class="btn-outline" onclick="navigate('shop')">View All Outfits</button>
       </div>
