@@ -123,19 +123,14 @@ class Review(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.rating}"
 
-class ChatRoom(models.Model):
-    clothing = models.ForeignKey(Clothing, on_delete=models.CASCADE)
+class Detail(models.Model):
+    clothing = models.ForeignKey('Clothing', on_delete=models.CASCADE)
+    description = models.TextField()
+    size = models.CharField(max_length=20)
+    brand = models.CharField(max_length=100)
+    price_per_day = models.DecimalField(max_digits=8, decimal_places=2)
+    payment_status = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Chat for {self.clothing.title}"
-
-
-class Message(models.Model):
-    chatroom = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.sender.username
+        return self.clothing.title

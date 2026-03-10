@@ -8,7 +8,7 @@ def home(request):
     featured = Clothing.objects.filter(
         is_available=True,
         is_featured=True
-    )[:3]
+    )[:]
 
     return render(request, 'home.html', {'featured': featured})
 
