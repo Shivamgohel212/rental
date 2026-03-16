@@ -1,0 +1,39 @@
+Creating test database for alias 'default'...
+E...E.
+======================================================================
+ERROR: test_login_user_invalid (store.tests.AuthViewsTest.test_login_user_invalid)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\rental_project\store\tests.py", line 70, in test_login_user_invalid
+    self.assertFormError(response, 'form', None, 'Invalid email or password.')
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM\AppData\Roaming\Python\Python313\site-packages\django\test\testcases.py", line 708, in assertFormError
+    self._assert_form_error(form, field, errors, msg_prefix)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM\AppData\Roaming\Python\Python313\site-packages\django\test\testcases.py", line 665, in _assert_form_error
+    if not form.is_bound:
+           ^^^^^^^^^^^^^
+AttributeError: 'HttpResponse' object has no attribute 'is_bound'
+
+======================================================================
+ERROR: test_register_user_post (store.tests.AuthViewsTest.test_register_user_post)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\rental_project\store\tests.py", line 32, in test_register_user_post
+    user = User.objects.get(username=self.user_data['email'])  # username is the same as email
+  File "C:\Users\SHIVAM\AppData\Roaming\Python\Python313\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 639, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % self.model._meta.object_name
+    )
+django.contrib.auth.models.User.DoesNotExist: User matching query does not exist.
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.157s
+
+FAILED (errors=2)
+Destroying test database for alias 'default'...
+Found 6 test(s).
+System check identified no issues (0 silenced).

@@ -893,7 +893,7 @@ footer {
 .shop-layout {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 1rem 0rem;
   display: grid;
   grid-template-columns: 260px 1fr;
   gap: 3rem;
@@ -903,9 +903,9 @@ footer {
 /* .sidebar { } */
 
 .sidebar-block {
-  margin-bottom: 2.5rem;
-  padding-bottom: 2.5rem;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid var(--border);
 }
 
 .sidebar-block:last-child { border-bottom: none; }
@@ -1726,29 +1726,30 @@ footer {
 }
 
 .auth-visual {
-  background: linear-gradient(145deg, #1a1208, #2d2010);
+  background: url("/static/images/LoginImage.jpg") center/cover no-repeat;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content:end;
   padding: 3rem;
   position: relative;
   overflow: hidden;
+  /* padding-top: 0px; */
+  padding-bottom: 6rem ;
 }
 
-.auth-visual::before {
+/* .auth-visual::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(201,169,110,0.15) 0%, transparent 70%);
-}
-
+  background: rgba(0,0,0,0.5);
+} */
 .auth-visual-content {
   position: relative;
   text-align: center;
 }
 
-.auth-visual-icon { font-size: 8rem; opacity: 0.4; display: block; margin-bottom: 2rem; }
+/* .auth-visual-icon { font-size: 8rem; opacity: 0.4; display: block; margin-bottom: 2rem; } */
 
 .auth-visual h2 {
   font-size: 3rem;

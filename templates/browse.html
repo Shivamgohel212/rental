@@ -26,14 +26,30 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-block">
-        <h4>Category</h4>
-        <div class="filter-option"><input type="checkbox" id="c1" onchange="applyFilters()"><label for="c1">Designer (420)</label></div>
+        {% comment %} <h4>Category</h4> {% endcomment %}
+        {% comment %} <div class="filter-option"><input type="checkbox" id="c1" onchange="applyFilters()"><label for="c1">Designer (420)</label></div>
         <div class="filter-option"><input type="checkbox" id="c2" onchange="applyFilters()"><label for="c2">Party Wear (680)</label></div>
         <div class="filter-option"><input type="checkbox" id="c3" onchange="applyFilters()"><label for="c3">Wedding (1,200)</label></div>
-        <div class="filter-option"><input type="checkbox" id="c4" onchange="applyFilters()"><label for="c4">Ethnic (950)</label></div>
+        <div class="filter-option"><input type="checkbox" id="c4" onchange="applyFilters()"><label for="c4">Ethnic (950)</label></div> {% endcomment %}
       </div>
       <div class="sidebar-block">
-        <h4>Price / Day (₹)</h4>
+       
+        <div class="sidebar-block">
+    <h4>Gender</h4>
+
+    <div class="filter-option">
+        <a href="?gender=men" style="text-decoration:none; color:inherit;" >Men</a>
+    </div>
+
+    <div class="filter-option">
+        <a href="?gender=women"style="text-decoration:none; color:inherit;">Women</a>
+    </div>
+
+    <div class="filter-option">
+        {% comment %} <a href="">All</a> {% endcomment %}
+    </div>
+</div>
+ <h4>Price / Day (₹)</h4>
         <div class="price-range">
           <input type="number" id="minPrice" placeholder="Min" value="0" onchange="applyFilters()">
           <span style="color:var(--muted)">—</span>
@@ -72,19 +88,23 @@
       </div>
       <div class="shop-grid">
     {% for item in clothes %}
-
-        <div class="product-card">
+        <a href="{% url 'product_detail' item.id %}" style="text-decoration:none;color:inherit;">
+        <div class="product-card"
+            data-gender="{{ item.gender }}"
+            data-size="{{ item.size }}"
+            data-price="{{ item.price_per_day }}"
+            data-title="{{ item.title|lower }}">
             <div class="product-img">
                 <img src="{{ item.image.url }}" alt="{{ item.title }}">
             </div>
-
+            
             <div class="product-info">
                 <h3>{{ item.title }}</h3>
                 <p>{{ item.brand }}</p>
                 <p>₹{{ item.price_per_day }} / day</p>
             </div>
-        </div>
-
+          </div>
+        </a>
     {% empty %}
         <p>No outfits available.</p>
     {% endfor %}

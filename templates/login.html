@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — VÊTIR</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+  .auth-page { min-height: 100vh; display: flex; }
+  .auth-visual {
+    flex: 1;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+  }
+  .auth-visual-content h2 {
+    font-family: 'Cormorant Garamond', serif;
+    color: #d4af37;
+    font-size: 2.5rem;
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.3;
+  }
+  .auth-form-area {
+    width: 480px;
+    background: #fff;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .auth-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid #eee; }
+  .auth-tab {
+    background: none;
+    border: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    color: #999;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .auth-tab.active { color: #1a1a1a; border-bottom-color: #d4af37; }
+  .auth-tab:hover { color: #1a1a1a; }
+  .form-group { margin-bottom: 1.2rem; }
+  .form-group label {
+    display: block;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #666;
+    margin-bottom: 0.4rem;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    color: #1a1a1a;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus { border-color: #d4af37; }
+  .btn-primary {
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    padding: 0.85rem 2rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 0.5rem;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: #d4af37; }
+  .auth-divider {
+    text-align: center;
+    color: #999;
+    font-size: 0.8rem;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #eee;
+  }
+  .auth-divider::before { left: 0; }
+  .auth-divider::after { right: 0; }
+  .social-btns { display: flex; flex-direction: column; gap: 0.8rem; }
+  .social-btn {
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 0.75rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .social-btn:hover { background: #f0f0f0; }
+  .error-msg {
+    background: #fff0f0;
+    border: 1px solid #ffcccc;
+    color: #cc0000;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    font-family: 'Jost', sans-serif;
+  }
+  .success-msg {
+    background: #f0fff0;
+    border: 1px solid #ccffcc;
+    color: #006600;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    font-family: 'Jost', sans-serif;
+  }
+  nav .nav-inner { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; }
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.97); border-bottom: 1px solid #eee; padding: 1rem 0; }
+  .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.15em; color: #1a1a1a; text-decoration: none; }
+  .logo span { color: #d4af37; }
+  @media (max-width: 768px) {
+    .auth-visual { display: none; }
+    .auth-form-area { width: 100%; padding: 2rem; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="{% url 'home' %}">VÊT<span>IR</span></a>
+    <div>
+      {% if user.is_authenticated %}
+        <span style="margin-right:15px; font-family:'Jost',sans-serif; font-size:0.85rem;">Hello, {{ user.first_name|default:user.username }}</span>
+        <a href="{% url 'logout' %}" style="font-family:'Jost',sans-serif; font-size:0.85rem; color:#d4af37; text-decoration:none;">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}" style="font-family:'Jost',sans-serif; font-size:0.85rem; color:#1a1a1a; text-decoration:none; margin-right:1.5rem;">Login</a>
+        <a href="{% url 'register' %}" style="font-family:'Jost',sans-serif; font-size:0.85rem; color:#d4af37; text-decoration:none;">Register</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<div class="auth-page">
+  <div class="auth-visual">
+    <div class="auth-visual-content">
+      <h2>Rent Luxury.<br>Shine Everywhere.</h2>
+    </div>
+  </div>
+  <div class="auth-form-area">
+    <div class="auth-tabs">
+      <a href="{% url 'login' %}" class="auth-tab active" style="text-decoration:none;">Login</a>
+      <a href="{% url 'register' %}" class="auth-tab" style="text-decoration:none;">Register</a>
+    </div>
+
+    <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:400; margin-bottom:0.3rem;">Welcome Back</h3>
+    <p style="font-family:'Jost',sans-serif; font-size:0.85rem; color:#999; margin-bottom:1.5rem;">Sign in to your Vêtir account</p>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="{% if message.tags == 'success' %}success-msg{% else %}error-msg{% endif %}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% if form.errors %}
+      <div class="error-msg">
+        {% for field in form %}
+          {% for error in field.errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Email</label>
+        {{ form.email }}
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        {{ form.password }}
+      </div>
+      <div style="text-align:right; font-size:0.78rem; color:#d4af37; cursor:pointer; margin:0.5rem 0 1rem; font-family:'Jost',sans-serif;">Forgot password?</div>
+      <button type="submit" class="btn-primary">Sign In</button>
+    </form>
+
+    <div class="auth-divider">or continue with</div>
+    <div class="social-btns">
+      <button class="social-btn">🔵 Continue with Google</button>
+      <button class="social-btn">🔷 Continue with Facebook</button>
+    </div>
+
+    <p style="text-align:center; margin-top:1.5rem; font-family:'Jost',sans-serif; font-size:0.85rem; color:#999;">
+      Don't have an account? <a href="{% url 'register' %}" style="color:#d4af37; text-decoration:none;">Register</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>

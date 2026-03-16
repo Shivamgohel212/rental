@@ -6,15 +6,25 @@ from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=15)
-    address = models.TextField()
+    phone = models.CharField(max_length=15, blank=True, default='')
+    address = models.TextField(blank=True, default='')
     profile_image = models.ImageField(upload_to='profiles/', null=True, blank=True)
     is_owner = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.userprofile.save()
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
@@ -29,10 +39,21 @@ class Category(models.Model):
         return self.name
 
 class Clothing(models.Model):
+
+    GENDER_CHOICES = (
+        ('men', 'Men'),
+        ('women', 'Women'),
+    )
+
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
+
+    
+
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)   # 👈 ADD THIS
+
     size = models.CharField(max_length=20)
     brand = models.CharField(max_length=100)
     price_per_day = models.DecimalField(max_digits=8, decimal_places=2)
@@ -45,7 +66,6 @@ class Clothing(models.Model):
 
     def __str__(self):
         return self.title
-
 
 class Booking(models.Model):
     STATUS_CHOICES = [
