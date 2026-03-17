@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Rental History | PRORENT{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orders-container {
+        max-width: 1000px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
+
+    .orders-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .orders-header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .order-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 200px 1fr 250px;
+        transition: transform var(--transition);
+    }
+
+    .order-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow);
+    }
+
+    .order-img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        background: var(--cream);
+    }
+
+    .order-body {
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .order-cat {
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 0.5rem;
+    }
+
+    .order-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .order-meta {
+        font-size: 0.85rem;
+        color: var(--muted);
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .order-sidebar {
+        padding: 2rem;
+        background: var(--warm-white);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-end;
+    }
+
+    .order-status {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1.5rem;
+    }
+
+    .status-confirmed { background: #e8f5e9; color: #2e7d32; }
+    .status-pending { background: #fff3e0; color: #ef6c00; }
+    .status-cancelled { background: #ffebee; color: #c62828; }
+
+    .order-total {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.8rem;
+        color: var(--charcoal);
+        margin-bottom: 1.5rem;
+    }
+
+    .view-btn {
+        font-size: 0.75rem;
+        padding: 0.6rem 1.5rem;
+    }
+
+    .empty-orders {
+        text-align: center;
+        padding: 5rem 0;
+    }
+
+    @media (max-width: 800px) {
+        .order-card {
+            grid-template-columns: 1fr;
+        }
+        .order-img {
+            height: 300px;
+        }
+        .order-sidebar {
+            border-left: none;
+            border-top: 1px solid var(--border);
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-container">
+    <div class="orders-header">
+        <h1>My Rental History</h1>
+        <p style="color: var(--muted);">Track your luxury reservations and past styles.</p>
+    </div>
+
+    <div class="orders-list">
+        {% for order in orders %}
+            <div class="order-card">
+                <img src="{{ order.product.image.url }}" alt="{{ order.product.title }}" class="order-img">
+                <div class="order-body">
+                    <span class="order-cat">{{ order.product.category.name }}</span>
+                    <h3 class="order-title">{{ order.product.title }}</h3>
+                    <div class="order-meta">
+                        <span>📅 {{ order.order_date|date:"M d, Y" }}</span>
+                        <span>⏳ {{ order.rental_days }} Day{{ order.rental_days|pluralize }}</span>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--muted);">Rental Period Rate: ₹{{ order.price_per_day }}/day</p>
+                </div>
+                <div class="order-sidebar">
+                    <div class="order-status status-{{ order.status|lower }}">{{ order.status }}</div>
+                    <div class="order-total">₹{{ order.total_amount }}</div>
+                    <a href="{% url 'order_success' order.id %}" class="btn-outline view-btn">View Receipt</a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-orders">
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🧥</div>
+                <h3>No Orders Yet</h3>
+                <p style="color: var(--muted); margin-bottom: 2rem;">Your luxury journey starts with your first rental.</p>
+                <a href="{% url 'browse' %}" class="btn-primary">Browse Collection</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

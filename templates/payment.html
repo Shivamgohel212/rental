@@ -1,0 +1,524 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout – {{ product.title }} | PRORENT{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-wrapper {
+        max-width: 1000px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
+
+    /* Step Indicator */
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4rem;
+        position: relative;
+    }
+
+    .step-indicator::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--border);
+        z-index: 1;
+    }
+
+    .step {
+        position: relative;
+        z-index: 2;
+        background: var(--bg-color, white);
+        padding: 0 1rem;
+        text-align: center;
+    }
+
+    .step-num {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-family: 'Jost', sans-serif;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+    .step.active .step-num {
+        border-color: var(--gold);
+        color: var(--gold);
+        font-weight: 500;
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+
+    .step.completed .step-num {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: white;
+    }
+
+    .step-text {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+    }
+
+    .step.active .step-text {
+        color: var(--charcoal);
+        font-weight: 500;
+    }
+
+    /* Checkout Sections */
+    .checkout-section {
+        display: none;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .checkout-section.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .checkout-card {
+        background: white;
+        border: 1px solid var(--border);
+        padding: 3rem;
+        border-radius: 4px;
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 3rem;
+    }
+
+    .checkout-main h2 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.2rem;
+        margin-bottom: 2rem;
+    }
+
+    .product-mini {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .product-mini img {
+        width: 80px;
+        height: 110px;
+        object-fit: cover;
+    }
+
+    .summary-box {
+        background: var(--warm-white);
+        padding: 2rem;
+        border-radius: 4px;
+        height: fit-content;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .summary-row.total {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    /* Custom Controls */
+    .days-ctrl {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .sq-btn {
+        width: 44px;
+        height: 44px;
+        border: 1px solid var(--charcoal);
+        background: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: all 0.2s;
+    }
+
+    .sq-btn:hover { background: var(--charcoal); color: white; }
+
+    /* Payment Methods */
+    .method-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .method-item {
+        border: 1px solid var(--border);
+        padding: 1.2rem 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s;
+    }
+
+    .method-item:hover, .method-item.selected {
+        border-color: var(--gold);
+        background: rgba(212, 175, 55, 0.03);
+    }
+
+    .method-item input { display: none; }
+
+    /* Dynamic Details */
+    .payment-details-form {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.5rem;
+        color: var(--muted);
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1px solid var(--border);
+        font-family: inherit;
+    }
+
+    .form-group input:focus { border-color: var(--gold); outline: none; }
+
+    .nav-btns {
+        display: flex;
+        gap: 1rem;
+        margin-top: 3rem;
+    }
+
+    .btn-back { border: 1px solid var(--border); background: none; }
+
+    @media (max-width: 800px) {
+        .checkout-card { grid-template-columns: 1fr; }
+        .summary-box { order: -1; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-wrapper">
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+        <div class="step active" id="step-dot-1">
+            <div class="step-num">1</div>
+            <div class="step-text">Rental Details</div>
+        </div>
+        <div class="step" id="step-dot-2">
+            <div class="step-num">2</div>
+            <div class="step-text">Payment Method</div>
+        </div>
+        <div class="step" id="step-dot-3">
+            <div class="step-num">3</div>
+            <div class="step-text">Payment Details</div>
+        </div>
+        <div class="step" id="step-dot-4">
+            <div class="step-num">4</div>
+            <div class="step-text">Confirmation</div>
+        </div>
+    </div>
+
+    <form action="{% url 'place_order' product.id %}" method="POST" id="checkoutForm">
+        {% csrf_token %}
+        <input type="hidden" name="rental_days" id="hidden_days" value="1">
+        <input type="hidden" name="payment_method" id="hidden_method" value="">
+
+        <!-- STEP 1: RENTAL DETAILS -->
+        <section class="checkout-section active" id="section-1">
+            <div class="checkout-card">
+                <div class="checkout-main">
+                    <h2>Select Rental Period</h2>
+                    <div class="product-mini">
+                        <img src="{{ product.image.url }}" alt="">
+                        <div>
+                            <span style="font-size: 0.7rem; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase;">{{ product.category.name }}</span>
+                            <h4 style="margin: 0.3rem 0;">{{ product.title }}</h4>
+                            <p style="font-size: 0.85rem; color: var(--muted);">₹{{ product.price_per_day }} / day</p>
+                        </div>
+                    </div>
+
+                    <label class="section-label">Duration</label>
+                    <div class="days-ctrl">
+                        <button type="button" class="sq-btn" onclick="adjustDays(-1)">−</button>
+                        <span id="display-days" style="font-size: 1.8rem; font-family: 'Cormorant Garamond', serif; min-width: 40px; text-align: center;">1</span>
+                        <button type="button" class="sq-btn" onclick="adjustDays(1)">+</button>
+                        <span style="color: var(--muted);">days</span>
+                    </div>
+
+                    <div class="nav-btns">
+                        <button type="button" class="btn-primary" onclick="goToStep(2)" style="flex: 1;">Continue to Payment</button>
+                    </div>
+                </div>
+
+                <div class="summary-box">
+                    <h3 style="font-family: 'Cormorant Garamond', serif; margin-bottom: 1.5rem;">Total Calculation</h3>
+                    <div class="summary-row"><span>Rent Total</span><span id="sum-rent">₹{{ product.price_per_day }}</span></div>
+                    <div class="summary-row"><span>Security Deposit</span><span>₹{{ product.security_deposit }}</span></div>
+                    <div class="summary-row total"><span>Total Payable</span><span id="sum-total">₹{{ product.price_per_day|add:product.security_deposit }}</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2: PAYMENT METHOD -->
+        <section class="checkout-section" id="section-2">
+            <div class="checkout-card">
+                <div class="checkout-main">
+                    <h2>Choose Payment Method</h2>
+                    <div class="method-list">
+                        <div class="method-item" onclick="setMethod('upi', this)">
+                            <div class="step-num" style="width: 24px; height: 24px; margin: 0;"></div>
+                            <div>
+                                <div style="font-weight: 500;">UPI (PhonePe / Google Pay)</div>
+                                <div style="font-size: 0.8rem; color: var(--muted);">Instant payment via UPI ID</div>
+                            </div>
+                        </div>
+                        <div class="method-item" onclick="setMethod('card', this)">
+                            <div class="step-num" style="width: 24px; height: 24px; margin: 0;"></div>
+                            <div>
+                                <div style="font-weight: 500;">Credit / Debit Card</div>
+                                <div style="font-size: 0.8rem; color: var(--muted);">Visa, Mastercard, Amex</div>
+                            </div>
+                        </div>
+                        <div class="method-item" onclick="setMethod('cod', this)">
+                            <div class="step-num" style="width: 24px; height: 24px; margin: 0;"></div>
+                            <div>
+                                <div style="font-weight: 500;">Cash on Delivery</div>
+                                <div style="font-size: 0.8rem; color: var(--muted);">Pay when you receive the outfit</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-btns">
+                        <button type="button" class="btn-primary btn-back" onclick="goToStep(1)">Back</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(3)" style="flex: 1;">Proceed</button>
+                    </div>
+                </div>
+
+                <div class="summary-box">
+                    <h3 id="step2-total" style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--gold);">₹0.00</h3>
+                    <p style="font-size: 0.8rem; color: var(--muted);">Payable for <span id="step2-days">1</span> day rental</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 3: PAYMENT DETAILS -->
+        <section class="checkout-section" id="section-3">
+            <div class="checkout-card">
+                <div class="checkout-main">
+                    <h2 id="details-title">Payment Details</h2>
+                    
+                    <div id="details-upi" class="method-details" style="display: none;">
+                        <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--muted);">Please enter your VPA / UPI ID to proceed.</p>
+                        <div class="form-group">
+                            <label>UPI ID</label>
+                            <input type="text" name="upi_id" placeholder="username@bank">
+                        </div>
+                    </div>
+
+                    <div id="details-card" class="method-details" style="display: none;">
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input type="text" placeholder="XXXX XXXX XXXX XXXX">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Expiry Date</label>
+                                <input type="text" placeholder="MM/YY">
+                            </div>
+                            <div class="form-group">
+                                <label>CVV</label>
+                                <input type="password" placeholder="***">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="details-cod" class="method-details" style="display: none;">
+                        <div style="padding: 2rem; background: var(--cream); border-radius: 4px; border: 1px dashed var(--gold);">
+                            <p style="margin: 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;">You have selected Cash on Delivery. A secure verification call may be placed before shipping.</p>
+                        </div>
+                    </div>
+
+                    <div class="nav-btns">
+                        <button type="button" class="btn-primary btn-back" onclick="goToStep(2)">Back</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(4)" style="flex: 1;">Confirm Payment</button>
+                    </div>
+                </div>
+
+                <div class="summary-box">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;" id="method-icon">💳</div>
+                        <h4 id="selected-method-name">Credit Card</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 4: CONFIRMATION -->
+        <section class="checkout-section" id="section-4">
+            <div class="checkout-card" style="text-align: center; display: block;">
+                <div style="max-width: 500px; margin: 0 auto; padding: 2rem 0;">
+                    <div style="font-size: 4rem; margin-bottom: 1.5rem;">📋</div>
+                    <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem;">Review & Confirm</h2>
+                    <p style="color: var(--muted); margin-bottom: 2rem;">Please review your rental details one last time. Once confirmed, your reservation will be secured.</p>
+                    
+                    <div style="background: var(--warm-white); padding: 2rem; border-radius: 4px; text-align: left; margin-bottom: 2.5rem;">
+                        <div class="summary-row"><span>Item</span><span style="font-weight: 500;">{{ product.title }}</span></div>
+                        <div class="summary-row"><span>Duration</span><span id="final-days">1 day</span></div>
+                        <div class="summary-row"><span>Payment</span><span id="final-method" style="text-transform: uppercase; font-weight: 500;">COD</span></div>
+                        <div class="summary-row total" style="margin-top: 1rem; border-top-style: dashed;">
+                            <span>Total Amount</span>
+                            <span id="final-total" style="color: var(--gold); font-size: 1.5rem;">₹0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="nav-btns">
+                        <button type="button" class="btn-primary btn-back" onclick="goToStep(3)">Edit Details</button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">Confirm Booking</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const pricePerDay = parseFloat("{{ product.price_per_day }}");
+    const deposit = parseFloat("{{ product.security_deposit }}");
+    const minD = parseInt("{{ min_days }}") || 1;
+    const maxD = parseInt("{{ max_days }}") || 30;
+
+    let currentStep = 1;
+    let days = 1;
+    let method = '';
+
+    function adjustDays(delta) {
+        let newDays = days + delta;
+        if (newDays >= minD && newDays <= maxD) {
+            days = newDays;
+            updateUI();
+        }
+    }
+
+    function updateUI() {
+        // Step 1 UI
+        document.getElementById('display-days').innerText = days;
+        document.getElementById('hidden_days').value = days;
+        const rentTotal = days * pricePerDay;
+        const finalTotal = rentTotal + deposit;
+        
+        document.getElementById('sum-rent').innerText = `₹${rentTotal.toFixed(2)}`;
+        document.getElementById('sum-total').innerText = `₹${finalTotal.toFixed(2)}`;
+
+        // Global Updates
+        document.getElementById('step2-days').innerText = days;
+        document.getElementById('step2-total').innerText = `₹${finalTotal.toFixed(2)}`;
+        document.getElementById('final-days').innerText = `${days} day${days > 1 ? 's' : ''}`;
+        document.getElementById('final-total').innerText = `₹${finalTotal.toFixed(2)}`;
+    }
+
+    function setMethod(m, el) {
+        method = m;
+        document.getElementById('hidden_method').value = m;
+        
+        // UI visual
+        document.querySelectorAll('.method-item').forEach(item => item.classList.remove('selected'));
+        el.classList.add('selected');
+
+        // Step 3 UI
+        document.querySelectorAll('.method-details').forEach(d => d.style.display = 'none');
+        document.getElementById('details-' + m).style.display = 'block';
+        
+        const methodLabels = { 'upi': 'UPI Payment', 'card': 'Credit / Debit Card', 'cod': 'Cash on Delivery' };
+        const methodIcons = { 'upi': '📱', 'card': '💳', 'cod': '💵' };
+        
+        document.getElementById('details-title').innerText = methodLabels[m] + ' Details';
+        document.getElementById('selected-method-name').innerText = methodLabels[m];
+        document.getElementById('method-icon').innerText = methodIcons[m];
+        document.getElementById('final-method').innerText = methodLabels[m];
+    }
+
+    function goToStep(s) {
+        if (s > currentStep) {
+            // Validation for Step 1
+            if (currentStep === 1 && days < 1) return;
+            
+            // Validation for Step 2
+            if (currentStep === 2 && !method) {
+                showToast("Please select a payment method", "⚠️");
+                return;
+            }
+
+            // Validation for Step 3
+            if (currentStep === 3) {
+                if (method === 'upi') {
+                    const upiInput = document.querySelector('input[name="upi_id"]');
+                    if (!upiInput.value.trim()) {
+                        showToast("Please enter your UPI ID", "⚠️");
+                        upiInput.focus();
+                        return;
+                    }
+                } else if (method === 'card') {
+                    const cardNo = document.querySelector('input[placeholder="XXXX XXXX XXXX XXXX"]');
+                    if (!cardNo.value.trim() || cardNo.value.length < 12) {
+                        showToast("Please enter a valid card number", "⚠️");
+                        cardNo.focus();
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Hide current
+        document.getElementById('section-' + currentStep).classList.remove('active');
+        document.getElementById('step-dot-' + currentStep).classList.remove('active');
+        if (s > currentStep) document.getElementById('step-dot-' + currentStep).classList.add('completed');
+        
+        // Show next
+        currentStep = s;
+        document.getElementById('section-' + currentStep).classList.add('active');
+        document.getElementById('step-dot-' + currentStep).classList.add('active');
+        document.getElementById('step-dot-' + currentStep).classList.remove('completed');
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Init
+    updateUI();
+</script>
+{% endblock %}

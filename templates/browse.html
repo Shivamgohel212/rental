@@ -1,119 +1,256 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Browse</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        .shop-header {
-            padding: 90px 0 40px!important;
+
+{% block title %}Browse Collection | PRORENT{% endblock %}
+
+{% block extra_css %}
+<style>
+    .shop-header {
+        padding: 4rem 2rem;
+        background: var(--cream);
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .shop-header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .shop-layout {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 3rem;
+    }
+
+    .sidebar h4 {
+        font-family: 'Jost', sans-serif;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .filter-option {
+        margin-bottom: 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .filter-option a {
+        transition: color var(--transition);
+    }
+
+    .filter-option a:hover {
+        color: var(--gold);
+    }
+
+    .shop-products {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .shop-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .search-bar {
+        display: flex;
+        align-items: center;
+        background: white;
+        border: 1px solid var(--border);
+        padding: 0.5rem 1rem;
+        border-radius: 2px;
+        width: 300px;
+    }
+
+    .search-bar input {
+        border: none;
+        outline: none;
+        margin-left: 0.8rem;
+        font-family: 'Jost', sans-serif;
+        font-size: 0.9rem;
+        width: 100%;
+    }
+
+    .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+    }
+
+    .results-count {
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+
+    .sort-select {
+        border: 1px solid var(--border);
+        padding: 0.5rem;
+        font-family: 'Jost', sans-serif;
+        font-size: 0.85rem;
+        outline: none;
+    }
+
+    @media (max-width: 1000px) {
+        .shop-layout {
+            grid-template-columns: 1fr;
         }
-    </style>
-</head>
-<body>
-<div>
-  <div class="shop-header">
+        .sidebar {
+            display: none; /* Desktop sidebar hidden on mobile for now as per original */
+        }
+        .shop-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shop-header">
     <h1>
-{% if selected_category %}
-    {{ selected_category.name }}
-{% else %}
-    Browse Collection
-{% endif %}
-</h1>
-    <div class="breadcrumb">Home <span>/</span> All Outfits</div>
-  </div>
-  <div class="shop-layout">
+        {% if selected_category %}
+            {{ selected_category.name }}
+        {% else %}
+            Browse Collection
+        {% endif %}
+    </h1>
+    <div class="breadcrumb" style="font-size: 0.8rem; color: var(--muted);">Home <span>/</span> All Outfits</div>
+</div>
+
+<div class="shop-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <div class="sidebar-block">
-        {% comment %} <h4>Category</h4> {% endcomment %}
-        {% comment %} <div class="filter-option"><input type="checkbox" id="c1" onchange="applyFilters()"><label for="c1">Designer (420)</label></div>
-        <div class="filter-option"><input type="checkbox" id="c2" onchange="applyFilters()"><label for="c2">Party Wear (680)</label></div>
-        <div class="filter-option"><input type="checkbox" id="c3" onchange="applyFilters()"><label for="c3">Wedding (1,200)</label></div>
-        <div class="filter-option"><input type="checkbox" id="c4" onchange="applyFilters()"><label for="c4">Ethnic (950)</label></div> {% endcomment %}
-      </div>
-      <div class="sidebar-block">
-       
+        <div class="sidebar-block" style="margin-bottom: 3rem;">
+            <h4>Categories</h4>
+            <div class="filter-option"><a href="/category/party-wear/" style="text-decoration:none; color:inherit;">Party Wear</a></div>
+            <div class="filter-option"><a href="/category/wedding-wear/" style="text-decoration:none; color:inherit;">Wedding Wear</a></div>
+            <div class="filter-option"><a href="/browse/" style="text-decoration:none; color:var(--gold);">All Categories</a></div>
+        </div>
+
+        <div class="sidebar-block" style="margin-bottom: 3rem;">
+            <h4>Gender</h4>
+            <div class="filter-option"><a href="?gender=men" style="text-decoration:none; color:inherit;">Men</a></div>
+            <div class="filter-option"><a href="?gender=women" style="text-decoration:none; color:inherit;">Women</a></div>
+            <div class="filter-option"><a href="{% url 'browse' %}" style="text-decoration:none; color:var(--gold);">All</a></div>
+        </div>
+
+        <div class="sidebar-block" style="margin-bottom: 3rem;">
+            <h4>Price Range</h4>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="number" id="minPrice" placeholder="Min" style="width: 80px; padding: 0.4rem; border: 1px solid var(--border);" onchange="applyFilters()">
+                <span>—</span>
+                <input type="number" id="maxPrice" placeholder="Max" style="width: 80px; padding: 0.4rem; border: 1px solid var(--border);" onchange="applyFilters()">
+            </div>
+        </div>
+
         <div class="sidebar-block">
-    <h4>Gender</h4>
-
-    <div class="filter-option">
-        <a href="?gender=men" style="text-decoration:none; color:inherit;" >Men</a>
-    </div>
-
-    <div class="filter-option">
-        <a href="?gender=women"style="text-decoration:none; color:inherit;">Women</a>
-    </div>
-
-    <div class="filter-option">
-        {% comment %} <a href="">All</a> {% endcomment %}
-    </div>
-</div>
- <h4>Price / Day (₹)</h4>
-        <div class="price-range">
-          <input type="number" id="minPrice" placeholder="Min" value="0" onchange="applyFilters()">
-          <span style="color:var(--muted)">—</span>
-          <input type="number" id="maxPrice" placeholder="Max" value="10000" onchange="applyFilters()">
+            <h4>Size</h4>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">XS</button>
+                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">S</button>
+                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">M</button>
+                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">L</button>
+                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">XL</button>
+                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">XXL</button>
+            </div>
         </div>
-      </div>
-      <div class="sidebar-block">
-        <h4>Size</h4>
-        <div class="size-grid">
-          <button class="size-btn" onclick="toggleSizeFilter(this)">XS</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">S</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">M</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">L</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">XL</button>
-          <button class="size-btn" onclick="toggleSizeFilter(this)">XXL</button>
-        </div>
-      </div>
-      <div class="sidebar-block">
-        <button class="btn-outline" style="width:100%" onclick="clearFilters()">Clear Filters</button>
-      </div>
     </aside>
+
     <!-- Products -->
     <div class="shop-products">
-      <div class="shop-toolbar">
-        <div class="search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="shopSearch" placeholder="Search outfits..." oninput="applyFilters()">
+        <div class="shop-toolbar">
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="shopSearch" placeholder="Search outfits..." oninput="applyFilters()">
+            </div>
+            <span class="results-count" id="resultCount">Showing {{ clothes|length }} products</span>
+            <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+                <option value="default">Sort By</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+            </select>
         </div>
-        <span class="results-count" id="resultCount">Loading...</span>
-        <select class="sort-select" id="sortSelect" onchange="applyFilters()">
-          <option value="default">Sort By</option>
-          <option value="price-asc">Price: Low to High</option>
-          <option value="price-desc">Price: High to Low</option>
-          <option value="rating">Top Rated</option>
-        </select>
-      </div>
-      <div class="shop-grid">
-    {% for item in clothes %}
-        <a href="{% url 'product_detail' item.id %}" style="text-decoration:none;color:inherit;">
-        <div class="product-card"
-            data-gender="{{ item.gender }}"
-            data-size="{{ item.size }}"
-            data-price="{{ item.price_per_day }}"
-            data-title="{{ item.title|lower }}">
-            <div class="product-img">
-                <img src="{{ item.image.url }}" alt="{{ item.title }}">
-            </div>
-            
-            <div class="product-info">
-                <h3>{{ item.title }}</h3>
-                <p>{{ item.brand }}</p>
-                <p>₹{{ item.price_per_day }} / day</p>
-            </div>
-          </div>
-        </a>
-    {% empty %}
-        <p>No outfits available.</p>
-    {% endfor %}
-</div>
+
+        <div class="shop-grid" id="shopGrid">
+            {% for item in clothes %}
+                <a href="{% url 'product_detail' item.id %}" style="text-decoration:none; color:inherit;">
+                    <div class="product-card" 
+                         data-gender="{{ item.gender }}" 
+                         data-size="{{ item.size }}" 
+                         data-price="{{ item.price_per_day }}" 
+                         data-title="{{ item.title|lower }}">
+                        <div class="product-img-wrap">
+                            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                        </div>
+                        <div class="product-info">
+                            <span class="product-cat">{{ item.category.name }}</span>
+                            <h4>{{ item.title }}</h4>
+                            <div class="product-price">₹{{ item.price_per_day }} <span>/ day</span></div>
+                        </div>
+                    </div>
+                </a>
+            {% empty %}
+                <div style="grid-column: span 3; padding: 4rem; text-align: center; color: var(--muted);">
+                    <p>No outfits available.</p>
+                </div>
+            {% endfor %}
+        </div>
     </div>
-  </div>
-  <script src="{% static 'js/script.js' %}"></script>
 </div>
+{% endblock %}
 
-</body>
-</html>
+{% block extra_js %}
+<script>
+    // Note: Re-using the logic from the original script.js if needed, 
+    // but here we ensure the product-card structure matches the home page for consistency.
+    
+    function applyFilters() {
+        const search = document.getElementById('shopSearch').value.toLowerCase();
+        const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+        const maxPrice = parseFloat(document.getElementById('maxPrice').value) || 100000;
+        
+        const cards = document.querySelectorAll('.product-card');
+        let count = 0;
+        
+        cards.forEach(card => {
+            const title = card.getAttribute('data-title');
+            const price = parseFloat(card.getAttribute('data-price'));
+            
+            const matchesSearch = title.includes(search);
+            const matchesPrice = price >= minPrice && price <= maxPrice;
+            
+            if (matchesSearch && matchesPrice) {
+                card.parentElement.style.display = 'block';
+                count++;
+            } else {
+                card.parentElement.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('resultCount').innerText = `Showing ${count} products`;
+    }
 
+    function toggleSizeFilter(btn) {
+        btn.classList.toggle('active');
+        if (btn.classList.contains('active')) {
+            btn.style.background = 'var(--charcoal)';
+            btn.style.color = 'white';
+        } else {
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--charcoal)';
+        }
+        applyFilters(); // Simplified for now
+    }
+</script>
+{% endblock %}

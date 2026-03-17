@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Confirmed – #{{ order.id }} | VÊTIR{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-container {
+        max-width: 800px;
+        margin: 6rem auto;
+        padding: 4rem;
+        background: white;
+        border: 1px solid var(--border);
+        text-align: center;
+        border-radius: 4px;
+        box-shadow: var(--shadow);
+    }
+
+    .success-icon {
+        font-size: 4rem;
+        color: var(--success);
+        margin-bottom: 2rem;
+    }
+
+    .success-header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .order-number {
+        font-size: 0.85rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 3rem;
+        display: block;
+    }
+
+    .order-details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        text-align: left;
+        margin: 3rem 0;
+        padding: 2rem 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .detail-item h4 {
+        font-family: 'Jost', sans-serif;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-item p {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.25rem;
+        color: var(--charcoal);
+    }
+
+    .amount-highlight {
+        color: var(--gold-dark);
+        font-weight: 500;
+    }
+
+    .success-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+    }
+
+    .success-actions .btn-primary, .success-actions .btn-outline {
+        padding: 1rem 2.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+            <div class="success-card">
+                <div class="success-header">
+                    <div class="success-icon">✓</div>
+                    <h2>Reservation Confirmed</h2>
+                    <p>Order ID: #{{ order.id|stringformat:"05d" }}</p>
+                </div>
+
+                <div class="receipt-body">
+                    <div class="receipt-section">
+                        <h3>Rental Summary</h3>
+                        <div class="receipt-row">
+                            <span>OUTFIT</span>
+                            <span class="val">{{ order.product.title }}</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span>DURATION</span>
+                            <span class="val">{{ order.rental_days }} Days</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span>PICKUP DATE</span>
+                            <span class="val">{{ order.order_date|date:"F j, Y" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="receipt-section">
+                        <h3>Cost Breakdown</h3>
+                        <div class="receipt-row">
+                            <span>RENTAL FEE</span>
+                            <span class="val">₹{{ order.get_rent_total }}</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span>SEC. DEPOSIT</span>
+                            <span class="val">₹{{ order.deposit }}</span>
+                        </div>
+                        <div class="receipt-row total">
+                            <span>TOTAL PAID ({{ order.payment_method|upper }})</span>
+                            <span class="val">₹{{ order.total_amount }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success-actions">
+                    <a href="{% url 'my_orders' %}" class="btn-primary">View My Orders</a>
+                    <a href="{% url 'home' %}" class="btn-outline">Return Home</a>
+                </div>
+                
+                <div class="receipt-footer">
+                    <p>A confirmation email has been sent to {{ user.email }}</p>
+                    <p>Enjoy your luxury experience with PRORENT.</p>
+                </div>
+            </div>
+</div>
+{% endblock %}

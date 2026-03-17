@@ -1,67 +1,19 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VÊTIR — Peer-to-Peer Luxury Clothing Rental</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% block title %}PRORENT — Peer-to-Peer Luxury Clothing Rental{% endblock %}
 
-</head>
-<body>
-<script src="{% static 'js/script.js' %}"></script>
+{% block extra_css %}
+<style>
+  /* Unique styles for home page hero and specific sections */
+  .hero {
+    margin-top: -72px;
+    /* Pull into nav area */
+  }
+</style>
+{% endblock %}
 
-<!-- TOAST -->
-<div class="toast" id="toast">
-  <span class="toast-icon">✓</span>
-  <span id="toast-msg">Item added to cart</span>
-</div>
-
-<!-- MOBILE NAV -->
-<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileNav()"></div>
-<div class="mobile-nav" id="mobileNav">
-  <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
-  <div style="clear:both"></div>
-  <div class="logo" onclick="navigate('home'); closeMobileNav()">VÊT<span>IR</span></div>
-  <ul>
-    <li><a href="{% url 'browse' %}">Browse</a></li>
-    <li><a href="{% url 'collections' %}">Collections</a></li>
-    <li><a href="{% url 'how_it_works' %}">How It Works</a></li>
-  </ul>
-</div>
-
-<!-- NAVBAR -->
-<nav>
-  <div class="nav-inner">
-    <a class="logo" href="{% url 'home' %}"></a>
-    <ul class="nav-links">
-      <li><a href="{% url 'browse' %}">Browse</a></li>
-      <li><a href="{% url 'collections' %}">Collections</a></li>
-      <li><a href="{% url 'how_it_works' %}">How It Works</a></li>
-      
-    </ul>
-    <div class="nav-actions">
-      <button class="cart-btn" onclick="navigate('cart')" title="Cart">
-        🛍️
-        <span class="cart-count" id="cartCount">0</span>
-      </button>
-
-      {% if user.is_authenticated %}
-        <span style="margin-right: 15px;">Hello, {{ user.first_name|default:user.username }}!</span>
-        <a href="{% url 'logout' %}" class="btn-primary" style="text-decoration: none;">Logout</a>
-      {% else %}
-        <a href="{% url 'login' %}" class="btn-primary" style="text-decoration: none;">Login</a>
-        <a href="{% url 'register' %}" class="btn-primary" style="text-decoration: none; margin-left:10px;">Register</a>
-      {% endif %}
-      <button class="hamburger" onclick="openMobileNav()" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </div>
-</nav>
-
+{% block content %}
 <!-- ═══════════════════════ HOME PAGE ═══════════════════════ -->
 <div class="page active" id="page-home">
 
@@ -70,19 +22,20 @@
     <div class="hero-bg"></div>
     <div class="hero-pattern"></div>
     <div class="hero-content">
-        <div class="hero-slide active"></div>
-        <div class="hero-slide"></div>
-        <div class="hero-slide"></div>
-        <div class="hero-slide"></div>
+      <div class="hero-slide active"></div>
+      <div class="hero-slide"></div>
+      <div class="hero-slide"></div>
+      <div class="hero-slide"></div>
       <div class="hero-text">
         <div class="hero-eyebrow">India's Premier Rental Marketplace</div>
         <h1>
-        Rent <span class="highlight">Luxury</span><br>
-        Own the Moment
+          Rent <span class="highlight">Luxury</span><br>
+          Own the Moment
         </h1>
-        <p class="hero-desc">Rent stunning designer ensembles for every occasion — weddings, galas, parties, and beyond. Sustainably sourced, curated with care.</p>
+        <p class="hero-desc">Rent stunning designer ensembles for every occasion — weddings, galas, parties, and beyond.
+          Sustainably sourced, curated with care.</p>
         <div class="hero-cta">
-          <button class="btn-gold" onclick="navigate('shop')">Rent Now</button>
+          <a href="{% url 'browse' %}" class="btn-gold" style="text-decoration: none;">Rent Now</a>
           <button class="btn-outline" onclick="showToast('Listing page coming soon!')">List Your Outfit</button>
         </div>
         <div class="hero-stats">
@@ -100,55 +53,41 @@
           </div>
         </div>
       </div>
-      {% comment %} <div class="hero-visual">
-        <div class="hero-card-grid">
-    {% for item in featured %}
-        <div class="hero-card">
-            <img src="{{ item.image.url }}" alt="{{ item.title }}">
-            <div class="label">
-                <h4>{{ item.title }}</h4>
-                <p>₹{{ item.price_per_day }} / day</p>
-            </div>
-        </div>
-    {% endfor %}
-</div>
-      </div> {% endcomment %}
     </div>
   </section>
 
   <!-- CATEGORIES -->
   <section>
-    <div class="section-inner">   
+    <div class="section-inner">
       <div class="section-header">
         <span class="section-eyebrow">Shop by Occasion</span>
         <h2>Curated Collections</h2>
         <p>Every ensemble tells a story. Find yours.</p>
       </div>
       <div class="categories-grid">
-         <a href="/category/party-wear/" style="text-decoration:none; color:inherit;">
-        <div class="cat-card" onclick="filterAndShop('Party')">
-          <div class="cat-img">
+        <a href="/category/party-wear/" style="text-decoration:none; color:inherit;">
+          <div class="cat-card">
+            <div class="cat-img">
               <img src="{% static 'images/party2.jpg' %}" alt="party">
-
+            </div>
+            <div class="cat-overlay"></div>
+            <div class="cat-info">
+              <h3>Party Wear</h3>
+            </div>
           </div>
-          <div class="cat-overlay"></div>
-          <div class="cat-info">
-            <h3>Party Wear</h3>
-            
-          </div>
-        </div>
-        <div class="cat-card" onclick="filterAndShop('Wedding')">
-          <a href="/category/wedding-wear/" style="text-decoration:none; color:inherit;">
-          <div class="cat-img">
+        </a>
+        <a href="/category/wedding-wear/" style="text-decoration:none; color:inherit;">
+          <div class="cat-card">
+            <div class="cat-img">
               <img src="{% static 'images/wedding2.jpg' %}" alt="Wedding">
+            </div>
+            <div class="cat-overlay"></div>
+            <div class="cat-info">
+              <h3>Wedding Wear</h3>
+            </div>
           </div>
-          <div class="cat-overlay"></div>
-          <div class="cat-info">
-            <h3>Wedding Wear</h3>
-          </div>
-        </div>
+        </a>
       </div>
-    </a>
     </div>
   </section>
 
@@ -160,27 +99,35 @@
         <h2>Featured Pieces</h2>
         <p>Our most-loved styles this season</p>
       </div>
-  <div class="products-grid">
-  {% for item in featured %}
-    <div class="product-card">
-        
-        <div class="product-img-wrap">
-            <img src="{{ item.image.url }}" alt="{{ item.title }}">
-        </div>
-
-        <div class="product-info">
-            <h4>{{ item.title }}</h4>
-            <div class="product-price">
-                ₹{{ item.price_per_day }} <span>/ day</span>
+      <div class="products-grid">
+        {% for item in featured %}
+        <a href="{% url 'product_detail' item.id %}" class="product-item {% if forloop.counter > 4 %}hidden-product{% endif %}" style="text-decoration: none; color: inherit;">
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <img src="{{ item.image.url }}" alt="{{ item.title }}">
             </div>
-        </div>
-
-    </div>
-  {% endfor %}
-  </div>
-      <div style="text-align:center; margin-top:3rem;">
-        <button class="btn-outline" onclick="navigate('shop')">View All Outfits</button>
+            <div class="product-info">
+              <h4>{{ item.title }}</h4>
+              <div class="product-price">
+                ₹{{ item.price_per_day }} <span>/ day</span>
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
       </div>
+      
+      <style>
+        .hidden-product {
+          display: none;
+        }
+      </style>
+
+      {% if featured|length > 4 %}
+      <div style="text-align:center; margin-top:3rem;">
+        <button id="toggleProductsBtn" class="btn-outline">View All Outfits</button>
+      </div>
+      {% endif %}
     </div>
   </section>
 
@@ -197,7 +144,8 @@
           <span class="hiw-num">01</span>
           <span class="hiw-icon">🔍</span>
           <h3>Browse & Choose</h3>
-          <p>Explore thousands of curated outfits. Filter by category, size, or budget. Find your perfect look effortlessly.</p>
+          <p>Explore thousands of curated outfits. Filter by category, size, or budget. Find your perfect look
+            effortlessly.</p>
         </div>
         <div class="hiw-item">
           <span class="hiw-num">02</span>
@@ -214,315 +162,46 @@
       </div>
     </div>
   </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <span class="logo">VÊT<span>IR</span></span>
-          <p>India's most trusted peer-to-peer luxury clothing rental marketplace. Wear designer, sustainably.</p>
-        </div>
-        <div class="footer-col">
-          <h5>Explore</h5>
-          <ul>
-            <li><a onclick="navigate('shop')">Designer Wear</a></li>
-            <li><a onclick="navigate('shop')">Party Wear</a></li>
-            <li><a onclick="navigate('shop')">Wedding Outfits</a></li>
-            <li><a onclick="navigate('shop')">Ethnic Wear</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h5>Account</h5>
-          <ul>
-            <li><a onclick="navigate('auth')">Login</a></li>
-            <li><a onclick="navigate('auth')">Register</a></li>
-            <li><a onclick="navigate('cart')">My Cart</a></li>
-            <li><a onclick="showToast('Orders page coming soon!')">My Orders</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h5>Support</h5>
-          <ul>
-            <li><a>FAQs</a></li>
-            <li><a>Size Guide</a></li>
-            <li><a>Return Policy</a></li>
-            <li><a>Contact Us</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© 2025 Vêtir. All rights reserved.</span>
-        <span>Privacy Policy · Terms of Use</span>
-      </div>
-    </div>
-  </footer>
 </div>
+{% endblock %}
 
-<!-- ═══════════════════════ SHOP PAGE ═══════════════════════ -->
-
-<!-- ═══════════════════════ PRODUCT DETAIL PAGE ═══════════════════════ -->
-<div class="page" id="page-detail">
-  <div class="detail-page">
-    <div class="detail-inner">
-      <!-- Images -->
-      <div class="detail-images">
-        <div class="main-image" id="mainProductImg"></div>
-        <div class="thumbs" id="productThumbs"></div>
-      </div>
-      <!-- Info -->
-      <div class="detail-info">
-        <div class="detail-breadcrumb" onclick="navigate('shop')">← Back to Browse</div>
-        <span class="product-cat" id="detailCat"></span>
-        <h1 id="detailName"></h1>
-        <div class="detail-rating-row">
-          <div class="product-rating">
-            <span class="stars" id="detailStars"></span>
-            <span id="detailRating"></span>
-          </div>
-          <span class="review-count" id="detailReviewCount"></span>
-        </div>
-        <div class="detail-price" id="detailPrice"></div>
-        <div class="detail-price-note">per day · includes dry cleaning</div>
-        <p class="detail-desc" id="detailDesc"></p>
-
-        <!-- Size -->
-        <span class="detail-section-label">Select Size</span>
-        <div class="size-selector" id="sizeSelector"></div>
-
-        <!-- Duration -->
-        <div class="duration-selector">
-          <span class="detail-section-label">Rental Duration</span>
-          <div class="duration-control">
-            <button class="dur-btn" onclick="changeDuration(-1)">−</button>
-            <div class="dur-val" id="durVal">1</div>
-            <button class="dur-btn" onclick="changeDuration(1)">+</button>
-          </div>
-          <div style="font-size:0.75rem; color:var(--muted); margin-top:0.4rem;">days (max 7)</div>
-        </div>
-
-        <!-- Price Calc -->
-        <div class="price-calc">
-          <div class="price-calc-row"><span>Base price</span><span id="basePrice">—</span></div>
-          <div class="price-calc-row"><span>Duration</span><span id="durationLabel">1 day</span></div>
-          <div class="price-calc-row"><span>Security deposit</span><span id="depositLabel">—</span></div>
-          <div class="price-calc-row total"><span>Total</span><span class="amount" id="totalPrice">—</span></div>
-        </div>
-
-        <!-- Actions -->
-        <div class="detail-actions">
-          <button class="btn-primary" onclick="addToCartFromDetail()">Add to Cart</button>
-          <button class="btn-outline" onclick="addToCartFromDetail(true)">♡ Wishlist</button>
-        </div>
-
-        <div style="font-size:0.75rem; color:var(--muted); display:flex; gap:1.5rem;">
-          <span>✓ Free delivery & pickup</span>
-          <span>✓ Dry-cleaned</span>
-          <span>✓ Insured</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Reviews -->
-    <div class="reviews-section">
-      <div class="reviews-header">
-        <h3>Customer Reviews</h3>
-        <div class="avg-rating">
-          <span class="big-num" id="avgRatingNum">4.8</span>
-          <div class="stars" style="color:var(--gold)">★★★★★</div>
-          <div style="font-size:0.75rem; color:var(--muted); margin-top:0.3rem;">Based on 234 reviews</div>
-        </div>
-      </div>
-      <div class="review-grid" id="reviewGrid"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════ CART PAGE ═══════════════════════ -->
-<div class="page" id="page-cart">
-  <div class="cart-layout">
-    <div>
-      <h2 class="cart-title">Shopping Cart</h2>
-      <div id="cartItems"></div>
-    </div>
-    <div class="order-summary" id="orderSummary">
-      <h3>Order Summary</h3>
-      <div id="summaryDetails"></div>
-      <div class="promo-row">
-        <input class="promo-input" type="text" placeholder="Promo code">
-        <button class="promo-apply" onclick="showToast('Promo code applied! 10% off')">Apply</button>
-      </div>
-      <button class="checkout-btn" onclick="navigate('checkout')">Proceed to Checkout →</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════ CHECKOUT PAGE ═══════════════════════ -->
-<div class="page" id="page-checkout">
-  <div class="checkout-layout">
-    <div>
-      <div class="checkout-steps">
-        <div class="step active">1. Details</div>
-        <div class="step">2. Address</div>
-        <div class="step">3. Payment</div>
-      </div>
-
-      <!-- Personal Details -->
-      <div class="form-section">
-        <h3>Personal Details</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>First Name</label>
-            <input type="text" placeholder="Priya">
-          </div>
-          <div class="form-group">
-            <label>Last Name</label>
-            <input type="text" placeholder="Sharma">
-          </div>
-          <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" placeholder="priya@example.com">
-          </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" placeholder="+91 98765 43210">
-          </div>
-        </div>
-      </div>
-
-      <!-- Delivery Address -->
-      <div class="form-section">
-        <h3>Delivery Address</h3>
-        <div class="form-grid full">
-          <div class="form-group">
-            <label>Address Line 1</label>
-            <input type="text" placeholder="Flat / Building No.">
-          </div>
-          <div class="form-group">
-            <label>Address Line 2</label>
-            <input type="text" placeholder="Street / Area">
-          </div>
-        </div>
-        <div class="form-grid" style="margin-top:1rem;">
-          <div class="form-group">
-            <label>City</label>
-            <input type="text" placeholder="Mumbai">
-          </div>
-          <div class="form-group">
-            <label>PIN Code</label>
-            <input type="text" placeholder="400001">
-          </div>
-          <div class="form-group">
-            <label>State</label>
-            <select>
-              <option>Maharashtra</option>
-              <option>Delhi</option>
-              <option>Karnataka</option>
-              <option>Tamil Nadu</option>
-              <option>Gujarat</option>
-              <option>Rajasthan</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Rental Start Date</label>
-            <input type="date">
-          </div>
-        </div>
-      </div>
-
-      <!-- Payment -->
-      <div class="form-section">
-        <h3>Payment Method</h3>
-        <div class="payment-options" id="paymentOptions">
-          <div class="payment-option selected" onclick="selectPayment(this, 'card')">
-            <input type="radio" name="payment" checked>
-            <div class="payment-option-label">
-              <strong>Credit / Debit Card</strong>
-              <span>Visa, Mastercard, RuPay</span>
-            </div>
-            <span style="margin-left:auto;font-size:1.3rem">💳</span>
-          </div>
-          <div class="payment-option" onclick="selectPayment(this, 'upi')">
-            <input type="radio" name="payment">
-            <div class="payment-option-label">
-              <strong>UPI</strong>
-              <span>PhonePe, Google Pay, Paytm</span>
-            </div>
-            <span style="margin-left:auto;font-size:1.3rem">📱</span>
-          </div>
-          <div class="payment-option" onclick="selectPayment(this, 'netbanking')">
-            <input type="radio" name="payment">
-            <div class="payment-option-label">
-              <strong>Net Banking</strong>
-              <span>All major banks</span>
-            </div>
-            <span style="margin-left:auto;font-size:1.3rem">🏦</span>
-          </div>
-          <div class="payment-option" onclick="selectPayment(this, 'cod')">
-            <input type="radio" name="payment">
-            <div class="payment-option-label">
-              <strong>Cash on Delivery</strong>
-              <span>Pay when you receive</span>
-            </div>
-            <span style="margin-left:auto;font-size:1.3rem">💵</span>
-          </div>
-        </div>
-        <div class="card-fields" id="cardFields">
-          <div class="form-group">
-            <label>Card Number</label>
-            <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)">
-          </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Expiry Date</label>
-              <input type="text" placeholder="MM / YY" maxlength="7">
-            </div>
-            <div class="form-group">
-              <label>CVV</label>
-              <input type="password" placeholder="•••" maxlength="3">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Name on Card</label>
-            <input type="text" placeholder="PRIYA SHARMA">
-          </div>
-        </div>
-      </div>
-
-      <button class="confirm-btn" onclick="confirmBooking()">Confirm Booking & Pay →</button>
-    </div>
-
-    <!-- Order summary sidebar -->
-    <div class="order-summary" style="position:sticky; top:90px;">
-      <h3>Your Order</h3>
-      <div id="checkoutSummary"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Auth handled via views -->
-
-<!-- SUCCESS MODAL -->
-<div class="modal-overlay" id="successModal">
-  <div class="modal">
-    <span class="modal-icon">🎉</span>
-    <h3>Booking Confirmed!</h3>
-    <p>Your outfit is on its way! You'll receive a confirmation email shortly. Expected delivery within 24 hours.</p>
-    <p style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; color:var(--gold); margin-bottom:1.5rem;">Booking ID: VTR-<span id="bookingId"></span></p>
-    <button class="btn-primary" onclick="closeModal()">Back to Home</button>
-  </div>
-</div>
-
+{% block extra_js %}
 <script>
-const slides = document.querySelectorAll(".hero-slide");
-let current = 0;
+  const slides = document.querySelectorAll(".hero-slide");
+  let current = 0;
 
-setInterval(() => {
-    slides[current].classList.remove("active");
-    current = (current + 1) % slides.length;
-    slides[current].classList.add("active");
-}, 4000);
+  if (slides.length > 0) {
+    setInterval(() => {
+      slides[current].classList.remove("active");
+      current = (current + 1) % slides.length;
+      slides[current].classList.add("active");
+    }, 4000);
+  }
+
+  // Product Toggle Logic
+  const toggleBtn = document.getElementById("toggleProductsBtn");
+  const hiddenProducts = document.querySelectorAll(".hidden-product");
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", function() {
+      const isExpanded = toggleBtn.classList.contains("expanded");
+      
+      hiddenProducts.forEach(product => {
+        if (isExpanded) {
+          product.style.display = "none";
+        } else {
+          product.style.display = "block";
+        }
+      });
+
+      if (isExpanded) {
+        toggleBtn.innerText = "View All Outfits";
+        toggleBtn.classList.remove("expanded");
+      } else {
+        toggleBtn.innerText = "Show Less";
+        toggleBtn.classList.add("expanded");
+      }
+    });
+  }
 </script>
-
-</body>
-</html>
+{% endblock %}

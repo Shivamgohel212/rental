@@ -1,208 +1,202 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-<title>{{ product.title }}</title>
 
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% block title %}{{ product.title }} | PRORENT{% endblock %}
 
+{% block extra_css %}
 <style>
+    .detail-page {
+        max-width: 1400px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
 
-body{
-    margin:0;
-    font-family: 'Segoe UI', sans-serif;
-    background:linear-gradient(to right,#f8f8f8,#f2f2f2);
-}
+    .detail-inner {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5rem;
+        align-items: start;
+    }
 
-/* MAIN LAYOUT */
+    .detail-images {
+        position: sticky;
+        top: 100px;
+    }
 
-.product-page{
-    max-width:1000px;
-    margin:20px auto;
-    display:flex;
-    gap:70px;
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 10px 35px rgba(0,0,0,0.08);
-}
+    .main-image {
+        width: 100%;
+        height: 800px;
+        background: var(--cream);
+        overflow: hidden;
+        border-radius: 4px;
+        position: relative;
+    }
 
-/* LEFT IMAGE */
+    .main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s var(--transition);
+    }
 
-.product-left{
-    flex:1;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
+    .main-image:hover img {
+        transform: scale(1.05);
+    }
 
-.product-left img{
-    width:90%;
-    border-radius:10px;
-    transition:0.3s;
-}
+    .detail-info {
+        padding-top: 2rem;
+    }
 
-.product-left img:hover{
-    transform:scale(1.05);
-}
+    .detail-breadcrumb {
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 2rem;
+        cursor: pointer;
+        display: inline-block;
+        transition: color var(--transition);
+    }
 
-/* RIGHT SIDE */
+    .detail-breadcrumb:hover {
+        color: var(--charcoal);
+    }
 
-.product-right{
-    flex:1;
-}
+    .product-cat {
+        font-size: 0.7rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 1rem;
+        display: block;
+    }
 
-.product-title{
-    font-size:42px;
-    font-weight:600;
-    margin-bottom:5px;
-}
+    .detail-info h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--charcoal);
+    }
 
-.product-price{
-    font-size:35px;
-    font-weight:bold;
-    margin:12px 0;
-}
+    .detail-price {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.2rem;
+        color: var(--charcoal);
+        margin-bottom: 0.5rem;
+    }
 
-.deposit{
-    color:#888;
-    margin-bottom:30px;
-}
+    .detail-price-note {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 2.5rem;
+    }
 
-/* SIZE BUTTONS */
+    .detail-desc {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #555;
+        margin-bottom: 3rem;
+        max-width: 500px;
+    }
 
-.size-box{
-    margin-bottom:25px;
-}
+    .detail-section-label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--muted);
+        margin-bottom: 1.2rem;
+    }
 
-.size-btn{
-    padding:10px 16px;
-    border:1px solid #ddd;
-    background:white;
-    cursor:pointer;
-    margin-right:10px;
-    border-radius:6px;
-    transition:0.2s;
-}
+    .size-badge {
+        display: inline-block;
+        padding: 0.8rem 1.5rem;
+        border: 1px solid var(--charcoal);
+        font-size: 0.85rem;
+        margin-bottom: 3rem;
+    }
 
-.size-btn:hover{
-    border-color:black;
-}
+    .detail-actions {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
 
-/* DATE INPUT */
+    .detail-actions .btn-primary {
+        flex: 2;
+        padding: 1.2rem;
+    }
 
-.option-box{
-    margin-bottom:20px;
-}
+    .detail-actions .btn-outline {
+        flex: 1;
+        padding: 1.2rem;
+    }
 
-.option-box label{
-    display:block;
-    margin-bottom:6px;
-    color:#555;
-}
+    .feature-list {
+        display: flex;
+        gap: 2rem;
+        border-top: 1px solid var(--border);
+        padding-top: 2rem;
+    }
 
-input{
-    padding:12px;
-    width:250px;
-    border:1px solid #ddd;
-    border-radius:6px;
-}
+    .feature-item {
+        font-size: 0.75rem;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-/* RENT BUTTON */
-
-.rent-btn{
-    margin-top:25px;
-    padding:15px;
-    width:260px;
-    background:black;
-    color:white;
-    border:none;
-    font-size:16px;
-    border-radius:6px;
-    cursor:pointer;
-    transition:0.3s;
-}
-
-.rent-btn:hover{
-    background:#333;
-}
-
-/* DESCRIPTION */
-
-.description{
-    margin-top:35px;
-}
-
-.description h3{
-    margin-bottom:10px;
-}
-
-.description p{
-    color:#555;
-    line-height:1.6;
-}
-
+    @media (max-width: 1000px) {
+        .detail-inner {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+        .main-image {
+            height: 600px;
+        }
+        .detail-images {
+            position: relative;
+            top: 0;
+        }
+    }
 </style>
+{% endblock %}
 
-</head>
-<body>
+{% block content %}
+<div class="detail-page">
+    <div class="detail-inner">
+        <!-- Images -->
+        <div class="detail-images">
+            <div class="main-image">
+                <img src="{{ product.image.url }}" alt="{{ product.title }}">
+            </div>
+        </div>
 
-<div class="product-page">
+        <!-- Info -->
+        <div class="detail-info">
+            <a href="{% url 'browse' %}" class="detail-breadcrumb">← Back to Browse</a>
+            <span class="product-cat">{{ product.category.name }}</span>
+            <h1>{{ product.title }}</h1>
+            
+            <div class="detail-price">₹{{ product.price_per_day }} <span>/ day</span></div>
+            <div class="detail-price-note">Refundable Security Deposit: ₹{{ product.security_deposit }}</div>
+            
+            <p class="detail-desc">{{ product.description }}</p>
 
-<div class="product-left">
-<img src="{{ product.image.url }}">
+            <span class="detail-section-label">Available Size</span>
+            <div class="size-badge">{{ product.size }}</div>
+
+            <div class="detail-actions">
+                <a href="{% url 'payment_page' product.id %}" class="btn-primary" style="text-align: center;">Rent Now</a>
+                <button class="btn-outline">♡ Wishlist</button>
+            </div>
+
+            <div class="feature-list">
+                <div class="feature-item"><span>✓</span> Free delivery</div>
+                <div class="feature-item"><span>✓</span> Dry-cleaned</div>
+                <div class="feature-item"><span>✓</span> Fully Insured</div>
+            </div>
+        </div>
+    </div>
 </div>
-
-<div class="product-right">
-
-<h1 class="product-title">{{ product.title }}</h1>
-
-<div class="product-price">
-₹{{ product.price_per_day }} / day
-</div>
-
-<div class="deposit">
-Refundable Deposit ₹{{ product.security_deposit }}
-</div>
-
-<!-- SIZE -->
-
-<div class="size-box">
-<label><b>Size</b></label><br><br>
-
-<button class="size-btn">{{ product.size }}</button>
-
-</div>
-
-<!-- START DATE -->
-
-<div class="option-box">
-<label>Start Date</label>
-<input type="date">
-</div>
-
-<!-- RETURN DATE -->
-
-<div class="option-box">
-<label>Return Date</label>
-<input type="date">
-</div>
-
-<button class="rent-btn">
-Rent Now
-</button>
-
-<div class="description">
-
-<h3>Description</h3>
-
-<p>{{ product.description }}</p>
-
-</div>
-
-</div>
-
-</div>
-
-</body>
-</html>
+{% endblock %}

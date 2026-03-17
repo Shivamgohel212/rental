@@ -11,4 +11,10 @@ urlpatterns = [
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),
     path('logout/', views.logout_user, name='logout'),
+
+    # Payment
+    path('product/<int:product_id>/payment/', views.payment_page, name='payment_page'),
+    path('product/<int:product_id>/place-order/', views.place_order, name='place_order'),
+    path('order/<int:order_id>/success/', views.order_success, name='order_success'),
+    path('my-orders/', views.my_orders, name='my_orders'),
 ]

@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.utils.text import slugify
 # Create your models here.
 # from django.db import models
@@ -24,7 +26,8 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.userprofile.save()
+    if hasattr(instance, 'userprofile'):
+        instance.userprofile.save()
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
@@ -154,3 +157,37 @@ class Detail(models.Model):
 
     def __str__(self):
         return self.clothing.title
+
+
+class RentalOrder(models.Model):
+    PAYMENT_METHOD_CHOICES = [
+        ('upi', 'UPI'),
+        ('card', 'Card'),
+        ('cod', 'Cash on Delivery'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rental_orders')
+    product = models.ForeignKey(Clothing, on_delete=models.CASCADE, related_name='rental_orders')
+    rental_days = models.PositiveIntegerField()
+    price_per_day = models.DecimalField(max_digits=8, decimal_places=2)
+    deposit = models.DecimalField(max_digits=8, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES, default='cod')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
+    order_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-order_date']
+
+    @property
+    def get_rent_total(self):
+        return self.price_per_day * self.rental_days
+
+    def __str__(self):
+        return f"Order #{self.pk} – {self.user.username} – {self.product.title}"

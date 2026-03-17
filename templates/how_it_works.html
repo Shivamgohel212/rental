@@ -1,24 +1,17 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>How It Works</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
 
-<nav>
-    <!-- navbar same as home -->
-</nav>
+{% block title %}How It Works | PRORENT{% endblock %}
 
-<section class="hiw-section">
-    <section class="hiw-section">
+{% block content %}
+<section class="hiw-section" style="padding: 8rem 0;">
     <div class="section-inner">
       <div class="section-header">
         <span class="section-eyebrow">Simple & Seamless</span>
         <h2>How It Works</h2>
         <p>Renting has never been this effortless</p>
       </div>
+      
       <div class="hiw-grid">
         <div class="hiw-item">
           <span class="hiw-num">01</span>
@@ -40,9 +33,5 @@
         </div>
       </div>
     </div>
-  </section>
 </section>
-
-<script src="{% static 'js/script.js' %}"></script>
-</body>
-</html>
+{% endblock %}

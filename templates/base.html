@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PRORENT — Peer-to-Peer Luxury Clothing Rental{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <script src="{% static 'js/script.js' %}"></script>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+      <span class="toast-icon">✓</span>
+      <span id="toast-msg">Item added to cart</span>
+    </div>
+
+    <!-- NAVBAR -->
+    <style>
+      .mobile-nav {
+        position: fixed;
+        top: 0; right: -300px;
+        width: 300px; height: 100vh;
+        background: white;
+        z-index: 2000;
+        padding: 4rem 2rem;
+        transition: right 0.4s var(--transition);
+        box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+      }
+      .mobile-nav.open { right: 0; }
+      .mobile-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1999;
+        display: none;
+        backdrop-filter: blur(4px);
+      }
+      .mobile-overlay.show { display: block; }
+      .mobile-nav ul { list-style: none; }
+      .mobile-nav li { margin-bottom: 1.5rem; }
+      .mobile-nav a {
+        text-decoration: none;
+        color: var(--charcoal);
+        font-family: 'Jost', sans-serif;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .close-nav {
+        position: absolute;
+        top: 2rem; right: 2rem;
+        background: none; border: none;
+        font-size: 2.5rem; cursor: pointer;
+      }
+      @media (max-width: 900px) {
+        .nav-links { display: none; }
+        .hamburger { display: block !important; }
+      }
+    </style>
+    <nav>
+      <div class="nav-inner">
+        <a class="logo" href="{% url 'home' %}">PRO<span>RENT</span></a>
+        <ul class="nav-links">
+          <li><a href="{% url 'browse' %}">Browse</a></li>
+          <li><a href="{% url 'collections' %}">Collections</a></li>
+          <li><a href="{% url 'how_it_works' %}">How It Works</a></li>
+        </ul>
+        <div class="nav-actions">
+          <button class="cart-btn" onclick="showToast('Cart feature coming soon!', '🛒')" title="Cart">
+            🛍️
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+
+          {% if user.is_authenticated %}
+            <a href="{% url 'my_orders' %}" style="font-family:'Jost',sans-serif; font-size:0.85rem; color:var(--gold); margin-right: 20px; text-decoration: none;">My Orders</a>
+            <span style="font-family:'Jost',sans-serif; font-size:0.85rem; color:white; margin-right: 15px;">Hello, {{ user.first_name|default:user.username }}!</span>
+            <a href="{% url 'logout' %}" class="btn-primary" style="text-decoration: none;">Logout</a>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn-primary" style="text-decoration: none;">Login</a>
+            <a href="{% url 'register' %}" class="btn-primary" style="text-decoration: none; margin-left:10px;">Register</a>
+          {% endif %}
+          
+          <!-- Hamburger for Mobile -->
+          <button class="hamburger" onclick="openMobileNav()" style="margin-left: 15px; background: none; border: none; cursor: pointer; display: none;">
+            <span style="display: block; width: 25px; height: 2px; background: white; margin-bottom: 5px;"></span>
+            <span style="display: block; width: 25px; height: 2px; background: white; margin-bottom: 5px;"></span>
+            <span style="display: block; width: 25px; height: 2px; background: white;"></span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Mobile Nav Overlay -->
+      <div id="mobileOverlay" class="mobile-overlay" onclick="closeMobileNav()"></div>
+      <div id="mobileNav" class="mobile-nav">
+        <button class="close-nav" onclick="closeMobileNav()">×</button>
+        <a class="logo" href="{% url 'home' %}" style="margin-bottom: 3rem; display: block;">PRO<span>RENT</span></a>
+        <ul>
+          <li><a href="{% url 'browse' %}">Browse</a></li>
+          <li><a href="{% url 'collections' %}">Collections</a></li>
+          <li><a href="{% url 'how_it_works' %}">How It Works</a></li>
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'my_orders' %}">My Orders</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}">Login</a></li>
+            <li><a href="{% url 'register' %}">Register</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    <div style="margin-top: 72px;"> <!-- Offset for fixed nav -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <span class="logo">PRO<span>RENT</span></span>
+            <p>India's most trusted peer-to-peer luxury clothing rental marketplace. Wear designer, sustainably.</p>
+          </div>
+          <div class="footer-col">
+            <h5>Explore</h5>
+            <ul>
+              <li><a href="{% url 'browse' %}">Designer Wear</a></li>
+              <li><a href="{% url 'browse' %}">Party Wear</a></li>
+              <li><a href="{% url 'browse' %}">Wedding Outfits</a></li>
+              <li><a href="{% url 'browse' %}">Ethnic Wear</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Account</h5>
+            <ul>
+              <li><a href="{% url 'login' %}">Login</a></li>
+              <li><a href="{% url 'register' %}">Register</a></li>
+              <li><a onclick="showToast('Cart feature coming soon!', '🛒')">My Cart</a></li>
+              <li><a onclick="showToast('Orders page coming soon!')">My Orders</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Support</h5>
+            <ul>
+              <li><a>FAQs</a></li>
+              <li><a>Size Guide</a></li>
+              <li><a>Return Policy</a></li>
+              <li><a>Contact Us</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© 2025 ProRent. All rights reserved.</span>
+          <span>Privacy Policy · Terms of Use</span>
+        </div>
+      </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

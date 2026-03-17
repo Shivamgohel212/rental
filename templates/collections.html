@@ -1,59 +1,42 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Collections</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
 
-<nav>
-    <!-- navbar same as home -->
-</nav>
+{% block title %}Curated Collections | PRORENT{% endblock %}
 
-<section>
-    <section>
+{% block content %}
+<section style="padding: 6rem 0;">
     <div class="section-inner">
       <div class="section-header">
         <span class="section-eyebrow">Shop by Occasion</span>
         <h2>Curated Collections</h2>
         <p>Every ensemble tells a story. Find yours.</p>
       </div>
-     <div class="categories-grid">
+      
+      <div class="categories-grid">
+        <a href="/category/party-wear/" style="text-decoration:none; color:inherit;">
+          <div class="cat-card">
+            <div class="cat-img">
+              <img src="{% static 'images/party2.jpg' %}" alt="Party Wear">
+            </div>
+            <div class="cat-overlay"></div>
+            <div class="cat-info">
+              <h3>Party Wear</h3>
+            </div>
+          </div>
+        </a>
 
-<a href="/category/party-wear/" style="text-decoration:none; color:inherit;">
-  <div class="cat-card">
-    <div class="cat-img c-party">
-      <img src="{% static 'images/party2.jpg' %}" alt="Party Wear">
-    </div>
-    <div class="cat-overlay"></div>
-    <div class="cat-info">
-      <h3>Party Wear</h3>
-      <p></p>
-    </div>
-  </div>
-</a>
-
-<a href="/category/wedding-wear/" style="text-decoration:none; color:inherit;">
-  <div class="cat-card">
-    <div class="cat-img c-wedding">
-            <img src="{% static 'images/wedding2.jpg' %}" alt="Wedding Wear">
-
-    </div>
-    <div class="cat-overlay"></div>
-    <div class="cat-info">
-      <h3>Wedding Wear</h3>
-      <p></p>
-    </div>
-  </div>
-</a>
-
-</div>
+        <a href="/category/wedding-wear/" style="text-decoration:none; color:inherit;">
+          <div class="cat-card">
+            <div class="cat-img">
+              <img src="{% static 'images/wedding2.jpg' %}" alt="Wedding Wear">
+            </div>
+            <div class="cat-overlay"></div>
+            <div class="cat-info">
+              <h3>Wedding Wear</h3>
+            </div>
+          </div>
+        </a>
       </div>
     </div>
-  </section>
 </section>
-
-<script src="{% static 'js/script.js' %}"></script>
-</body>
-</html>
+{% endblock %}

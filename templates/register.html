@@ -1,14 +1,11 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register — VÊTIR</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+{% block title %}Register — PRORENT{% endblock %}
+
+{% block extra_css %}
 <style>
-  .auth-page { min-height: 100vh; display: flex; }
+  .auth-page { min-height: calc(100vh - 72px); display: flex; }
   .auth-visual {
     flex: 1;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -32,7 +29,6 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 100vh;
   }
   .auth-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid #eee; }
   .auth-tab {
@@ -74,21 +70,6 @@
   }
   .form-group input:focus { border-color: #d4af37; }
   .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .btn-primary {
-    background: #1a1a1a;
-    color: #fff;
-    border: none;
-    padding: 0.85rem 2rem;
-    font-family: 'Jost', sans-serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 0.5rem;
-    transition: background 0.2s;
-  }
-  .btn-primary:hover { background: #d4af37; }
   .error-msg {
     background: #fff0f0;
     border: 1px solid #ffcccc;
@@ -107,33 +88,15 @@
     font-size: 0.85rem;
     font-family: 'Jost', sans-serif;
   }
-  nav .nav-inner { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; }
-  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.97); border-bottom: 1px solid #eee; padding: 1rem 0; }
-  .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 500; letter-spacing: 0.15em; color: #1a1a1a; text-decoration: none; }
-  .logo span { color: #d4af37; }
   @media (max-width: 768px) {
     .auth-visual { display: none; }
     .auth-form-area { width: 100%; padding: 2rem; }
     .form-grid-2 { grid-template-columns: 1fr; }
   }
 </style>
-</head>
-<body>
-<nav>
-  <div class="nav-inner">
-    <a class="logo" href="{% url 'home' %}">VÊT<span>IR</span></a>
-    <div>
-      {% if user.is_authenticated %}
-        <span style="margin-right:15px; font-family:'Jost',sans-serif; font-size:0.85rem;">Hello, {{ user.first_name|default:user.username }}</span>
-        <a href="{% url 'logout' %}" style="font-family:'Jost',sans-serif; font-size:0.85rem; color:#d4af37; text-decoration:none;">Logout</a>
-      {% else %}
-        <a href="{% url 'login' %}" style="font-family:'Jost',sans-serif; font-size:0.85rem; color:#1a1a1a; text-decoration:none; margin-right:1.5rem;">Login</a>
-        <a href="{% url 'register' %}" style="font-family:'Jost',sans-serif; font-size:0.85rem; color:#d4af37; text-decoration:none;">Register</a>
-      {% endif %}
-    </div>
-  </div>
-</nav>
+{% endblock %}
 
+{% block content %}
 <div class="auth-page">
   <div class="auth-visual">
     <div class="auth-visual-content">
@@ -142,8 +105,8 @@
   </div>
   <div class="auth-form-area">
     <div class="auth-tabs">
-      <a href="{% url 'login' %}" class="auth-tab" style="text-decoration:none;">Login</a>
-      <a href="{% url 'register' %}" class="auth-tab active" style="text-decoration:none;">Register</a>
+      <a href="{% url 'login' %}" class="auth-tab">Login</a>
+      <a href="{% url 'register' %}" class="auth-tab active">Register</a>
     </div>
 
     <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:400; margin-bottom:0.3rem;">Create Account</h3>
@@ -199,5 +162,4 @@
     </p>
   </div>
 </div>
-</body>
-</html>
+{% endblock %}
