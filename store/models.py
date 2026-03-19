@@ -2,22 +2,51 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.text import slugify
-# Create your models here.
-# from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
+
+# --- Choice Constants ---
+BOOKING_STATUS_CHOICES = [
+    ('Pending', 'Pending'),
+    ('Approved', 'Approved'),
+    ('Cancelled', 'Cancelled'),
+    ('Returned', 'Returned'),
+]
+
+PAYMENT_STATUS_CHOICES = [
+    ('Pending', 'Pending'),
+    ('Completed', 'Completed'),
+    ('Failed', 'Failed'),
+]
+
+ORDER_STATUS_CHOICES = [
+    ('pending', 'Pending'),
+    ('confirmed', 'Confirmed'),
+    ('cancelled', 'Cancelled'),
+]
+
+PAYMENT_METHOD_CHOICES = [
+    ('upi', 'UPI'),
+    ('card', 'Card'),
+    ('cod', 'Cash on Delivery'),
+]
+
+GENDER_CHOICES = (
+    ('men', 'Men'),
+    ('women', 'Women'),
+)
+
+# --- Models ---
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=15, blank=True, default='')
-    address = models.TextField(blank=True, default='')
     profile_image = models.ImageField(upload_to='profiles/', null=True, blank=True)
     is_owner = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -28,6 +57,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     if hasattr(instance, 'userprofile'):
         instance.userprofile.save()
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
@@ -42,21 +72,11 @@ class Category(models.Model):
         return self.name
 
 class Clothing(models.Model):
-
-    GENDER_CHOICES = (
-        ('men', 'Men'),
-        ('women', 'Women'),
-    )
-
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
-
-    
-
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)   # 👈 ADD THIS
-
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     size = models.CharField(max_length=20)
     brand = models.CharField(max_length=100)
     price_per_day = models.DecimalField(max_digits=8, decimal_places=2)
@@ -70,71 +90,54 @@ class Clothing(models.Model):
     def __str__(self):
         return self.title
 
-class Booking(models.Model):
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Approved', 'Approved'),
-        ('Cancelled', 'Cancelled'),
-        ('Returned', 'Returned'),
-    ]
+    @property
+    def is_currently_booked(self):
+        today = timezone.now().date()
+        return self.rental_orders.filter(
+            status='confirmed',
+            start_date__lte=today,
+            end_date__gte=today
+        ).exists()
 
+class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     clothing = models.ForeignKey(Clothing, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
     total_days = models.IntegerField(blank=True, null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    status = models.CharField(max_length=20, choices=BOOKING_STATUS_CHOICES, default='Pending')
     booked_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-
-        # 🔴 Date Validation
         if self.end_date <= self.start_date:
             raise ValidationError("End date must be greater than start date.")
 
-        # 🔴 Double Booking Check
-        overlapping_bookings = Booking.objects.filter(
-            clothing=self.clothing
-        ).filter(
-            Q(start_date__lt=self.end_date) &
-            Q(end_date__gt=self.start_date)
+        overlapping_bookings = Booking.objects.filter(clothing=self.clothing).filter(
+            Q(start_date__lt=self.end_date) & Q(end_date__gt=self.start_date)
         )
-
         if self.pk:
             overlapping_bookings = overlapping_bookings.exclude(pk=self.pk)
-
         if overlapping_bookings.exists():
             raise ValidationError("This clothing is already booked for selected dates.")
 
-        # 🟢 Calculate total days
         self.total_days = (self.end_date - self.start_date).days
-
-        # 🟢 Calculate total price
         self.total_price = self.total_days * self.clothing.price_per_day
-
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.username} - {self.clothing.title}"
 
 class Payment(models.Model):
-    PAYMENT_STATUS = [
-        ('Pending', 'Pending'),
-        ('Completed', 'Completed'),
-        ('Failed', 'Failed'),
-    ]
-
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
     payment_method = models.CharField(max_length=50)
     transaction_id = models.CharField(max_length=100)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='Pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending')
     paid_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.transaction_id
-
 
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -146,48 +149,64 @@ class Review(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.rating}"
 
-class Detail(models.Model):
-    clothing = models.ForeignKey('Clothing', on_delete=models.CASCADE)
-    description = models.TextField()
-    size = models.CharField(max_length=20)
-    brand = models.CharField(max_length=100)
-    price_per_day = models.DecimalField(max_digits=8, decimal_places=2)
-    payment_status = models.CharField(max_length=50)
+class UserAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
+    full_name = models.CharField(max_length=200)
+    phone_number = models.CharField(max_length=15)
+    address_line = models.TextField()
+    city = models.CharField(max_length=100)
+    pincode = models.CharField(max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.clothing.title
-
+        return f"{self.full_name} - {self.city}"
 
 class RentalOrder(models.Model):
-    PAYMENT_METHOD_CHOICES = [
-        ('upi', 'UPI'),
-        ('card', 'Card'),
-        ('cod', 'Cash on Delivery'),
-    ]
-
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
-        ('cancelled', 'Cancelled'),
-    ]
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rental_orders')
     product = models.ForeignKey(Clothing, on_delete=models.CASCADE, related_name='rental_orders')
+    
+    start_date = models.DateField()
+    end_date = models.DateField()
     rental_days = models.PositiveIntegerField()
+    
     price_per_day = models.DecimalField(max_digits=8, decimal_places=2)
     deposit = models.DecimalField(max_digits=8, decimal_places=2)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES, default='cod')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
+    address = models.ForeignKey(UserAddress, on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='confirmed')
     order_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-order_date']
+
+    def clean(self):
+        # Overlap validation logic
+        if self.start_date and self.end_date:
+            if self.end_date <= self.start_date:
+                raise ValidationError("End date must be greater than start date.")
+            
+            # Check for overlapping CONFIRMED orders
+            overlaps = RentalOrder.objects.filter(
+                product=self.product,
+                status='confirmed'
+            ).filter(
+                Q(start_date__lte=self.end_date) & Q(end_date__gte=self.start_date)
+            )
+            
+            if self.pk:
+                overlaps = overlaps.exclude(pk=self.pk)
+            
+            if overlaps.exists():
+                raise ValidationError("This product is already booked for the selected dates.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     @property
     def get_rent_total(self):
         return self.price_per_day * self.rental_days
 
     def __str__(self):
-        return f"Order #{self.pk} – {self.user.username} – {self.product.title}"
+        return f"Order #{self.pk} – {self.user.username} – {self.product.title} ({self.start_date} to {self.end_date})"

@@ -4,162 +4,69 @@
 {% block title %}Register — PRORENT{% endblock %}
 
 {% block extra_css %}
-<style>
-  .auth-page { min-height: calc(100vh - 72px); display: flex; }
-  .auth-visual {
-    flex: 1;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
-  }
-  .auth-visual-content h2 {
-    font-family: 'Cormorant Garamond', serif;
-    color: #d4af37;
-    font-size: 2.5rem;
-    font-style: italic;
-    font-weight: 300;
-    line-height: 1.3;
-  }
-  .auth-form-area {
-    width: 520px;
-    background: #fff;
-    padding: 3rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  .auth-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid #eee; }
-  .auth-tab {
-    background: none;
-    border: none;
-    font-family: 'Jost', sans-serif;
-    font-size: 0.9rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.5rem 0;
-    cursor: pointer;
-    color: #999;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    text-decoration: none;
-  }
-  .auth-tab.active { color: #1a1a1a; border-bottom-color: #d4af37; }
-  .auth-tab:hover { color: #1a1a1a; }
-  .form-group { margin-bottom: 1.1rem; }
-  .form-group label {
-    display: block;
-    font-family: 'Jost', sans-serif;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #666;
-    margin-bottom: 0.4rem;
-  }
-  .form-group input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ddd;
-    font-family: 'Jost', sans-serif;
-    font-size: 0.9rem;
-    color: #1a1a1a;
-    outline: none;
-    box-sizing: border-box;
-    transition: border-color 0.2s;
-  }
-  .form-group input:focus { border-color: #d4af37; }
-  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .error-msg {
-    background: #fff0f0;
-    border: 1px solid #ffcccc;
-    color: #cc0000;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
-    font-size: 0.85rem;
-    font-family: 'Jost', sans-serif;
-  }
-  .success-msg {
-    background: #f0fff0;
-    border: 1px solid #ccffcc;
-    color: #006600;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
-    font-size: 0.85rem;
-    font-family: 'Jost', sans-serif;
-  }
-  @media (max-width: 768px) {
-    .auth-visual { display: none; }
-    .auth-form-area { width: 100%; padding: 2rem; }
-    .form-grid-2 { grid-template-columns: 1fr; }
-  }
-</style>
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="auth-page">
-  <div class="auth-visual">
-    <div class="auth-visual-content">
-      <h2>Rent Luxury.<br>Shine Everywhere.</h2>
-    </div>
-  </div>
-  <div class="auth-form-area">
-    <div class="auth-tabs">
-      <a href="{% url 'login' %}" class="auth-tab">Login</a>
-      <a href="{% url 'register' %}" class="auth-tab active">Register</a>
-    </div>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Create Account</h2>
+        <p class="subtitle">Join the Vêtir community and start renting luxury today</p>
 
-    <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:400; margin-bottom:0.3rem;">Create Account</h3>
-    <p style="font-family:'Jost',sans-serif; font-size:0.85rem; color:#999; margin-bottom:1.5rem;">Join Vêtir and start renting today</p>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="auth-msg {% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
-    {% if messages %}
-      {% for message in messages %}
-        <div class="{% if message.tags == 'success' %}success-msg{% else %}error-msg{% endif %}">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
+        {% if form.errors %}
+            <div class="auth-msg error">
+                {% for field in form %}
+                    {% for error in field.errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
+            </div>
+        {% endif %}
 
-    {% if form.errors %}
-      <div class="error-msg">
-        {% for field in form %}
-          {% for error in field.errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
-        {% endfor %}
-        {% for error in form.non_field_errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
-      </div>
-    {% endif %}
+        <form method="POST" action="{% url 'register' %}" autocomplete="off">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="id_first_name">First Name</label>
+                    {{ form.first_name|safe }}
+                    <script>document.getElementById('id_first_name').setAttribute('autocomplete', 'off');</script>
+                </div>
+                <div class="form-group">
+                    <label for="id_last_name">Last Name</label>
+                    {{ form.last_name|safe }}
+                    <script>document.getElementById('id_last_name').setAttribute('autocomplete', 'off');</script>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_email">Email Address</label>
+                {{ form.email|safe }}
+                <script>document.getElementById('id_email').setAttribute('autocomplete', 'off');</script>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password">Password</label>
+                {{ form.password|safe }}
+                <script>document.getElementById('id_password').setAttribute('autocomplete', 'new-password');</script>
+            </div>
 
-    <form method="POST" action="{% url 'register' %}">
-      {% csrf_token %}
-      <div class="form-grid-2">
-        <div class="form-group">
-          <label>First Name</label>
-          {{ form.first_name }}
+            <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin: 1rem 0; text-align: center;">
+                By signing up, you agree to our <a href="#" style="color: var(--gold); text-decoration: none;">Terms</a> and <a href="#" style="color: var(--gold); text-decoration: none;">Privacy Policy</a>.
+            </p>
+
+            <button type="submit" class="btn-auth-primary">Create Account</button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="{% url 'login' %}">Sign In</a>
         </div>
-        <div class="form-group">
-          <label>Last Name</label>
-          {{ form.last_name }}
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Email</label>
-        {{ form.email }}
-      </div>
-      <div class="form-group">
-        <label>Phone</label>
-        {{ form.phone }}
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        {{ form.password }}
-      </div>
-      <div style="font-size:0.75rem; color:#999; margin:0.5rem 0 1rem; font-family:'Jost',sans-serif;">
-        By registering, you agree to our <span style="color:#d4af37; cursor:pointer;">Terms</span> and <span style="color:#d4af37; cursor:pointer;">Privacy Policy</span>.
-      </div>
-      <button type="submit" class="btn-primary">Create Account</button>
-    </form>
-
-    <p style="text-align:center; margin-top:1.5rem; font-family:'Jost',sans-serif; font-size:0.85rem; color:#999;">
-      Already have an account? <a href="{% url 'login' %}" style="color:#d4af37; text-decoration:none;">Sign In</a>
-    </p>
-  </div>
+    </div>
 </div>
 {% endblock %}

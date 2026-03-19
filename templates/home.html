@@ -69,6 +69,7 @@
           <div class="cat-card">
             <div class="cat-img">
               <img src="{% static 'images/party2.jpg' %}" alt="party">
+              <div class=""></div>
             </div>
             <div class="cat-overlay"></div>
             <div class="cat-info">
@@ -101,10 +102,15 @@
       </div>
       <div class="products-grid">
         {% for item in featured %}
-        <a href="{% url 'product_detail' item.id %}" class="product-item {% if forloop.counter > 4 %}hidden-product{% endif %}" style="text-decoration: none; color: inherit;">
+        <a href="{% url 'product_detail' item.id %}"
+          class="product-item {% if forloop.counter > 4 %}hidden-product{% endif %}"
+          style="text-decoration: none; color: inherit;">
           <div class="product-card">
             <div class="product-img-wrap">
               <img src="{{ item.image.url }}" alt="{{ item.title }}">
+              {% if item.is_currently_booked %}
+              <div class="booked-badge" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 12px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--gold); border-radius: 20px; z-index: 2;">Booked</div>
+              {% endif %}
             </div>
             <div class="product-info">
               <h4>{{ item.title }}</h4>
@@ -116,7 +122,7 @@
         </a>
         {% endfor %}
       </div>
-      
+
       <style>
         .hidden-product {
           display: none;
@@ -183,9 +189,9 @@
   const hiddenProducts = document.querySelectorAll(".hidden-product");
 
   if (toggleBtn) {
-    toggleBtn.addEventListener("click", function() {
+    toggleBtn.addEventListener("click", function () {
       const isExpanded = toggleBtn.classList.contains("expanded");
-      
+
       hiddenProducts.forEach(product => {
         if (isExpanded) {
           product.style.display = "none";

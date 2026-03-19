@@ -240,14 +240,18 @@
         </div>
         <div class="step" id="step-dot-2">
             <div class="step-num">2</div>
-            <div class="step-text">Payment Method</div>
+            <div class="step-text">Delivery Address</div>
         </div>
         <div class="step" id="step-dot-3">
             <div class="step-num">3</div>
-            <div class="step-text">Payment Details</div>
+            <div class="step-text">Payment Method</div>
         </div>
         <div class="step" id="step-dot-4">
             <div class="step-num">4</div>
+            <div class="step-text">Payment Details</div>
+        </div>
+        <div class="step" id="step-dot-5">
+            <div class="step-num">5</div>
             <div class="step-text">Confirmation</div>
         </div>
     </div>
@@ -271,16 +275,28 @@
                         </div>
                     </div>
 
-                    <label class="section-label">Duration</label>
-                    <div class="days-ctrl">
-                        <button type="button" class="sq-btn" onclick="adjustDays(-1)">−</button>
-                        <span id="display-days" style="font-size: 1.8rem; font-family: 'Cormorant Garamond', serif; min-width: 40px; text-align: center;">1</span>
-                        <button type="button" class="sq-btn" onclick="adjustDays(1)">+</button>
-                        <span style="color: var(--muted);">days</span>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                        <div>
+                            <label class="section-label">Start Date</label>
+                            <input type="date" id="id_start_date" name="start_date" class="form-control" required style="width:100%; padding:0.8rem; border:1px solid var(--border); background:white;">
+                        </div>
+                        <div>
+                            <label class="section-label">Duration</label>
+                            <div class="days-ctrl" style="margin-top:0;">
+                                <button type="button" class="sq-btn" onclick="adjustDays(-1)">−</button>
+                                <span id="display-days" style="font-size: 1.8rem; font-family: 'Cormorant Garamond', serif; min-width: 40px; text-align: center;">1</span>
+                                <button type="button" class="sq-btn" onclick="adjustDays(1)">+</button>
+                                <span style="color: var(--muted);">days</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="booking-range" style="margin-top: 1.5rem; padding: 1rem; background: var(--warm-white); border-radius: 4px; border-left: 3px solid var(--gold); display: none;">
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--muted);">Rental Period: <strong id="range-text" style="color: var(--dark);"></strong></p>
                     </div>
 
                     <div class="nav-btns">
-                        <button type="button" class="btn-primary" onclick="goToStep(2)" style="flex: 1;">Continue to Payment</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(2)" style="flex: 1;">Continue to Address</button>
                     </div>
                 </div>
 
@@ -292,9 +308,48 @@
                 </div>
             </div>
         </section>
-
-        <!-- STEP 2: PAYMENT METHOD -->
+        
+        <!-- STEP 2: DELIVERY ADDRESS -->
         <section class="checkout-section" id="section-2">
+            <div class="checkout-card">
+                <div class="checkout-main">
+                    <h2>Delivery Address</h2>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="full_name" id="id_full_name" value="{{ last_address.full_name|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone_number" id="id_phone_number" value="{{ last_address.phone_number|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Street Address</label>
+                        <textarea name="address_line" id="id_address_line" rows="3" style="width:100%; padding:0.8rem; border:1px solid var(--border); font-family:inherit;" required>{{ last_address.address_line|default:'' }}</textarea>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" name="city" id="id_city" value="{{ last_address.city|default:'' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Pincode</label>
+                            <input type="text" name="pincode" id="id_pincode" value="{{ last_address.pincode|default:'' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="nav-btns">
+                        <button type="button" class="btn-primary btn-back" onclick="goToStep(1)">Back</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(3)" style="flex: 1;">Continue to Payment</button>
+                    </div>
+                </div>
+                <div class="summary-box">
+                    <p style="font-size: 0.85rem; color: var(--muted); border-left: 2px solid var(--gold); padding-left: 1rem;">We'll save this address for your future rentals to make checkout faster.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 3: PAYMENT METHOD -->
+        <section class="checkout-section" id="section-3">
             <div class="checkout-card">
                 <div class="checkout-main">
                     <h2>Choose Payment Method</h2>
@@ -323,8 +378,8 @@
                     </div>
 
                     <div class="nav-btns">
-                        <button type="button" class="btn-primary btn-back" onclick="goToStep(1)">Back</button>
-                        <button type="button" class="btn-primary" onclick="goToStep(3)" style="flex: 1;">Proceed</button>
+                        <button type="button" class="btn-primary btn-back" onclick="goToStep(2)">Back</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(4)" style="flex: 1;">Proceed</button>
                     </div>
                 </div>
 
@@ -335,8 +390,8 @@
             </div>
         </section>
 
-        <!-- STEP 3: PAYMENT DETAILS -->
-        <section class="checkout-section" id="section-3">
+        <!-- STEP 4: PAYMENT DETAILS -->
+        <section class="checkout-section" id="section-4">
             <div class="checkout-card">
                 <div class="checkout-main">
                     <h2 id="details-title">Payment Details</h2>
@@ -373,8 +428,8 @@
                     </div>
 
                     <div class="nav-btns">
-                        <button type="button" class="btn-primary btn-back" onclick="goToStep(2)">Back</button>
-                        <button type="button" class="btn-primary" onclick="goToStep(4)" style="flex: 1;">Confirm Payment</button>
+                        <button type="button" class="btn-primary btn-back" onclick="goToStep(3)">Back</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(5)" style="flex: 1;">Confirm Payment</button>
                     </div>
                 </div>
 
@@ -387,8 +442,8 @@
             </div>
         </section>
 
-        <!-- STEP 4: CONFIRMATION -->
-        <section class="checkout-section" id="section-4">
+        <!-- STEP 5: CONFIRMATION -->
+        <section class="checkout-section" id="section-5">
             <div class="checkout-card" style="text-align: center; display: block;">
                 <div style="max-width: 500px; margin: 0 auto; padding: 2rem 0;">
                     <div style="font-size: 4rem; margin-bottom: 1.5rem;">📋</div>
@@ -406,7 +461,7 @@
                     </div>
 
                     <div class="nav-btns">
-                        <button type="button" class="btn-primary btn-back" onclick="goToStep(3)">Edit Details</button>
+                        <button type="button" class="btn-primary btn-back" onclick="goToStep(4)">Edit Details</button>
                         <button type="submit" class="btn-primary" style="flex: 1;">Confirm Booking</button>
                     </div>
                 </div>
@@ -445,12 +500,33 @@
         document.getElementById('sum-rent').innerText = `₹${rentTotal.toFixed(2)}`;
         document.getElementById('sum-total').innerText = `₹${finalTotal.toFixed(2)}`;
 
+        // Date Calculation
+        const startDateInput = document.getElementById('id_start_date');
+        const rangeBox = document.getElementById('booking-range');
+        if (startDateInput.value) {
+            rangeBox.style.display = 'block';
+            const startStr = startDateInput.value;
+            const start = new Date(startStr);
+            const end = new Date(start);
+            end.setDate(start.getDate() + days - 1); // If rent for 1 day, start and end are same
+            
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            document.getElementById('range-text').innerText = `${start.toLocaleDateString('en-US', options)} to ${end.toLocaleDateString('en-US', options)}`;
+        } else {
+            rangeBox.style.display = 'none';
+        }
+
         // Global Updates
         document.getElementById('step2-days').innerText = days;
         document.getElementById('step2-total').innerText = `₹${finalTotal.toFixed(2)}`;
         document.getElementById('final-days').innerText = `${days} day${days > 1 ? 's' : ''}`;
         document.getElementById('final-total').innerText = `₹${finalTotal.toFixed(2)}`;
     }
+
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('id_start_date').setAttribute('min', today);
+    document.getElementById('id_start_date').addEventListener('change', updateUI);
 
     function setMethod(m, el) {
         method = m;
@@ -460,7 +536,7 @@
         document.querySelectorAll('.method-item').forEach(item => item.classList.remove('selected'));
         el.classList.add('selected');
 
-        // Step 3 UI
+        // Step 4 UI
         document.querySelectorAll('.method-details').forEach(d => d.style.display = 'none');
         document.getElementById('details-' + m).style.display = 'block';
         
@@ -476,16 +552,44 @@
     function goToStep(s) {
         if (s > currentStep) {
             // Validation for Step 1
-            if (currentStep === 1 && days < 1) return;
+            if (currentStep === 1) {
+                if (days < 1) return;
+                if (!document.getElementById('id_start_date').value) {
+                    showToast("Please select a start date", "⚠️");
+                    return;
+                }
+            }
             
-            // Validation for Step 2
-            if (currentStep === 2 && !method) {
+            // Validation for Step 2 (Address)
+            if (currentStep === 2) {
+                const name = document.getElementById('id_full_name').value.trim();
+                const phone = document.getElementById('id_phone_number').value.trim();
+                const addr = document.getElementById('id_address_line').value.trim();
+                const city = document.getElementById('id_city').value.trim();
+                const pincode = document.getElementById('id_pincode').value.trim();
+
+                if (!name || !phone || !addr || !city || !pincode) {
+                    showToast("All address fields are required", "⚠️");
+                    return;
+                }
+                if (!/^\d{10,15}$/.test(phone)) {
+                    showToast("Enter a valid phone number", "⚠️");
+                    return;
+                }
+                if (!/^\d{6}$/.test(pincode)) {
+                    showToast("Enter a valid 6-digit pincode", "⚠️");
+                    return;
+                }
+            }
+
+            // Validation for Step 3 (Payment Method)
+            if (currentStep === 3 && !method) {
                 showToast("Please select a payment method", "⚠️");
                 return;
             }
 
-            // Validation for Step 3
-            if (currentStep === 3) {
+            // Validation for Step 4 (Payment Details)
+            if (currentStep === 4) {
                 if (method === 'upi') {
                     const upiInput = document.querySelector('input[name="upi_id"]');
                     if (!upiInput.value.trim()) {
@@ -517,8 +621,5 @@
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
-    // Init
-    updateUI();
 </script>
 {% endblock %}

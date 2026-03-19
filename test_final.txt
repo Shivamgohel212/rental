@@ -1,0 +1,333 @@
+python : Creating test 
+database for alias 
+'default'...
+At line:1 char:1
++ python manage.py 
+test store.tests.Bookin
+gOverlapTest --noinput 
+2>&1 | ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (Creating test   
+  d...as 'default'.    
+..:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+
+E
+=======================
+=======================
+=======================
+=
+ERROR: test_overlapping
+_bookings (store.tests.
+BookingOverlapTest.test
+_overlapping_bookings)
+-----------------------
+-----------------------
+-----------------------
+-
+Traceback (most recent 
+call last):
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\backends\ut
+ils.py", line 105, in 
+_execute
+    return self.cursor.
+execute(sql, params)
+           ~~~~~~~~~~~~
+~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\backends\my
+sql\base.py", line 78, 
+in execute
+    return self.cursor.
+execute(query, args)
+           ~~~~~~~~~~~~
+~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\MySQLdb\cursors.py", 
+line 179, in execute
+    res = self._query(m
+ogrified_query)
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\MySQLdb\cursors.py", 
+line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\MySQLdb\connections.p
+y", line 286, in query
+    _mysql.connection.q
+uery(self, query)
+    ~~~~~~~~~~~~~~~~~~~
+~~~~^^^^^^^^^^^^^
+MySQLdb.IntegrityError:
+ (1048, "Column 
+'owner_id' cannot be 
+null")
+
+The above exception 
+was the direct cause 
+of the following 
+exception:
+
+Traceback (most recent 
+call last):
+  File "C:\rental_proje
+ct\store\tests.py", 
+line 91, in setUp
+    self.product = Clot
+hing.objects.create(
+                   ~~~~
+~~~~~~~~~~~~~~~~~~~^
+        title='Test 
+Item',
+        
+^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        
+is_available=True
+        
+^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\models\mana
+ger.py", line 87, in 
+manager_method
+    return getattr(self
+.get_queryset(), 
+name)(*args, **kwargs)
+           ~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~^
+^^^^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\models\quer
+y.py", line 669, in 
+create
+    obj.save(force_inse
+rt=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\models\base
+.py", line 874, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=u
+pdate_fields,
+        ^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\models\base
+.py", line 966, in 
+save_base
+    updated = 
+self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\models\base
+.py", line 1167, in 
+_save_table
+    results = 
+self._do_insert(
+        
+cls._base_manager, 
+using, insert_fields, 
+returning_fields, raw
+    )
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\models\base
+.py", line 1218, in 
+_do_insert
+    return 
+manager._insert(
+           
+~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\models\mana
+ger.py", line 87, in 
+manager_method
+    return getattr(self
+.get_queryset(), 
+name)(*args, **kwargs)
+           ~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~^
+^^^^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\models\quer
+y.py", line 1918, in 
+_insert
+    return query.get_co
+mpiler(using=using).exe
+cute_sql(returning_fiel
+ds)
+           ~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~^^^^^^^^^^^^^^^
+^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\models\sql\
+compiler.py", line 
+1925, in execute_sql
+    
+cursor.execute(sql, 
+params)
+    ~~~~~~~~~~~~~~^^^^^
+^^^^^^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\backends\ut
+ils.py", line 79, in 
+execute
+    return self._execut
+e_with_wrappers(
+           ~~~~~~~~~~~~
+~~~~~~~~~~~~~~~^
+        sql, params, 
+many=False, 
+executor=self._execute
+        ^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+    )
+    ^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\backends\ut
+ils.py", line 92, in 
+_execute_with_wrappers
+    return 
+executor(sql, params, 
+many, context)
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\backends\ut
+ils.py", line 100, in 
+_execute
+    with self.db.wrap_d
+atabase_errors:
+         ^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\utils.py", 
+line 94, in __exit__
+    raise dj_exc_value.
+with_traceback(tracebac
+k) from exc_value
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\backends\ut
+ils.py", line 105, in 
+_execute
+    return self.cursor.
+execute(sql, params)
+           ~~~~~~~~~~~~
+~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\django\db\backends\my
+sql\base.py", line 78, 
+in execute
+    return self.cursor.
+execute(query, args)
+           ~~~~~~~~~~~~
+~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\MySQLdb\cursors.py", 
+line 179, in execute
+    res = self._query(m
+ogrified_query)
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\MySQLdb\cursors.py", 
+line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "C:\Users\SHIVAM
+\AppData\Roaming\Python
+\Python313\site-package
+s\MySQLdb\connections.p
+y", line 286, in query
+    _mysql.connection.q
+uery(self, query)
+    ~~~~~~~~~~~~~~~~~~~
+~~~~^^^^^^^^^^^^^
+django.db.utils.Integri
+tyError: (1048, 
+"Column 'owner_id' 
+cannot be null")
+
+-----------------------
+-----------------------
+-----------------------
+-
+Ran 1 test in 0.458s
+
+FAILED (errors=1)
+Destroying test 
+database for alias 
+'default'...
+
+Found 1 test(s).
+System check identified no issues (0 silenced).

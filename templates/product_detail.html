@@ -181,6 +181,13 @@
             <div class="detail-price">₹{{ product.price_per_day }} <span>/ day</span></div>
             <div class="detail-price-note">Refundable Security Deposit: ₹{{ product.security_deposit }}</div>
             
+            {% if product.is_currently_booked %}
+            <div style="background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; padding: 1rem; border-radius: 4px; margin-bottom: 2.5rem; display: flex; align-items: center; gap: 0.8rem; font-size: 0.9rem;">
+                <span style="font-size: 1.2rem;">📅</span>
+                <span>This item is <strong>currently on rent</strong>. You can still book it for future dates below.</span>
+            </div>
+            {% endif %}
+            
             <p class="detail-desc">{{ product.description }}</p>
 
             <span class="detail-section-label">Available Size</span>
