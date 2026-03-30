@@ -1,5 +1,3 @@
-
-
 """
 Django settings for rental_project project.
 
@@ -33,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -144,4 +143,67 @@ MESSAGE_TAGS = {
     messages.SUCCESS: 'success',
     messages.WARNING: 'warning',
     messages.ERROR: 'error',
-}
+}
+
+# JAZZMIN SETTINGS
+JAZZMIN_SETTINGS = {
+    "site_title": "PRORENT Admin",
+    "site_header": "PRORENT",
+    "site_brand": "PRORENT Admin",
+    "site_logo": None,
+    "welcome_sign": "Welcome to the PRORENT Admin Panel",
+    "copyright": "PRORENT Ltd",
+    "search_model": ["auth.User", "store.Clothing"],
+    "user_avatar": None,
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"model": "auth.User"},
+        {"model": "store.Clothing"},
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.group": "fas fa-users",
+        "store.userprofile": "fas fa-user-circle",
+        "store.category": "fas fa-th-list",
+        "store.clothing": "fas fa-tshirt",
+        "store.booking": "fas fa-calendar-alt",
+        "store.payment": "fas fa-credit-card",
+        "store.review": "fas fa-star",
+        "store.useraddress": "fas fa-map-marker-alt",
+        "store.rentalorder": "fas fa-shopping-basket",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": True,
+    "custom_js": None,
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "theme": "flatly",
+    "dark_mode_theme": None,
+    "navbar_fixed": True,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark",
+    "accent": "accent-primary",
+}

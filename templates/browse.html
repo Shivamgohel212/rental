@@ -5,55 +5,62 @@
 
 {% block extra_css %}
 <style>
+    /* ── BROWSE PAGE PREMIUM ENHANCEMENTS ── */
+
     .shop-header {
-        padding: 4rem 2rem;
-        background: var(--cream);
+        padding: 5rem 2rem 4rem;
+        background: #ffffff;
         text-align: center;
-        margin-bottom: 2rem;
+        box-shadow: 0 6px 30px rgba(0,0,0,0.05);
+        border-radius: 0 0 20px 20px;
     }
 
     .shop-header h1 {
+        font-family: 'Playfair Display', serif;
         font-size: 3rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.6rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--charcoal);
     }
+
+    .breadcrumb { color: var(--muted); font-size: 0.8rem; margin-top: 0.5rem; }
 
     .shop-layout {
         max-width: 1400px;
         margin: 0 auto;
-        padding: 2rem;
+        padding: 2.5rem 2rem;
         display: grid;
         grid-template-columns: 280px 1fr;
         gap: 3rem;
     }
 
+    /* Sidebar */
+    .sidebar-block {
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        margin-bottom: 1.8rem;
+        border: 1px solid var(--border);
+    }
+
     .sidebar h4 {
-        font-family: 'Jost', sans-serif;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.15em;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.5rem;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.8rem;
         border-bottom: 1px solid var(--border);
+        color: var(--charcoal);
     }
 
-    .filter-option {
-        margin-bottom: 0.8rem;
-        font-size: 0.9rem;
-    }
+    .filter-option { margin-bottom: 0.8rem; font-size: 0.9rem; }
 
-    .filter-option a {
-        transition: color var(--transition);
-    }
+    .filter-option a { transition: color 0.2s ease; }
+    .filter-option a:hover { color: var(--gold); }
 
-    .filter-option a:hover {
-        color: var(--gold);
-    }
-
-    .shop-products {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
+    /* Search & sort toolbar */
+    .shop-products { display: flex; flex-direction: column; gap: 2rem; }
 
     .shop-toolbar {
         display: flex;
@@ -61,6 +68,8 @@
         align-items: center;
         padding-bottom: 1rem;
         border-bottom: 1px solid var(--border);
+        gap: 1rem;
+        flex-wrap: wrap;
     }
 
     .search-bar {
@@ -68,49 +77,102 @@
         align-items: center;
         background: white;
         border: 1px solid var(--border);
-        padding: 0.5rem 1rem;
-        border-radius: 2px;
+        padding: 0.55rem 1rem;
+        border-radius: 8px;
         width: 300px;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .search-bar:focus-within {
+        border-color: var(--gold);
+        box-shadow: 0 0 0 3px rgba(201,169,110,0.15);
     }
 
     .search-bar input {
         border: none;
         outline: none;
         margin-left: 0.8rem;
-        font-family: 'Jost', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: 0.9rem;
         width: 100%;
     }
 
+    .sort-select {
+        border: 1px solid var(--border);
+        padding: 0.55rem 0.9rem;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.25s ease;
+    }
+
+    .sort-select:focus { border-color: var(--gold); }
+
+    .results-count { font-size: 0.82rem; color: var(--muted); }
+
+    /* Shop grid */
     .shop-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 2rem;
     }
 
-    .results-count {
-        font-size: 0.85rem;
-        color: var(--muted);
+    /* Product card enhancements */
+    .product-card {
+        border-radius: 12px !important;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        background: white;
+        border: 1px solid var(--border);
     }
 
-    .sort-select {
-        border: 1px solid var(--border);
-        padding: 0.5rem;
-        font-family: 'Jost', sans-serif;
-        font-size: 0.85rem;
-        outline: none;
+    .product-card:hover {
+        transform: scale(1.025) translateY(-5px) !important;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.13) !important;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1 !important;
+    }
+
+    .product-img-wrap img { transition: transform 0.5s ease; }
+    .product-card:hover .product-img-wrap img { transform: scale(1.05); }
+
+    /* Scroll reveal */
+    .reveal-hidden {
+        opacity: 0;
+        transform: translateY(22px);
+        transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+
+    .reveal-visible {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+
+    /* Size filter active state */
+    .size-btn-active {
+        background: var(--charcoal) !important;
+        color: white !important;
+        border-color: var(--charcoal) !important;
+    }
+
+    /* Btn polish */
+    .btn-outline {
+        border-radius: 8px !important;
     }
 
     @media (max-width: 1000px) {
-        .shop-layout {
-            grid-template-columns: 1fr;
-        }
-        .sidebar {
-            display: none; /* Desktop sidebar hidden on mobile for now as per original */
-        }
-        .shop-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+        .shop-layout { grid-template-columns: 1fr; }
+        .sidebar { display: none; }
+        .shop-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+        .shop-grid { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -119,9 +181,9 @@
 <div class="shop-header">
     <h1>
         {% if selected_category %}
-            {{ selected_category.name }}
+        {{ selected_category.name }}
         {% else %}
-            Browse Collection
+        Browse Collection
         {% endif %}
     </h1>
     <div class="breadcrumb" style="font-size: 0.8rem; color: var(--muted);">Home <span>/</span> All Outfits</div>
@@ -130,38 +192,53 @@
 <div class="shop-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
-        <div class="sidebar-block" style="margin-bottom: 3rem;">
+        <div class="sidebar-block">
             <h4>Categories</h4>
-            <div class="filter-option"><a href="/category/party-wear/" style="text-decoration:none; color:inherit;">Party Wear</a></div>
-            <div class="filter-option"><a href="/category/wedding-wear/" style="text-decoration:none; color:inherit;">Wedding Wear</a></div>
-            <div class="filter-option"><a href="/browse/" style="text-decoration:none; color:var(--gold);">All Categories</a></div>
+            <div class="filter-option"><a href="/category/party-wear/"
+                    style="text-decoration:none; color:inherit;">Party Wear</a></div>
+            <div class="filter-option"><a href="/category/wedding-wear/"
+                    style="text-decoration:none; color:inherit;">Wedding Wear</a></div>
+            <div class="filter-option"><a href="/browse/" style="text-decoration:none; color:var(--gold);">All
+                    Categories</a></div>
         </div>
 
-        <div class="sidebar-block" style="margin-bottom: 3rem;">
+        <div class="sidebar-block">
             <h4>Gender</h4>
             <div class="filter-option"><a href="?gender=men" style="text-decoration:none; color:inherit;">Men</a></div>
-            <div class="filter-option"><a href="?gender=women" style="text-decoration:none; color:inherit;">Women</a></div>
-            <div class="filter-option"><a href="{% url 'browse' %}" style="text-decoration:none; color:var(--gold);">All</a></div>
+            <div class="filter-option"><a href="?gender=women" style="text-decoration:none; color:inherit;">Women</a>
+            </div>
+            <div class="filter-option"><a href="{% url 'browse' %}"
+                    style="text-decoration:none; color:var(--gold);">All</a></div>
         </div>
 
-        <div class="sidebar-block" style="margin-bottom: 3rem;">
+        <div class="sidebar-block">
             <h4>Price Range</h4>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <input type="number" id="minPrice" placeholder="Min" style="width: 80px; padding: 0.4rem; border: 1px solid var(--border);" onchange="applyFilters()">
-                <span>—</span>
-                <input type="number" id="maxPrice" placeholder="Max" style="width: 80px; padding: 0.4rem; border: 1px solid var(--border);" onchange="applyFilters()">
+                <input type="number" id="minPrice" placeholder="Min"
+                    style="width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-family: inherit;"
+                    onchange="applyFilters()">
+                <span style="color: var(--muted);">–</span>
+                <input type="number" id="maxPrice" placeholder="Max"
+                    style="width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-family: inherit;"
+                    onchange="applyFilters()">
             </div>
         </div>
 
         <div class="sidebar-block">
             <h4>Size</h4>
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">XS</button>
-                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">S</button>
-                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">M</button>
-                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">L</button>
-                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">XL</button>
-                <button class="btn-outline" style="padding: 0.5rem; font-size: 0.7rem;" onclick="toggleSizeFilter(this)">XXL</button>
+                <button class="btn-outline" style="padding: 0.6rem; font-size: 0.72rem; border-radius: 4px;"
+                    onclick="toggleSizeFilter(this)">XS</button>
+                <button class="btn-outline" style="padding: 0.6rem; font-size: 0.72rem; border-radius: 4px;"
+                    onclick="toggleSizeFilter(this)">S</button>
+                <button class="btn-outline" style="padding: 0.6rem; font-size: 0.72rem; border-radius: 4px;"
+                    onclick="toggleSizeFilter(this)">M</button>
+                <button class="btn-outline" style="padding: 0.6rem; font-size: 0.72rem; border-radius: 4px;"
+                    onclick="toggleSizeFilter(this)">L</button>
+                <button class="btn-outline" style="padding: 0.6rem; font-size: 0.72rem; border-radius: 4px;"
+                    onclick="toggleSizeFilter(this)">XL</button>
+                <button class="btn-outline" style="padding: 0.6rem; font-size: 0.72rem; border-radius: 4px;"
+                    onclick="toggleSizeFilter(this)">XXL</button>
             </div>
         </div>
     </aside>
@@ -184,29 +261,40 @@
 
         <div class="shop-grid" id="shopGrid">
             {% for item in clothes %}
-                <a href="{% url 'product_detail' item.id %}" style="text-decoration:none; color:inherit;">
-                    <div class="product-card" 
-                         data-gender="{{ item.gender }}" 
-                         data-size="{{ item.size }}" 
-                         data-price="{{ item.price_per_day }}" 
-                         data-title="{{ item.title|lower }}">
-                        <div class="product-img-wrap">
-                            <img src="{{ item.image.url }}" alt="{{ item.title }}">
-                            {% if item.is_currently_booked %}
-                            <div class="booked-badge" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 12px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--gold); border-radius: 20px; z-index: 2;">Booked</div>
-                            {% endif %}
-                        </div>
-                        <div class="product-info">
-                            <span class="product-cat">{{ item.category.name }}</span>
-                            <h4>{{ item.title }}</h4>
-                            <div class="product-price">₹{{ item.price_per_day }} <span>/ day</span></div>
+            <a href="{% url 'product_detail' item.id %}" style="text-decoration:none; color:inherit;">
+                <div class="product-card" data-gender="{{ item.gender }}" data-size="{{ item.size }}"
+                    data-price="{{ item.price_per_day }}" data-title="{{ item.title|lower }}">
+                    <div class="product-img-wrap">
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                        {% if item.is_currently_booked %}
+                        <div class="booked-badge"
+                            style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 12px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--gold); border-radius: 20px; z-index: 2;">
+                            Booked</div>
+                        {% endif %}
+                        <div class="product-overlay"
+                            style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); backdrop-filter: blur(2px);">
+                            <span class="btn-premium"
+                                style="background: white; color: var(--charcoal); padding: 0.8rem 1.8rem; border-radius: 50px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600;">View
+                                Details</span>
                         </div>
                     </div>
-                </a>
-            {% empty %}
-                <div style="grid-column: span 3; padding: 4rem; text-align: center; color: var(--muted);">
-                    <p>No outfits available.</p>
+                    <div class="product-info" style="padding: 1.5rem; text-align: center;">
+                        <span
+                            style="font-size: 0.6rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.15em; display: block; margin-bottom: 0.5rem;">{{
+                            item.category.name }}</span>
+                        <h4 style="font-size: 1.1rem; font-weight: 500; margin-bottom: 0.5rem;">{{ item.title }}</h4>
+                        <div class="product-price"
+                            style="font-family: 'Jost', sans-serif; font-size: 0.9rem; color: var(--charcoal);">
+                            ₹{{ item.price_per_day }} <span style="font-size: 0.75rem; color: var(--muted);">/
+                                day</span>
+                        </div>
+                    </div>
                 </div>
+            </a>
+            {% empty %}
+            <div style="grid-column: span 3; padding: 4rem; text-align: center; color: var(--muted);">
+                <p>No outfits available.</p>
+            </div>
             {% endfor %}
         </div>
     </div>
@@ -215,24 +303,44 @@
 
 {% block extra_js %}
 <script>
-    // Note: Re-using the logic from the original script.js if needed, 
-    // but here we ensure the product-card structure matches the home page for consistency.
-    
+    // ── Scroll Reveal ──
+    const revealEls = document.querySelectorAll('.product-card, .sidebar-block');
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('reveal-visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    revealEls.forEach(el => {
+        el.classList.add('reveal-hidden');
+        revealObserver.observe(el);
+    });
+
+    // ── Navbar Glass on Scroll ──
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+        nav.classList.toggle('nav-scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    // ── Product Filters ──
     function applyFilters() {
         const search = document.getElementById('shopSearch').value.toLowerCase();
         const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
         const maxPrice = parseFloat(document.getElementById('maxPrice').value) || 100000;
-        
+
         const cards = document.querySelectorAll('.product-card');
         let count = 0;
-        
+
         cards.forEach(card => {
             const title = card.getAttribute('data-title');
             const price = parseFloat(card.getAttribute('data-price'));
-            
+
             const matchesSearch = title.includes(search);
             const matchesPrice = price >= minPrice && price <= maxPrice;
-            
+
             if (matchesSearch && matchesPrice) {
                 card.parentElement.style.display = 'block';
                 count++;
@@ -240,11 +348,12 @@
                 card.parentElement.style.display = 'none';
             }
         });
-        
+
         document.getElementById('resultCount').innerText = `Showing ${count} products`;
     }
 
     function toggleSizeFilter(btn) {
+        btn.classList.toggle('size-btn-active');
         btn.classList.toggle('active');
         if (btn.classList.contains('active')) {
             btn.style.background = 'var(--charcoal)';
@@ -253,7 +362,7 @@
             btn.style.background = 'transparent';
             btn.style.color = 'var(--charcoal)';
         }
-        applyFilters(); // Simplified for now
+        applyFilters();
     }
 </script>
 {% endblock %}

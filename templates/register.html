@@ -4,30 +4,34 @@
 {% block title %}Register — PRORENT{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=1.1">
 {% endblock %}
 
 {% block content %}
 <div class="auth-wrapper">
     <div class="auth-card">
         <h2>Create Account</h2>
-        <p class="subtitle">Join the Vêtir community and start renting luxury today</p>
+        <p class="subtitle">Join the PRORENT community and start renting luxury today</p>
 
         {% if messages %}
-            {% for message in messages %}
-                <div class="auth-msg {% if message.tags == 'success' %}success{% else %}error{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
         {% endif %}
 
         {% if form.errors %}
-            <div class="auth-msg error">
-                {% for field in form %}
-                    {% for error in field.errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
-                {% endfor %}
-                {% for error in form.non_field_errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
-            </div>
+            <ul class="messages">
+                <li class="error">
+                    {% for field in form %}
+                        {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </li>
+            </ul>
         {% endif %}
 
         <form method="POST" action="{% url 'register' %}" autocomplete="off">
@@ -57,8 +61,8 @@
                 <script>document.getElementById('id_password').setAttribute('autocomplete', 'new-password');</script>
             </div>
 
-            <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin: 1rem 0; text-align: center;">
-                By signing up, you agree to our <a href="#" style="color: var(--gold); text-decoration: none;">Terms</a> and <a href="#" style="color: var(--gold); text-decoration: none;">Privacy Policy</a>.
+            <p style="font-size: 0.8rem; color: var(--muted); margin: 2rem 0; text-align: center;">
+                By signing up, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
             </p>
 
             <button type="submit" class="btn-auth-primary">Create Account</button>

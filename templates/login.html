@@ -4,30 +4,34 @@
 {% block title %}Login — PRORENT{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=1.1">
 {% endblock %}
 
 {% block content %}
 <div class="auth-wrapper">
     <div class="auth-card">
         <h2>Welcome Back</h2>
-        <p class="subtitle">Enter your details to access your Vêtir account</p>
+        <p class="subtitle">Enter your details to access your PRORENT account</p>
 
         {% if messages %}
-            {% for message in messages %}
-                <div class="auth-msg {% if message.tags == 'success' %}success{% else %}error{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
         {% endif %}
 
         {% if form.errors %}
-            <div class="auth-msg error">
-                {% for field in form %}
-                    {% for error in field.errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
-                {% endfor %}
-                {% for error in form.non_field_errors %}<p style="margin:0.2rem 0;">{{ error }}</p>{% endfor %}
-            </div>
+            <ul class="messages">
+                <li class="error">
+                    {% for field in form %}
+                        {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </li>
+            </ul>
         {% endif %}
 
         <form method="POST" action="{% url 'login' %}" autocomplete="off">

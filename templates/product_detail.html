@@ -1,160 +1,200 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ product.title }} | PRORENT{% endblock %}
-
 {% block extra_css %}
 <style>
-    .detail-page {
-        max-width: 1400px;
+    .product-detail-container {
+        max-width: 1000px;
         margin: 4rem auto;
         padding: 0 2rem;
-    }
-
-    .detail-inner {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 5rem;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 6rem;
         align-items: start;
     }
 
-    .detail-images {
+    .product-gallery {
         position: sticky;
-        top: 100px;
+        top: 120px;
     }
 
-    .main-image {
-        width: 100%;
-        height: 800px;
-        background: var(--cream);
+    .main-image-wrap {
+        background: var(--surface);
+        border-radius: var(--rounded);
         overflow: hidden;
-        border-radius: 4px;
-        position: relative;
+        aspect-ratio: 3/4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .main-image img {
+    .main-image-wrap img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.6s var(--transition);
+        transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
     }
 
-    .main-image:hover img {
+    .main-image-wrap:hover img {
         transform: scale(1.05);
     }
 
-    .detail-info {
-        padding-top: 2rem;
+    .product-info-sticky {
+        position: sticky;
+        top: 120px;
     }
 
-    .detail-breadcrumb {
-        font-size: 0.72rem;
-        letter-spacing: 0.12em;
+    .breadcrumb {
+        font-size: 0.75rem;
         text-transform: uppercase;
+        letter-spacing: 0.1em;
         color: var(--muted);
         margin-bottom: 2rem;
-        cursor: pointer;
-        display: inline-block;
-        transition: color var(--transition);
+        display: block;
+        text-decoration: none;
     }
 
-    .detail-breadcrumb:hover {
-        color: var(--charcoal);
-    }
-
-    .product-cat {
-        font-size: 0.7rem;
-        letter-spacing: 0.25em;
+    .product-category {
+        font-size: 0.75rem;
         text-transform: uppercase;
+        letter-spacing: 0.2em;
         color: var(--gold);
         margin-bottom: 1rem;
         display: block;
     }
 
-    .detail-info h1 {
+    .product-title {
         font-size: 3.5rem;
+        line-height: 1.1;
         margin-bottom: 1.5rem;
         color: var(--charcoal);
     }
 
-    .detail-price {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 2.2rem;
-        color: var(--charcoal);
+    .price-block {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
         margin-bottom: 0.5rem;
     }
 
-    .detail-price-note {
-        font-size: 0.8rem;
-        color: var(--muted);
-        margin-bottom: 2.5rem;
+    .price-value {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.4rem;
+        font-weight: 600;
     }
 
-    .detail-desc {
+    .price-label {
         font-size: 1rem;
-        line-height: 1.8;
-        color: #555;
-        margin-bottom: 3rem;
-        max-width: 500px;
+        color: var(--muted);
     }
 
-    .detail-section-label {
-        display: block;
+    .security-deposit {
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+
+    .security-deposit strong {
+        color: var(--charcoal);
+        font-weight: 600;
+    }
+
+    .selection-label {
         font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.15em;
-        color: var(--muted);
+        letter-spacing: 0.1em;
+        font-weight: 700;
         margin-bottom: 1.2rem;
+        display: block;
     }
 
-    .size-badge {
-        display: inline-block;
-        padding: 0.8rem 1.5rem;
-        border: 1px solid var(--charcoal);
-        font-size: 0.85rem;
+    .size-grid {
+        display: flex;
+        gap: 1rem;
         margin-bottom: 3rem;
     }
 
-    .detail-actions {
-        display: flex;
-        gap: 1.5rem;
-        margin-bottom: 3rem;
-    }
-
-    .detail-actions .btn-primary {
-        flex: 2;
-        padding: 1.2rem;
-    }
-
-    .detail-actions .btn-outline {
-        flex: 1;
-        padding: 1.2rem;
-    }
-
-    .feature-list {
-        display: flex;
-        gap: 2rem;
-        border-top: 1px solid var(--border);
-        padding-top: 2rem;
-    }
-
-    .feature-item {
-        font-size: 0.75rem;
-        color: var(--muted);
+    .size-item {
+        width: 60px;
+        height: 50px;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .size-item:hover, .size-item.selected {
+        border-color: var(--charcoal);
+        background: var(--charcoal);
+        color: white;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        margin-bottom: 4rem;
+    }
+
+    .wishlist-btn {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: var(--transition);
+    }
+
+    .wishlist-btn:hover {
+        border-color: var(--charcoal);
+        transform: translateY(-2px);
+    }
+
+    .details-list {
+        list-style: none;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .details-list li {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+
+    .details-list li::before {
+        content: '—';
+        position: absolute;
+        left: 0;
+        color: var(--gold);
     }
 
     @media (max-width: 1000px) {
-        .detail-inner {
+        .product-detail-container {
             grid-template-columns: 1fr;
             gap: 3rem;
         }
-        .main-image {
-            height: 600px;
+        .product-title {
+            font-size: 2.5rem;
         }
-        .detail-images {
+        .product-gallery, .product-info-sticky {
             position: relative;
             top: 0;
         }
@@ -163,47 +203,60 @@
 {% endblock %}
 
 {% block content %}
-<div class="detail-page">
-    <div class="detail-inner">
-        <!-- Images -->
-        <div class="detail-images">
-            <div class="main-image">
-                <img src="{{ product.image.url }}" alt="{{ product.title }}">
+<div class="product-detail-container fade-in">
+    <!-- Left: Gallery -->
+    <div class="product-gallery">
+        <div class="main-image-wrap">
+            <img src="{{ product.image.url }}" alt="{{ product.title }}">
+        </div>
+    </div>
+
+    <!-- Right: Info -->
+    <div class="product-info-sticky">
+        <a href="{% url 'browse' %}" class="breadcrumb">← Back to collection</a>
+        
+        <span class="product-category">{{ product.category.name }}</span>
+        <h1 class="product-title">{{ product.title }}</h1>
+        
+        <div class="price-block">
+            <div class="price-row">
+                <span class="price-value">₹{{ product.price_per_day }}</span>
+                <span class="price-label">/ day</span>
             </div>
+            <p class="security-deposit">Security Deposit: <strong>₹{{ product.security_deposit }}</strong> (Fully Refundable)</p>
         </div>
 
-        <!-- Info -->
-        <div class="detail-info">
-            <a href="{% url 'browse' %}" class="detail-breadcrumb">← Back to Browse</a>
-            <span class="product-cat">{{ product.category.name }}</span>
-            <h1>{{ product.title }}</h1>
-            
-            <div class="detail-price">₹{{ product.price_per_day }} <span>/ day</span></div>
-            <div class="detail-price-note">Refundable Security Deposit: ₹{{ product.security_deposit }}</div>
-            
-            {% if product.is_currently_booked %}
-            <div style="background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; padding: 1rem; border-radius: 4px; margin-bottom: 2.5rem; display: flex; align-items: center; gap: 0.8rem; font-size: 0.9rem;">
-                <span style="font-size: 1.2rem;">📅</span>
-                <span>This item is <strong>currently on rent</strong>. You can still book it for future dates below.</span>
-            </div>
-            {% endif %}
-            
-            <p class="detail-desc">{{ product.description }}</p>
-
-            <span class="detail-section-label">Available Size</span>
-            <div class="size-badge">{{ product.size }}</div>
-
-            <div class="detail-actions">
-                <a href="{% url 'payment_page' product.id %}" class="btn-primary" style="text-align: center;">Rent Now</a>
-                <button class="btn-outline">♡ Wishlist</button>
-            </div>
-
-            <div class="feature-list">
-                <div class="feature-item"><span>✓</span> Free delivery</div>
-                <div class="feature-item"><span>✓</span> Dry-cleaned</div>
-                <div class="feature-item"><span>✓</span> Fully Insured</div>
-            </div>
+        {% if product.is_currently_booked %}
+        <div style="background: #fff8eb; border: 1px solid #ffe8cc; color: #8a632e; padding: 1rem; border-radius: 8px; margin-bottom: 3rem; font-size: 0.85rem; display: flex; gap: 0.8rem; align-items: center;">
+            <span style="font-size: 1.2rem;">🗓️</span>
+            <span>Reserved for current dates. Book for future below.</span>
         </div>
+        {% endif %}
+
+        <label class="selection-label">Select Size</label>
+        <div class="size-grid">
+            <div class="size-item selected">{{ product.size }}</div>
+            <!-- Mock sizes for UI feel -->
+            <div class="size-item" style="opacity: 0.4; cursor: not-allowed; border-style: dashed;">S</div>
+            <div class="size-item" style="opacity: 0.4; cursor: not-allowed; border-style: dashed;">L</div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'payment_page' product.id %}" class="btn-primary" style="display: flex; align-items: center; justify-content: center;">Rent Now</a>
+            <button class="wishlist-btn" title="Add to Wishlist">♡</button>
+        </div>
+
+        <div class="product-description" style="margin-bottom: 4rem;">
+            <label class="selection-label">Description</label>
+            <p style="font-size: 0.95rem; color: var(--muted); line-height: 1.8;">{{ product.description }}</p>
+        </div>
+
+        <ul class="details-list">
+            <li>Standard 4-day rental period</li>
+            <li>Carbon-neutral delivery and returns</li>
+            <li>Premium dry cleaning included</li>
+            <li>Damage insurance available at checkout</li>
+        </ul>
     </div>
 </div>
 {% endblock %}
