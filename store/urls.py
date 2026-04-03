@@ -17,4 +17,8 @@ urlpatterns = [
     path('product/<int:product_id>/place-order/', views.place_order, name='place_order'),
     path('order/<int:order_id>/success/', views.order_success, name='order_success'),
     path('my-orders/', views.my_orders, name='my_orders'),
+
+    # Razorpay API endpoints (JSON)
+    path('product/<int:product_id>/create-razorpay-order/', views.create_razorpay_order, name='create_razorpay_order'),
+    path('product/<int:product_id>/verify-payment/', views.verify_payment, name='verify_payment'),
 ]

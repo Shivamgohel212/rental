@@ -130,6 +130,9 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+RAZORPAY_KEY_ID = "rzp_test_SWD6XmdT3zYnrA"
+RAZORPAY_KEY_SECRET = "NJCzSc3NPtg3sHxbaggPcEnS"
+
 # Auth settings
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -144,6 +147,7 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'error',
 }
+
 
 # JAZZMIN SETTINGS
 JAZZMIN_SETTINGS = {
@@ -207,3 +211,9 @@ JAZZMIN_UI_TWEAKS = {
     "brand_colour": "navbar-dark",
     "accent": "accent-primary",
 }
+
+# ── Razorpay ──────────────────────────────────────────────────────────────────
+# Replace these with your actual Razorpay Dashboard keys.
+# Test keys start with rzp_test_  |  Live keys start with rzp_live_
+RAZORPAY_KEY_ID     = 'rzp_test_SWD6XmdT3zYnrA'       # exposed to frontend
+RAZORPAY_KEY_SECRET = 'NJCzSc3NPtg3sHxbaggPcEnS'             # NEVER expose this

@@ -27,6 +27,12 @@ ORDER_STATUS_CHOICES = [
     ('cancelled', 'Cancelled'),
 ]
 
+DEPOSIT_REFUND_STATUS_CHOICES = [
+    ('pending', 'Pending Refund'),
+    ('refunded', 'Refunded'),
+    ('withheld', 'Withheld'),
+]
+
 PAYMENT_METHOD_CHOICES = [
     ('upi', 'UPI'),
     ('card', 'Card'),
@@ -175,6 +181,8 @@ class RentalOrder(models.Model):
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES, default='cod')
     address = models.ForeignKey(UserAddress, on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='confirmed')
+    deposit_refund_status = models.CharField(max_length=20, choices=DEPOSIT_REFUND_STATUS_CHOICES, default='pending')
+    razorpay_refund_id = models.CharField(max_length=100, blank=True, null=True)
     order_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -210,3 +218,18 @@ class RentalOrder(models.Model):
 
     def __str__(self):
         return f"Order #{self.pk} – {self.user.username} – {self.product.title} ({self.start_date} to {self.end_date})"
+
+
+class RazorpayPayment(models.Model):
+    """Stores Razorpay transaction details for every online payment."""
+    order         = models.OneToOneField(RentalOrder, on_delete=models.CASCADE, related_name='razorpay_payment')
+    razorpay_order_id   = models.CharField(max_length=100)          # rzp order id
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)  # after success
+    razorpay_signature  = models.CharField(max_length=200, blank=True, null=True)  # for verification
+    amount        = models.DecimalField(max_digits=10, decimal_places=2)
+    currency      = models.CharField(max_length=10, default='INR')
+    is_verified   = models.BooleanField(default=False)
+    created_at    = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"RazorpayPayment – Order #{self.order_id} – {'✓' if self.is_verified else '✗'}"

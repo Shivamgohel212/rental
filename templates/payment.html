@@ -445,7 +445,7 @@
         <!-- STEP 5: CONFIRMATION -->
         <section class="checkout-section" id="section-5">
             <div class="checkout-card" style="text-align: center; display: block;">
-                <div style="max-width: 500px; margin: 0 auto; padding: 2rem 0;">
+                <div style="max-width: 520px; margin: 0 auto; padding: 2rem 0;">
                     <div style="font-size: 4rem; margin-bottom: 1.5rem;">📋</div>
                     <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem;">Review & Confirm</h2>
                     <p style="color: var(--muted); margin-bottom: 2rem;">Please review your rental details one last time. Once confirmed, your reservation will be secured.</p>
@@ -453,6 +453,8 @@
                     <div style="background: var(--warm-white); padding: 2rem; border-radius: 4px; text-align: left; margin-bottom: 2.5rem;">
                         <div class="summary-row"><span>Item</span><span style="font-weight: 500;">{{ product.title }}</span></div>
                         <div class="summary-row"><span>Duration</span><span id="final-days">1 day</span></div>
+                        <div class="summary-row"><span>Rent Amount</span><span id="final-rent">₹0.00</span></div>
+                        <div class="summary-row"><span>Security Deposit</span><span>₹{{ product.security_deposit }}</span></div>
                         <div class="summary-row"><span>Payment</span><span id="final-method" style="text-transform: uppercase; font-weight: 500;">COD</span></div>
                         <div class="summary-row total" style="margin-top: 1rem; border-top-style: dashed;">
                             <span>Total Amount</span>
@@ -462,8 +464,17 @@
 
                     <div class="nav-btns">
                         <button type="button" class="btn-primary btn-back" onclick="goToStep(4)">Edit Details</button>
-                        <button type="submit" class="btn-primary" style="flex: 1;">Confirm Booking</button>
+                        
+                        <!-- ── COD: classic form submit ── -->
+                        <button type="submit" id="btn-cod-confirm" class="btn-primary" style="flex: 1; display: none;">Confirm Booking (COD)</button>
+
+                        <!-- ── Razorpay: shown for UPI / Card ── -->
+                        <button type="button" id="btn-razorpay-pay" class="btn-primary" style="flex: 1; display: none; background: var(--gold); color: #fff;" onclick="startRazorpayPayment()">
+                            🔒 Pay <span id="rzp-btn-amount">₹0.00</span> Securely
+                        </button>
                     </div>
+
+                    <div id="rzp-status" style="margin-top: 1.5rem; display: none; padding: 1rem; border-radius: 4px; font-size: 0.9rem;"></div>
                 </div>
             </div>
         </section>
@@ -472,154 +483,256 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Razorpay Checkout.js (official CDN – must be loaded before our code) -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
-    const pricePerDay = parseFloat("{{ product.price_per_day }}");
-    const deposit = parseFloat("{{ product.security_deposit }}");
-    const minD = parseInt("{{ min_days }}") || 1;
-    const maxD = parseInt("{{ max_days }}") || 30;
+    // ── Constants passed from Django context ──
+    const pricePerDay       = parseFloat("{{ product.price_per_day|default_if_none:'0' }}");
+    const deposit           = parseFloat("{{ product.security_deposit|default_if_none:'0' }}");
+    const minD              = parseInt("{{ min_days|default_if_none:'1' }}");
+    const maxD              = parseInt("{{ max_days|default_if_none:'30' }}");
+    const PRODUCT_ID        = parseInt("{{ product.id|default_if_none:'0' }}");
+    const RAZORPAY_KEY      = "{{ razorpay_key_id|default:'' }}";   // key_id only – safe to expose
+    const CREATE_ORDER_URL  = "/product/" + PRODUCT_ID + "/create-razorpay-order/";
+    const VERIFY_URL        = "/product/" + PRODUCT_ID + "/verify-payment/";
+    const CSRF_TOKEN        = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
 
     let currentStep = 1;
-    let days = 1;
+    let days   = 1;
     let method = '';
 
+    // ── Day adjuster ──────────────────────────────────────────────────────────
     function adjustDays(delta) {
-        let newDays = days + delta;
-        if (newDays >= minD && newDays <= maxD) {
-            days = newDays;
-            updateUI();
-        }
+        const newDays = days + delta;
+        if (newDays >= minD && newDays <= maxD) { days = newDays; updateUI(); }
     }
 
+    // ── UI sync ───────────────────────────────────────────────────────────────
     function updateUI() {
-        // Step 1 UI
-        document.getElementById('display-days').innerText = days;
-        document.getElementById('hidden_days').value = days;
-        const rentTotal = days * pricePerDay;
-        const finalTotal = rentTotal + deposit;
-        
-        document.getElementById('sum-rent').innerText = `₹${rentTotal.toFixed(2)}`;
-        document.getElementById('sum-total').innerText = `₹${finalTotal.toFixed(2)}`;
+        document.getElementById('display-days').innerText  = days;
+        document.getElementById('hidden_days').value       = days;
 
-        // Date Calculation
+        const rentTotal  = days * pricePerDay;
+        const finalTotal = rentTotal + deposit;
+
+        document.getElementById('sum-rent').innerText   = `₹${rentTotal.toFixed(2)}`;
+        document.getElementById('sum-total').innerText  = `₹${finalTotal.toFixed(2)}`;
+        document.getElementById('step2-days').innerText  = days;
+        document.getElementById('step2-total').innerText = `₹${finalTotal.toFixed(2)}`;
+        
+        // Step 5 breakdown
+        document.getElementById('final-days').innerText  = `${days} day${days > 1 ? 's' : ''}`;
+        document.getElementById('final-rent').innerText  = `₹${rentTotal.toFixed(2)}`;
+        document.getElementById('final-total').innerText = `₹${finalTotal.toFixed(2)}`;
+        document.getElementById('rzp-btn-amount').innerText = `₹${finalTotal.toFixed(2)}`;
+
         const startDateInput = document.getElementById('id_start_date');
-        const rangeBox = document.getElementById('booking-range');
+        const rangeBox       = document.getElementById('booking-range');
         if (startDateInput.value) {
             rangeBox.style.display = 'block';
-            const startStr = startDateInput.value;
-            const start = new Date(startStr);
-            const end = new Date(start);
-            end.setDate(start.getDate() + days - 1); // If rent for 1 day, start and end are same
-            
-            const options = { month: 'short', day: 'numeric', year: 'numeric' };
-            document.getElementById('range-text').innerText = `${start.toLocaleDateString('en-US', options)} to ${end.toLocaleDateString('en-US', options)}`;
+            const start = new Date(startDateInput.value);
+            const end   = new Date(start);
+            end.setDate(start.getDate() + days - 1);
+            const opts  = { month: 'short', day: 'numeric', year: 'numeric' };
+            document.getElementById('range-text').innerText =
+                `${start.toLocaleDateString('en-US', opts)} to ${end.toLocaleDateString('en-US', opts)}`;
         } else {
             rangeBox.style.display = 'none';
         }
-
-        // Global Updates
-        document.getElementById('step2-days').innerText = days;
-        document.getElementById('step2-total').innerText = `₹${finalTotal.toFixed(2)}`;
-        document.getElementById('final-days').innerText = `${days} day${days > 1 ? 's' : ''}`;
-        document.getElementById('final-total').innerText = `₹${finalTotal.toFixed(2)}`;
     }
 
-    // Set min date to today
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('id_start_date').setAttribute('min', today);
     document.getElementById('id_start_date').addEventListener('change', updateUI);
+    updateUI();  // initialise totals on load
 
+    // ── Payment method selector ───────────────────────────────────────────────
     function setMethod(m, el) {
         method = m;
         document.getElementById('hidden_method').value = m;
-        
-        // UI visual
-        document.querySelectorAll('.method-item').forEach(item => item.classList.remove('selected'));
+
+        document.querySelectorAll('.method-item').forEach(i => i.classList.remove('selected'));
         el.classList.add('selected');
 
-        // Step 4 UI
         document.querySelectorAll('.method-details').forEach(d => d.style.display = 'none');
         document.getElementById('details-' + m).style.display = 'block';
-        
-        const methodLabels = { 'upi': 'UPI Payment', 'card': 'Credit / Debit Card', 'cod': 'Cash on Delivery' };
-        const methodIcons = { 'upi': '📱', 'card': '💳', 'cod': '💵' };
-        
-        document.getElementById('details-title').innerText = methodLabels[m] + ' Details';
-        document.getElementById('selected-method-name').innerText = methodLabels[m];
-        document.getElementById('method-icon').innerText = methodIcons[m];
-        document.getElementById('final-method').innerText = methodLabels[m];
+
+        const labels = { upi: 'UPI Payment', card: 'Credit / Debit Card', cod: 'Cash on Delivery' };
+        const icons  = { upi: '📱', card: '💳', cod: '💵' };
+
+        document.getElementById('details-title').innerText          = labels[m] + ' Details';
+        document.getElementById('selected-method-name').innerText   = labels[m];
+        document.getElementById('method-icon').innerText            = icons[m];
+        document.getElementById('final-method').innerText           = labels[m];
     }
 
+    // ── Show correct confirm button based on method ───────────────────────────
+    function updateConfirmButtons() {
+        const codBtn = document.getElementById('btn-cod-confirm');
+        const rzpBtn = document.getElementById('btn-razorpay-pay');
+        if (method === 'cod') {
+            codBtn.style.display = 'block';
+            rzpBtn.style.display = 'none';
+        } else {
+            codBtn.style.display = 'none';
+            rzpBtn.style.display = 'block';
+            // keep button label in sync
+            const total = (days * pricePerDay + deposit).toFixed(2);
+            document.getElementById('rzp-btn-amount').innerText = `₹${total}`;
+        }
+    }
+
+    // ── Step navigation ───────────────────────────────────────────────────────
     function goToStep(s) {
         if (s > currentStep) {
-            // Validation for Step 1
             if (currentStep === 1) {
                 if (days < 1) return;
                 if (!document.getElementById('id_start_date').value) {
-                    showToast("Please select a start date", "⚠️");
-                    return;
+                    showToast('Please select a start date', '⚠️'); return;
                 }
             }
-            
-            // Validation for Step 2 (Address)
             if (currentStep === 2) {
-                const name = document.getElementById('id_full_name').value.trim();
-                const phone = document.getElementById('id_phone_number').value.trim();
-                const addr = document.getElementById('id_address_line').value.trim();
-                const city = document.getElementById('id_city').value.trim();
+                const name    = document.getElementById('id_full_name').value.trim();
+                const phone   = document.getElementById('id_phone_number').value.trim();
+                const addr    = document.getElementById('id_address_line').value.trim();
+                const city    = document.getElementById('id_city').value.trim();
                 const pincode = document.getElementById('id_pincode').value.trim();
-
                 if (!name || !phone || !addr || !city || !pincode) {
-                    showToast("All address fields are required", "⚠️");
-                    return;
+                    showToast('All address fields are required', '⚠️'); return;
                 }
-                if (!/^\d{10,15}$/.test(phone)) {
-                    showToast("Enter a valid phone number", "⚠️");
-                    return;
-                }
-                if (!/^\d{6}$/.test(pincode)) {
-                    showToast("Enter a valid 6-digit pincode", "⚠️");
-                    return;
-                }
+                if (!/^\d{10,15}$/.test(phone))  { showToast('Enter a valid phone number', '⚠️'); return; }
+                if (!/^\d{6}$/.test(pincode))     { showToast('Enter a valid 6-digit pincode', '⚠️'); return; }
             }
-
-            // Validation for Step 3 (Payment Method)
             if (currentStep === 3 && !method) {
-                showToast("Please select a payment method", "⚠️");
-                return;
+                showToast('Please select a payment method', '⚠️'); return;
             }
-
-            // Validation for Step 4 (Payment Details)
             if (currentStep === 4) {
                 if (method === 'upi') {
                     const upiInput = document.querySelector('input[name="upi_id"]');
-                    if (!upiInput.value.trim()) {
-                        showToast("Please enter your UPI ID", "⚠️");
-                        upiInput.focus();
-                        return;
-                    }
-                } else if (method === 'card') {
-                    const cardNo = document.querySelector('input[placeholder="XXXX XXXX XXXX XXXX"]');
-                    if (!cardNo.value.trim() || cardNo.value.length < 12) {
-                        showToast("Please enter a valid card number", "⚠️");
-                        cardNo.focus();
-                        return;
-                    }
+                    if (!upiInput.value.trim()) { showToast('Please enter your UPI ID', '⚠️'); upiInput.focus(); return; }
                 }
             }
+            // When reaching step 5, determine which button to show
+            if (s === 5) { updateConfirmButtons(); }
         }
 
-        // Hide current
         document.getElementById('section-' + currentStep).classList.remove('active');
         document.getElementById('step-dot-' + currentStep).classList.remove('active');
         if (s > currentStep) document.getElementById('step-dot-' + currentStep).classList.add('completed');
-        
-        // Show next
+
         currentStep = s;
         document.getElementById('section-' + currentStep).classList.add('active');
         document.getElementById('step-dot-' + currentStep).classList.add('active');
         document.getElementById('step-dot-' + currentStep).classList.remove('completed');
-        
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── Razorpay flow ─────────────────────────────────────────────────────────
+    async function startRazorpayPayment() {
+        const rzpBtn   = document.getElementById('btn-razorpay-pay');
+        const statusEl = document.getElementById('rzp-status');
+
+        rzpBtn.disabled    = true;
+        rzpBtn.innerText   = '⏳ Initiating payment...';
+        statusEl.style.display = 'none';
+
+        // ── Step 1: Create Razorpay order on backend ──
+        let orderData;
+        try {
+            const res = await fetch(CREATE_ORDER_URL, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+                body:    JSON.stringify({ rental_days: days }),
+            });
+            orderData = await res.json();
+            if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
+        } catch (err) {
+            showStatus('❌ ' + err.message, '#fee2e2', '#b91c1c');
+            resetPayBtn();
+            return;
+        }
+
+        // ── Step 2: Open Razorpay Checkout popup ──
+        const options = {
+            key:         orderData.key_id,
+            amount:      orderData.amount,          // in paise
+            currency:    orderData.currency,
+            order_id:    orderData.order_id,
+            name:        'ProRent',
+            description: 'Rental Payment',
+            image:       '',                         // optional logo URL
+            prefill: {
+                name:    document.getElementById('id_full_name').value,
+                contact: document.getElementById('id_phone_number').value,
+            },
+            theme:  { color: '#D4AF37' },
+
+            handler: async function (response) {
+                // ── Step 3: Verify payment on backend ──
+                rzpBtn.innerText = '⏳ Verifying payment...';
+
+                const verifyPayload = {
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id:   response.razorpay_order_id,
+                    razorpay_signature:  response.razorpay_signature,
+                    start_date:  document.getElementById('id_start_date').value,
+                    rental_days: days,
+                    full_name:    document.getElementById('id_full_name').value,
+                    phone_number: document.getElementById('id_phone_number').value,
+                    address_line: document.getElementById('id_address_line').value,
+                    city:         document.getElementById('id_city').value,
+                    pincode:      document.getElementById('id_pincode').value,
+                };
+
+                try {
+                    const vRes  = await fetch(VERIFY_URL, {
+                        method:  'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+                        body:    JSON.stringify(verifyPayload),
+                    });
+                    const vData = await vRes.json();
+                    if (vData.success) {
+                        showStatus('✅ Payment verified! Redirecting...', '#dcfce7', '#166534');
+                        setTimeout(() => { window.location.href = vData.redirect_url; }, 1200);
+                    } else {
+                        throw new Error(vData.error || 'Verification failed');
+                    }
+                } catch (err) {
+                    showStatus('❌ ' + err.message, '#fee2e2', '#b91c1c');
+                    resetPayBtn();
+                }
+            },
+
+            modal: {
+                ondismiss: function () {
+                    showStatus('⚠️ Payment was cancelled. You can try again.', '#fef9c3', '#92400e');
+                    resetPayBtn();
+                }
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+    }
+
+    function resetPayBtn() {
+        const rzpBtn = document.getElementById('btn-razorpay-pay');
+        rzpBtn.disabled  = false;
+        const total = (days * pricePerDay + deposit).toFixed(2);
+        rzpBtn.innerHTML = `🔒 Pay <span id="rzp-btn-amount">₹${total}</span> Securely`;
+    }
+
+    function showStatus(msg, bg, color) {
+        const el = document.getElementById('rzp-status');
+        el.style.display    = 'block';
+        el.style.background = bg;
+        el.style.color      = color;
+        el.style.border     = `1px solid ${color}`;
+        el.style.borderRadius = '4px';
+        el.style.padding    = '1rem';
+        el.innerText        = msg;
     }
 </script>
 {% endblock %}
