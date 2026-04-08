@@ -4,7 +4,7 @@
 {% block extra_css %}
 <style>
     .product-detail-container {
-        max-width: 1000px;
+        max-width: 1400px;
         margin: 4rem auto;
         padding: 0 2rem;
         display: grid;
@@ -22,21 +22,24 @@
         background: var(--surface);
         border-radius: var(--rounded);
         overflow: hidden;
-        aspect-ratio: 3/4;
+        /* aspect-ratio: 3/4; */
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
     .main-image-wrap img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        width: 60%;
+        height: 60%;
+        object-fit: contain;
         transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+        border-radius: 10px !important;
     }
 
     .main-image-wrap:hover img {
         transform: scale(1.05);
+        border: 1px solid var(--border);
+        border-radius: 10px !important;
     }
 
     .product-info-sticky {
@@ -64,7 +67,7 @@
     }
 
     .product-title {
-        font-size: 3.5rem;
+        font-size: 50px;
         line-height: 1.1;
         margin-bottom: 1.5rem;
         color: var(--charcoal);
@@ -84,9 +87,10 @@
     }
 
     .price-value {
-        font-family: 'Playfair Display', serif;
-        font-size: 2.4rem;
-        font-weight: 600;
+       /* font-family: 'Playfair Display', serif;*/
+        font-size: 30px;
+        font-weight: 500;
+        font-family:'Jost', sans-serif;
     }
 
     .price-label {
@@ -133,7 +137,8 @@
         transition: var(--transition);
     }
 
-    .size-item:hover, .size-item.selected {
+    .size-item:hover,
+    .size-item.selected {
         border-color: var(--charcoal);
         background: var(--charcoal);
         color: white;
@@ -191,10 +196,13 @@
             grid-template-columns: 1fr;
             gap: 3rem;
         }
+
         .product-title {
             font-size: 2.5rem;
         }
-        .product-gallery, .product-info-sticky {
+
+        .product-gallery,
+        .product-info-sticky {
             position: relative;
             top: 0;
         }
@@ -214,20 +222,22 @@
     <!-- Right: Info -->
     <div class="product-info-sticky">
         <a href="{% url 'browse' %}" class="breadcrumb">← Back to collection</a>
-        
+
         <span class="product-category">{{ product.category.name }}</span>
         <h1 class="product-title">{{ product.title }}</h1>
-        
+
         <div class="price-block">
             <div class="price-row">
                 <span class="price-value">₹{{ product.price_per_day }}</span>
                 <span class="price-label">/ day</span>
             </div>
-            <p class="security-deposit">Security Deposit: <strong>₹{{ product.security_deposit }}</strong> (Fully Refundable)</p>
+            <p class="security-deposit">Security Deposit: <strong>₹{{ product.security_deposit }}</strong> (Fully
+                Refundable)</p>
         </div>
 
         {% if product.is_currently_booked %}
-        <div style="background: #fff8eb; border: 1px solid #ffe8cc; color: #8a632e; padding: 1rem; border-radius: 8px; margin-bottom: 3rem; font-size: 0.85rem; display: flex; gap: 0.8rem; align-items: center;">
+        <div
+            style="background: #fff8eb; border: 1px solid #ffe8cc; color: #8a632e; padding: 1rem; border-radius: 8px; margin-bottom: 3rem; font-size: 0.85rem; display: flex; gap: 0.8rem; align-items: center;">
             <span style="font-size: 1.2rem;">🗓️</span>
             <span>Reserved for current dates. Book for future below.</span>
         </div>
@@ -242,7 +252,8 @@
         </div>
 
         <div class="action-buttons">
-            <a href="{% url 'payment_page' product.id %}" class="btn-primary" style="display: flex; align-items: center; justify-content: center;">Rent Now</a>
+            <a href="{% url 'payment_page' product.id %}" class="btn-primary"
+                style="display: flex; align-items: center; justify-content: center;">Rent Now</a>
             <button class="wishlist-btn" title="Add to Wishlist">♡</button>
         </div>
 

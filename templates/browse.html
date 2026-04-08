@@ -11,7 +11,7 @@
         padding: 5rem 2rem 4rem;
         background: #ffffff;
         text-align: center;
-        box-shadow: 0 6px 30px rgba(0,0,0,0.05);
+        box-shadow: 0 6px 30px rgba(0, 0, 0, 0.05);
         border-radius: 0 0 20px 20px;
     }
 
@@ -24,7 +24,11 @@
         color: var(--charcoal);
     }
 
-    .breadcrumb { color: var(--muted); font-size: 0.8rem; margin-top: 0.5rem; }
+    .breadcrumb {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
 
     .shop-layout {
         max-width: 1400px;
@@ -40,7 +44,7 @@
         background: #ffffff;
         padding: 2rem;
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
         margin-bottom: 1.8rem;
         border: 1px solid var(--border);
     }
@@ -54,13 +58,25 @@
         color: var(--charcoal);
     }
 
-    .filter-option { margin-bottom: 0.8rem; font-size: 0.9rem; }
+    .filter-option {
+        margin-bottom: 0.8rem;
+        font-size: 0.9rem;
+    }
 
-    .filter-option a { transition: color 0.2s ease; }
-    .filter-option a:hover { color: var(--gold); }
+    .filter-option a {
+        transition: color 0.2s ease;
+    }
+
+    .filter-option a:hover {
+        color: var(--gold);
+    }
 
     /* Search & sort toolbar */
-    .shop-products { display: flex; flex-direction: column; gap: 2rem; }
+    .shop-products {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
 
     .shop-toolbar {
         display: flex;
@@ -85,7 +101,7 @@
 
     .search-bar:focus-within {
         border-color: var(--gold);
-        box-shadow: 0 0 0 3px rgba(201,169,110,0.15);
+        box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
     }
 
     .search-bar input {
@@ -108,9 +124,14 @@
         transition: border-color 0.25s ease;
     }
 
-    .sort-select:focus { border-color: var(--gold); }
+    .sort-select:focus {
+        border-color: var(--gold);
+    }
 
-    .results-count { font-size: 0.82rem; color: var(--muted); }
+    .results-count {
+        font-size: 0.82rem;
+        color: var(--muted);
+    }
 
     /* Shop grid */
     .shop-grid {
@@ -124,22 +145,27 @@
         border-radius: 12px !important;
         overflow: hidden;
         transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         background: white;
         border: 1px solid var(--border);
     }
 
     .product-card:hover {
         transform: scale(1.025) translateY(-5px) !important;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.13) !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.13) !important;
     }
 
     .product-card:hover .product-overlay {
         opacity: 1 !important;
     }
 
-    .product-img-wrap img { transition: transform 0.5s ease; }
-    .product-card:hover .product-img-wrap img { transform: scale(1.05); }
+    .product-img-wrap img {
+        transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-img-wrap img {
+        transform: scale(1.05);
+    }
 
     /* Scroll reveal */
     .reveal-hidden {
@@ -166,13 +192,23 @@
     }
 
     @media (max-width: 1000px) {
-        .shop-layout { grid-template-columns: 1fr; }
-        .sidebar { display: none; }
-        .shop-grid { grid-template-columns: repeat(2, 1fr); }
+        .shop-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+            display: none;
+        }
+
+        .shop-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 
     @media (max-width: 600px) {
-        .shop-grid { grid-template-columns: 1fr; }
+        .shop-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}
@@ -194,21 +230,32 @@
     <aside class="sidebar">
         <div class="sidebar-block">
             <h4>Categories</h4>
-            <div class="filter-option"><a href="/category/party-wear/"
-                    style="text-decoration:none; color:inherit;">Party Wear</a></div>
-            <div class="filter-option"><a href="/category/wedding-wear/"
-                    style="text-decoration:none; color:inherit;">Wedding Wear</a></div>
-            <div class="filter-option"><a href="/browse/" style="text-decoration:none; color:var(--gold);">All
+            <div class="filter-option"><a
+                    href="/category/party-wear/{% if request.GET.gender %}?gender={{ request.GET.gender }}{% endif %}"
+                    style="text-decoration:none; color:{% if selected_category.slug == 'party-wear' %}var(--gold){% else %}inherit{% endif %};">Party
+                    Wear</a></div>
+            <div class="filter-option"><a
+                    href="/category/wedding-wear/{% if request.GET.gender %}?gender={{ request.GET.gender }}{% endif %}"
+                    style="text-decoration:none; color:{% if selected_category.slug == 'wedding-wear' %}var(--gold){% else %}inherit{% endif %};">Wedding
+                    Wear</a></div>
+            <div class="filter-option"><a
+                    href="/browse/{% if request.GET.gender %}?gender={{ request.GET.gender }}{% endif %}"
+                    style="text-decoration:none; color:{% if not selected_category %}var(--gold){% else %}inherit{% endif %};">All
                     Categories</a></div>
         </div>
 
         <div class="sidebar-block">
             <h4>Gender</h4>
-            <div class="filter-option"><a href="?gender=men" style="text-decoration:none; color:inherit;">Men</a></div>
-            <div class="filter-option"><a href="?gender=women" style="text-decoration:none; color:inherit;">Women</a>
+            <div class="filter-option"><a href="?gender=men"
+                    style="text-decoration:none; color:{% if request.GET.gender == 'men' %}var(--gold){% else %}inherit{% endif %};">Men</a>
             </div>
-            <div class="filter-option"><a href="{% url 'browse' %}"
-                    style="text-decoration:none; color:var(--gold);">All</a></div>
+            <div class="filter-option"><a href="?gender=women"
+                    style="text-decoration:none; color:{% if request.GET.gender == 'women' %}var(--gold){% else %}inherit{% endif %};">Women</a>
+            </div>
+            <div class="filter-option"><a
+                    href="{% if selected_category %}/category/{{ selected_category.slug }}/{% else %}{% url 'browse' %}{% endif %}"
+                    style="text-decoration:none; color:{% if not request.GET.gender %}var(--gold){% else %}inherit{% endif %};">All</a>
+            </div>
         </div>
 
         <div class="sidebar-block">
@@ -297,6 +344,11 @@
             </div>
             {% endfor %}
         </div>
+
+        <div id="noResultsMsg"
+            style="display:none; grid-column: span 3; padding: 4rem; text-align: center; color: var(--muted);">
+            <p>No products found in this price range.</p>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -326,6 +378,11 @@
     }, { passive: true });
 
     // ── Product Filters ──
+    // Read gender from URL once so it drives both the active-state highlight
+    // AND the client-side card filter (needed on /browse/ where the server
+    // doesn't filter by gender, unlike /category/<slug>/ which does).
+    const activeGender = new URLSearchParams(window.location.search).get('gender');
+
     function applyFilters() {
         const search = document.getElementById('shopSearch').value.toLowerCase();
         const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
@@ -337,11 +394,13 @@
         cards.forEach(card => {
             const title = card.getAttribute('data-title');
             const price = parseFloat(card.getAttribute('data-price'));
+            const gender = card.getAttribute('data-gender');
 
             const matchesSearch = title.includes(search);
             const matchesPrice = price >= minPrice && price <= maxPrice;
+            const matchesGender = !activeGender || gender === activeGender;
 
-            if (matchesSearch && matchesPrice) {
+            if (matchesSearch && matchesPrice && matchesGender) {
                 card.parentElement.style.display = 'block';
                 count++;
             } else {
@@ -350,7 +409,11 @@
         });
 
         document.getElementById('resultCount').innerText = `Showing ${count} products`;
+        document.getElementById('noResultsMsg').style.display = count === 0 ? 'block' : 'none';
     }
+
+    // Run immediately so gender filter from URL is applied on first paint.
+    applyFilters();
 
     function toggleSizeFilter(btn) {
         btn.classList.toggle('size-btn-active');

@@ -89,8 +89,15 @@
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .checkout-card {
@@ -163,7 +170,10 @@
         transition: all 0.2s;
     }
 
-    .sq-btn:hover { background: var(--charcoal); color: white; }
+    .sq-btn:hover {
+        background: var(--charcoal);
+        color: white;
+    }
 
     /* Payment Methods */
     .method-list {
@@ -182,12 +192,15 @@
         transition: all 0.2s;
     }
 
-    .method-item:hover, .method-item.selected {
+    .method-item:hover,
+    .method-item.selected {
         border-color: var(--gold);
         background: rgba(212, 175, 55, 0.03);
     }
 
-    .method-item input { display: none; }
+    .method-item input {
+        display: none;
+    }
 
     /* Dynamic Details */
     .payment-details-form {
@@ -196,7 +209,10 @@
         border-top: 1px solid var(--border);
     }
 
-    .form-group { margin-bottom: 1.5rem; }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
     .form-group label {
         display: block;
         font-size: 0.75rem;
@@ -213,7 +229,10 @@
         font-family: inherit;
     }
 
-    .form-group input:focus { border-color: var(--gold); outline: none; }
+    .form-group input:focus {
+        border-color: var(--gold);
+        outline: none;
+    }
 
     .nav-btns {
         display: flex;
@@ -221,11 +240,19 @@
         margin-top: 3rem;
     }
 
-    .btn-back { border: 1px solid var(--border); background: none; }
+    .btn-back {
+        border: 1px solid var(--border);
+        background: none;
+    }
 
     @media (max-width: 800px) {
-        .checkout-card { grid-template-columns: 1fr; }
-        .summary-box { order: -1; }
+        .checkout-card {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-box {
+            order: -1;
+        }
     }
 </style>
 {% endblock %}
@@ -269,7 +296,9 @@
                     <div class="product-mini">
                         <img src="{{ product.image.url }}" alt="">
                         <div>
-                            <span style="font-size: 0.7rem; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase;">{{ product.category.name }}</span>
+                            <span
+                                style="font-size: 0.7rem; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase;">{{
+                                product.category.name }}</span>
                             <h4 style="margin: 0.3rem 0;">{{ product.title }}</h4>
                             <p style="font-size: 0.85rem; color: var(--muted);">₹{{ product.price_per_day }} / day</p>
                         </div>
@@ -278,37 +307,45 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
                         <div>
                             <label class="section-label">Start Date</label>
-                            <input type="date" id="id_start_date" name="start_date" class="form-control" required style="width:100%; padding:0.8rem; border:1px solid var(--border); background:white;">
+                            <input type="date" id="id_start_date" name="start_date" class="form-control" required
+                                style="width:100%; padding:0.8rem; border:1px solid var(--border); background:white;">
                         </div>
                         <div>
                             <label class="section-label">Duration</label>
                             <div class="days-ctrl" style="margin-top:0;">
                                 <button type="button" class="sq-btn" onclick="adjustDays(-1)">−</button>
-                                <span id="display-days" style="font-size: 1.8rem; font-family: 'Cormorant Garamond', serif; min-width: 40px; text-align: center;">1</span>
+                                <span id="display-days"
+                                    style="font-size: 1.8rem; font-family: 'Cormorant Garamond', serif; min-width: 40px; text-align: center;">1</span>
                                 <button type="button" class="sq-btn" onclick="adjustDays(1)">+</button>
                                 <span style="color: var(--muted);">days</span>
                             </div>
                         </div>
                     </div>
 
-                    <div id="booking-range" style="margin-top: 1.5rem; padding: 1rem; background: var(--warm-white); border-radius: 4px; border-left: 3px solid var(--gold); display: none;">
-                        <p style="margin: 0; font-size: 0.9rem; color: var(--muted);">Rental Period: <strong id="range-text" style="color: var(--dark);"></strong></p>
+                    <div id="booking-range"
+                        style="margin-top: 1.5rem; padding: 1rem; background: var(--warm-white); border-radius: 4px; border-left: 3px solid var(--gold); display: none;">
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--muted);">Rental Period: <strong
+                                id="range-text" style="color: var(--dark);"></strong></p>
                     </div>
 
                     <div class="nav-btns">
-                        <button type="button" class="btn-primary" onclick="goToStep(2)" style="flex: 1;">Continue to Address</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(2)" style="flex: 1;">Continue to
+                            Address</button>
                     </div>
                 </div>
 
                 <div class="summary-box">
                     <h3 style="font-family: 'Cormorant Garamond', serif; margin-bottom: 1.5rem;">Total Calculation</h3>
-                    <div class="summary-row"><span>Rent Total</span><span id="sum-rent">₹{{ product.price_per_day }}</span></div>
-                    <div class="summary-row"><span>Security Deposit</span><span>₹{{ product.security_deposit }}</span></div>
-                    <div class="summary-row total"><span>Total Payable</span><span id="sum-total">₹{{ product.price_per_day|add:product.security_deposit }}</span></div>
+                    <div class="summary-row"><span>Rent Total</span><span id="sum-rent">₹{{ product.price_per_day
+                            }}</span></div>
+                    <div class="summary-row"><span>Security Deposit</span><span>₹{{ product.security_deposit }}</span>
+                    </div>
+                    <div class="summary-row total"><span>Total Payable</span><span id="sum-total">₹{{
+                            product.price_per_day|add:product.security_deposit }}</span></div>
                 </div>
             </div>
         </section>
-        
+
         <!-- STEP 2: DELIVERY ADDRESS -->
         <section class="checkout-section" id="section-2">
             <div class="checkout-card">
@@ -316,34 +353,43 @@
                     <h2>Delivery Address</h2>
                     <div class="form-group">
                         <label>Full Name</label>
-                        <input type="text" name="full_name" id="id_full_name" value="{{ last_address.full_name|default:'' }}" required>
+                        <input type="text" name="full_name" id="id_full_name"
+                            value="{{ last_address.full_name|default:'' }}" required>
                     </div>
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="text" name="phone_number" id="id_phone_number" value="{{ last_address.phone_number|default:'' }}" required>
+                        <input type="text" name="phone_number" id="id_phone_number"
+                            value="{{ last_address.phone_number|default:'' }}" required>
                     </div>
                     <div class="form-group">
                         <label>Full Street Address</label>
-                        <textarea name="address_line" id="id_address_line" rows="3" style="width:100%; padding:0.8rem; border:1px solid var(--border); font-family:inherit;" required>{{ last_address.address_line|default:'' }}</textarea>
+                        <textarea name="address_line" id="id_address_line" rows="3"
+                            style="width:100%; padding:0.8rem; border:1px solid var(--border); font-family:inherit;"
+                            required>{{ last_address.address_line|default:'' }}</textarea>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-group">
                             <label>City</label>
-                            <input type="text" name="city" id="id_city" value="{{ last_address.city|default:'' }}" required>
+                            <input type="text" name="city" id="id_city" value="{{ last_address.city|default:'' }}"
+                                required>
                         </div>
                         <div class="form-group">
                             <label>Pincode</label>
-                            <input type="text" name="pincode" id="id_pincode" value="{{ last_address.pincode|default:'' }}" required>
+                            <input type="text" name="pincode" id="id_pincode"
+                                value="{{ last_address.pincode|default:'' }}" required>
                         </div>
                     </div>
 
                     <div class="nav-btns">
                         <button type="button" class="btn-primary btn-back" onclick="goToStep(1)">Back</button>
-                        <button type="button" class="btn-primary" onclick="goToStep(3)" style="flex: 1;">Continue to Payment</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(3)" style="flex: 1;">Continue to
+                            Payment</button>
                     </div>
                 </div>
                 <div class="summary-box">
-                    <p style="font-size: 0.85rem; color: var(--muted); border-left: 2px solid var(--gold); padding-left: 1rem;">We'll save this address for your future rentals to make checkout faster.</p>
+                    <p
+                        style="font-size: 0.85rem; color: var(--muted); border-left: 2px solid var(--gold); padding-left: 1rem;">
+                        We'll save this address for your future rentals to make checkout faster.</p>
                 </div>
             </div>
         </section>
@@ -372,20 +418,25 @@
                             <div class="step-num" style="width: 24px; height: 24px; margin: 0;"></div>
                             <div>
                                 <div style="font-weight: 500;">Cash on Delivery</div>
-                                <div style="font-size: 0.8rem; color: var(--muted);">Pay when you receive the outfit</div>
+                                <div style="font-size: 0.8rem; color: var(--muted);">Pay when you receive the outfit
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="nav-btns">
                         <button type="button" class="btn-primary btn-back" onclick="goToStep(2)">Back</button>
-                        <button type="button" class="btn-primary" onclick="goToStep(4)" style="flex: 1;">Proceed</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(4)"
+                            style="flex: 1;">Proceed</button>
                     </div>
                 </div>
 
                 <div class="summary-box">
-                    <h3 id="step2-total" style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--gold);">₹0.00</h3>
-                    <p style="font-size: 0.8rem; color: var(--muted);">Payable for <span id="step2-days">1</span> day rental</p>
+                    <h3 id="step2-total"
+                        style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--gold);">₹0.00
+                    </h3>
+                    <p style="font-size: 0.8rem; color: var(--muted);">Payable for <span id="step2-days">1</span> day
+                        rental</p>
                 </div>
             </div>
         </section>
@@ -395,9 +446,10 @@
             <div class="checkout-card">
                 <div class="checkout-main">
                     <h2 id="details-title">Payment Details</h2>
-                    
+
                     <div id="details-upi" class="method-details" style="display: none;">
-                        <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--muted);">Please enter your VPA / UPI ID to proceed.</p>
+                        <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--muted);">Please enter your VPA
+                            / UPI ID to proceed.</p>
                         <div class="form-group">
                             <label>UPI ID</label>
                             <input type="text" name="upi_id" placeholder="username@bank">
@@ -422,14 +474,17 @@
                     </div>
 
                     <div id="details-cod" class="method-details" style="display: none;">
-                        <div style="padding: 2rem; background: var(--cream); border-radius: 4px; border: 1px dashed var(--gold);">
-                            <p style="margin: 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;">You have selected Cash on Delivery. A secure verification call may be placed before shipping.</p>
+                        <div
+                            style="padding: 2rem; background: var(--cream); border-radius: 4px; border: 1px dashed var(--gold);">
+                            <p style="margin: 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;">You have
+                                selected Cash on Delivery. A secure verification call may be placed before shipping.</p>
                         </div>
                     </div>
 
                     <div class="nav-btns">
                         <button type="button" class="btn-primary btn-back" onclick="goToStep(3)">Back</button>
-                        <button type="button" class="btn-primary" onclick="goToStep(5)" style="flex: 1;">Confirm Payment</button>
+                        <button type="button" class="btn-primary" onclick="goToStep(5)" style="flex: 1;">Confirm
+                            Payment</button>
                     </div>
                 </div>
 
@@ -448,14 +503,19 @@
                 <div style="max-width: 520px; margin: 0 auto; padding: 2rem 0;">
                     <div style="font-size: 4rem; margin-bottom: 1.5rem;">📋</div>
                     <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem;">Review & Confirm</h2>
-                    <p style="color: var(--muted); margin-bottom: 2rem;">Please review your rental details one last time. Once confirmed, your reservation will be secured.</p>
-                    
-                    <div style="background: var(--warm-white); padding: 2rem; border-radius: 4px; text-align: left; margin-bottom: 2.5rem;">
-                        <div class="summary-row"><span>Item</span><span style="font-weight: 500;">{{ product.title }}</span></div>
+                    <p style="color: var(--muted); margin-bottom: 2rem;">Please review your rental details one last
+                        time. Once confirmed, your reservation will be secured.</p>
+
+                    <div
+                        style="background: var(--warm-white); padding: 2rem; border-radius: 4px; text-align: left; margin-bottom: 2.5rem;">
+                        <div class="summary-row"><span>Item</span><span style="font-weight: 500;">{{ product.title
+                                }}</span></div>
                         <div class="summary-row"><span>Duration</span><span id="final-days">1 day</span></div>
                         <div class="summary-row"><span>Rent Amount</span><span id="final-rent">₹0.00</span></div>
-                        <div class="summary-row"><span>Security Deposit</span><span>₹{{ product.security_deposit }}</span></div>
-                        <div class="summary-row"><span>Payment</span><span id="final-method" style="text-transform: uppercase; font-weight: 500;">COD</span></div>
+                        <div class="summary-row"><span>Security Deposit</span><span>₹{{ product.security_deposit
+                                }}</span></div>
+                        <div class="summary-row"><span>Payment</span><span id="final-method"
+                                style="text-transform: uppercase; font-weight: 500;">COD</span></div>
                         <div class="summary-row total" style="margin-top: 1rem; border-top-style: dashed;">
                             <span>Total Amount</span>
                             <span id="final-total" style="color: var(--gold); font-size: 1.5rem;">₹0.00</span>
@@ -464,17 +524,22 @@
 
                     <div class="nav-btns">
                         <button type="button" class="btn-primary btn-back" onclick="goToStep(4)">Edit Details</button>
-                        
+
                         <!-- ── COD: classic form submit ── -->
-                        <button type="submit" id="btn-cod-confirm" class="btn-primary" style="flex: 1; display: none;">Confirm Booking (COD)</button>
+                        <button type="submit" id="btn-cod-confirm" class="btn-primary"
+                            style="flex: 1; display: none;">Confirm Booking (COD)</button>
 
                         <!-- ── Razorpay: shown for UPI / Card ── -->
-                        <button type="button" id="btn-razorpay-pay" class="btn-primary" style="flex: 1; display: none; background: var(--gold); color: #fff;" onclick="startRazorpayPayment()">
+                        <button type="button" id="btn-razorpay-pay" class="btn-primary"
+                            style="flex: 1; display: none; background: var(--gold); color: #fff;"
+                            onclick="startRazorpayPayment()">
                             🔒 Pay <span id="rzp-btn-amount">₹0.00</span> Securely
                         </button>
                     </div>
 
-                    <div id="rzp-status" style="margin-top: 1.5rem; display: none; padding: 1rem; border-radius: 4px; font-size: 0.9rem;"></div>
+                    <div id="rzp-status"
+                        style="margin-top: 1.5rem; display: none; padding: 1rem; border-radius: 4px; font-size: 0.9rem;">
+                    </div>
                 </div>
             </div>
         </section>
@@ -488,18 +553,18 @@
 
 <script>
     // ── Constants passed from Django context ──
-    const pricePerDay       = parseFloat("{{ product.price_per_day|default_if_none:'0' }}");
-    const deposit           = parseFloat("{{ product.security_deposit|default_if_none:'0' }}");
-    const minD              = parseInt("{{ min_days|default_if_none:'1' }}");
-    const maxD              = parseInt("{{ max_days|default_if_none:'30' }}");
-    const PRODUCT_ID        = parseInt("{{ product.id|default_if_none:'0' }}");
-    const RAZORPAY_KEY      = "{{ razorpay_key_id|default:'' }}";   // key_id only – safe to expose
-    const CREATE_ORDER_URL  = "/product/" + PRODUCT_ID + "/create-razorpay-order/";
-    const VERIFY_URL        = "/product/" + PRODUCT_ID + "/verify-payment/";
-    const CSRF_TOKEN        = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+    const pricePerDay = parseFloat("{{ product.price_per_day|default_if_none:'0' }}");
+    const deposit = parseFloat("{{ product.security_deposit|default_if_none:'0' }}");
+    const minD = parseInt("{{ min_days|default_if_none:'1' }}");
+    const maxD = parseInt("{{ max_days|default_if_none:'30' }}");
+    const PRODUCT_ID = parseInt("{{ product.id|default_if_none:'0' }}");
+    const RAZORPAY_KEY = "{{ razorpay_key_id|default:'' }}";   // key_id only – safe to expose
+    const CREATE_ORDER_URL = "/product/" + PRODUCT_ID + "/create-razorpay-order/";
+    const VERIFY_URL = "/product/" + PRODUCT_ID + "/verify-payment/";
+    const CSRF_TOKEN = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
 
     let currentStep = 1;
-    let days   = 1;
+    let days = 1;
     let method = '';
 
     // ── Day adjuster ──────────────────────────────────────────────────────────
@@ -510,31 +575,31 @@
 
     // ── UI sync ───────────────────────────────────────────────────────────────
     function updateUI() {
-        document.getElementById('display-days').innerText  = days;
-        document.getElementById('hidden_days').value       = days;
+        document.getElementById('display-days').innerText = days;
+        document.getElementById('hidden_days').value = days;
 
-        const rentTotal  = days * pricePerDay;
+        const rentTotal = days * pricePerDay;
         const finalTotal = rentTotal + deposit;
 
-        document.getElementById('sum-rent').innerText   = `₹${rentTotal.toFixed(2)}`;
-        document.getElementById('sum-total').innerText  = `₹${finalTotal.toFixed(2)}`;
-        document.getElementById('step2-days').innerText  = days;
+        document.getElementById('sum-rent').innerText = `₹${rentTotal.toFixed(2)}`;
+        document.getElementById('sum-total').innerText = `₹${finalTotal.toFixed(2)}`;
+        document.getElementById('step2-days').innerText = days;
         document.getElementById('step2-total').innerText = `₹${finalTotal.toFixed(2)}`;
-        
+
         // Step 5 breakdown
-        document.getElementById('final-days').innerText  = `${days} day${days > 1 ? 's' : ''}`;
-        document.getElementById('final-rent').innerText  = `₹${rentTotal.toFixed(2)}`;
+        document.getElementById('final-days').innerText = `${days} day${days > 1 ? 's' : ''}`;
+        document.getElementById('final-rent').innerText = `₹${rentTotal.toFixed(2)}`;
         document.getElementById('final-total').innerText = `₹${finalTotal.toFixed(2)}`;
         document.getElementById('rzp-btn-amount').innerText = `₹${finalTotal.toFixed(2)}`;
 
         const startDateInput = document.getElementById('id_start_date');
-        const rangeBox       = document.getElementById('booking-range');
+        const rangeBox = document.getElementById('booking-range');
         if (startDateInput.value) {
             rangeBox.style.display = 'block';
             const start = new Date(startDateInput.value);
-            const end   = new Date(start);
+            const end = new Date(start);
             end.setDate(start.getDate() + days - 1);
-            const opts  = { month: 'short', day: 'numeric', year: 'numeric' };
+            const opts = { month: 'short', day: 'numeric', year: 'numeric' };
             document.getElementById('range-text').innerText =
                 `${start.toLocaleDateString('en-US', opts)} to ${end.toLocaleDateString('en-US', opts)}`;
         } else {
@@ -559,12 +624,12 @@
         document.getElementById('details-' + m).style.display = 'block';
 
         const labels = { upi: 'UPI Payment', card: 'Credit / Debit Card', cod: 'Cash on Delivery' };
-        const icons  = { upi: '📱', card: '💳', cod: '💵' };
+        const icons = { upi: '📱', card: '💳', cod: '💵' };
 
-        document.getElementById('details-title').innerText          = labels[m] + ' Details';
-        document.getElementById('selected-method-name').innerText   = labels[m];
-        document.getElementById('method-icon').innerText            = icons[m];
-        document.getElementById('final-method').innerText           = labels[m];
+        document.getElementById('details-title').innerText = labels[m] + ' Details';
+        document.getElementById('selected-method-name').innerText = labels[m];
+        document.getElementById('method-icon').innerText = icons[m];
+        document.getElementById('final-method').innerText = labels[m];
     }
 
     // ── Show correct confirm button based on method ───────────────────────────
@@ -593,16 +658,16 @@
                 }
             }
             if (currentStep === 2) {
-                const name    = document.getElementById('id_full_name').value.trim();
-                const phone   = document.getElementById('id_phone_number').value.trim();
-                const addr    = document.getElementById('id_address_line').value.trim();
-                const city    = document.getElementById('id_city').value.trim();
+                const name = document.getElementById('id_full_name').value.trim();
+                const phone = document.getElementById('id_phone_number').value.trim();
+                const addr = document.getElementById('id_address_line').value.trim();
+                const city = document.getElementById('id_city').value.trim();
                 const pincode = document.getElementById('id_pincode').value.trim();
                 if (!name || !phone || !addr || !city || !pincode) {
                     showToast('All address fields are required', '⚠️'); return;
                 }
-                if (!/^\d{10,15}$/.test(phone))  { showToast('Enter a valid phone number', '⚠️'); return; }
-                if (!/^\d{6}$/.test(pincode))     { showToast('Enter a valid 6-digit pincode', '⚠️'); return; }
+                if (!/^\d{10,15}$/.test(phone)) { showToast('Enter a valid phone number', '⚠️'); return; }
+                if (!/^\d{6}$/.test(pincode)) { showToast('Enter a valid 6-digit pincode', '⚠️'); return; }
             }
             if (currentStep === 3 && !method) {
                 showToast('Please select a payment method', '⚠️'); return;
@@ -631,20 +696,20 @@
 
     // ── Razorpay flow ─────────────────────────────────────────────────────────
     async function startRazorpayPayment() {
-        const rzpBtn   = document.getElementById('btn-razorpay-pay');
+        const rzpBtn = document.getElementById('btn-razorpay-pay');
         const statusEl = document.getElementById('rzp-status');
 
-        rzpBtn.disabled    = true;
-        rzpBtn.innerText   = '⏳ Initiating payment...';
+        rzpBtn.disabled = true;
+        rzpBtn.innerText = '⏳ Initiating payment...';
         statusEl.style.display = 'none';
 
         // ── Step 1: Create Razorpay order on backend ──
         let orderData;
         try {
             const res = await fetch(CREATE_ORDER_URL, {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
-                body:    JSON.stringify({ rental_days: days }),
+                body: JSON.stringify({ rental_days: days }),
             });
             orderData = await res.json();
             if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
@@ -656,18 +721,18 @@
 
         // ── Step 2: Open Razorpay Checkout popup ──
         const options = {
-            key:         orderData.key_id,
-            amount:      orderData.amount,          // in paise
-            currency:    orderData.currency,
-            order_id:    orderData.order_id,
-            name:        'ProRent',
+            key: orderData.key_id,
+            amount: orderData.amount,          // in paise
+            currency: orderData.currency,
+            order_id: orderData.order_id,
+            name: 'ProRent',
             description: 'Rental Payment',
-            image:       '',                         // optional logo URL
+            image: '',                         // optional logo URL
             prefill: {
-                name:    document.getElementById('id_full_name').value,
+                name: document.getElementById('id_full_name').value,
                 contact: document.getElementById('id_phone_number').value,
             },
-            theme:  { color: '#D4AF37' },
+            theme: { color: '#D4AF37' },
 
             handler: async function (response) {
                 // ── Step 3: Verify payment on backend ──
@@ -675,22 +740,21 @@
 
                 const verifyPayload = {
                     razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id:   response.razorpay_order_id,
-                    razorpay_signature:  response.razorpay_signature,
-                    start_date:  document.getElementById('id_start_date').value,
+                    razxorpay_signature: response.razorpay_signature,
+                    start_date: document.getElementById('id_start_date').value,
                     rental_days: days,
-                    full_name:    document.getElementById('id_full_name').value,
+                    full_name: document.getElementById('id_full_name').value,
                     phone_number: document.getElementById('id_phone_number').value,
                     address_line: document.getElementById('id_address_line').value,
-                    city:         document.getElementById('id_city').value,
-                    pincode:      document.getElementById('id_pincode').value,
+                    city: document.getElementById('id_city').value,
+                    pincode: document.getElementById('id_pincode').value,
                 };
 
                 try {
-                    const vRes  = await fetch(VERIFY_URL, {
-                        method:  'POST',
+                    const vRes = await fetch(VERIFY_URL, {
+                        method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
-                        body:    JSON.stringify(verifyPayload),
+                        body: JSON.stringify(verifyPayload),
                     });
                     const vData = await vRes.json();
                     if (vData.success) {
@@ -719,20 +783,20 @@
 
     function resetPayBtn() {
         const rzpBtn = document.getElementById('btn-razorpay-pay');
-        rzpBtn.disabled  = false;
+        rzpBtn.disabled = false;
         const total = (days * pricePerDay + deposit).toFixed(2);
         rzpBtn.innerHTML = `🔒 Pay <span id="rzp-btn-amount">₹${total}</span> Securely`;
     }
 
     function showStatus(msg, bg, color) {
         const el = document.getElementById('rzp-status');
-        el.style.display    = 'block';
+        el.style.display = 'block';
         el.style.background = bg;
-        el.style.color      = color;
-        el.style.border     = `1px solid ${color}`;
+        el.style.color = color;
+        el.style.border = `1px solid ${color}`;
         el.style.borderRadius = '4px';
-        el.style.padding    = '1rem';
-        el.innerText        = msg;
+        el.style.padding = '1rem';
+        el.innerText = msg;
     }
 </script>
 {% endblock %}
