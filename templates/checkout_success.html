@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="success-premium-wrapper">
+    <!-- CONFETTI EFFECT -->
+    <div class="confetti-container">
+        {% for i in "12345678901234567890" %}
+            <div class="confetti"></div>
+        {% endfor %}
+    </div>
+
+    <div class="success-container">
+        <div class="success-card shadow-lg rounded-card animate-fade-in">
+            <div class="success-header">
+                <div class="success-icon-badge">
+                    <span class="check-icon">✓</span>
+                </div>
+                <h1 class="premium-title">Reservation <span class="gold">Confirmed</span></h1>
+                <p class="success-subtitle">Your luxury pieces are prepared and reserved just for you.</p>
+            </div>
+
+            <div class="success-body">
+                <div class="summary-box">
+                    <h3 class="box-title">Order Summary</h3>
+                    <div class="success-items-list">
+                        {% for order in orders %}
+                        <div class="success-item">
+                            <div class="item-img">
+                                <img src="{{ order.product.image.url }}" alt="{{ order.product.title }}">
+                            </div>
+                            <div class="item-details">
+                                <h4>{{ order.product.title }}</h4>
+                                <p>Size: {{ order.size }} | {{ order.rental_days }} Days</p>
+                                <span class="item-dates">{{ order.start_date|date:"M d" }} — {{ order.end_date|date:"M d" }}</span>
+                            </div>
+                            <div class="item-price">
+                                ₹{{ order.total_amount|floatformat:0 }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="payment-summary-box">
+                    <div class="payment-info">
+                        <span class="label">Total Paid ({{ payment_method|upper }})</span>
+                        <span class="value">₹{{ total_paid|floatformat:0 }}</span>
+                    </div>
+                    <p class="email-note">A confirmation receipt has been sent to {{ user.email }}</p>
+                </div>
+
+                <div class="success-actions">
+                    <a href="{% url 'my_orders' %}" class="btn-primary-gold">
+                        TRACK MY EXPERIENCE
+                    </a>
+                    <a href="{% url 'browse' %}" class="btn-outline-dark">
+                        DISCOVER MORE
+                    </a>
+                </div>
+            </div>
+
+            <div class="success-footer">
+                <p>Thank you for choosing <span class="brand">PRORENT</span> – Where Elegance Meets Access.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Premium Success Page Styles */
+    .success-premium-wrapper {
+        background-color: #fafafa;
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .success-container {
+        max-width: 650px;
+        width: 100%;
+        position: relative;
+        z-index: 10;
+    }
+
+    .rounded-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 50px;
+        text-align: center;
+        border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .shadow-lg {
+        box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+    }
+
+    .success-icon-badge {
+        width: 80px;
+        height: 80px;
+        background: #fbf8f2;
+        border: 2px solid #c5a059;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        color: #c5a059;
+        font-size: 2.5rem;
+    }
+
+    .premium-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        letter-spacing: -0.5px;
+    }
+
+    .gold { color: #c5a059; }
+
+    .success-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 40px;
+    }
+
+    .summary-box {
+        text-align: left;
+        background: #fdfdfd;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 1px solid #f1f1f1;
+    }
+
+    .box-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #999;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #f5f5f5;
+        padding-bottom: 10px;
+    }
+
+    .success-items-list {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .success-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f9f9f9;
+    }
+
+    .item-img {
+        width: 50px;
+        height: 60px;
+        border-radius: 6px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .item-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .item-details h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0 0 2px 0;
+    }
+
+    .item-details p {
+        font-size: 0.8rem;
+        color: #888;
+        margin: 0;
+    }
+
+    .item-dates {
+        font-size: 0.75rem;
+        color: #c5a059;
+        font-weight: 600;
+    }
+
+    .item-price {
+        margin-left: auto;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .payment-summary-box {
+        margin-bottom: 40px;
+    }
+
+    .payment-info {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .payment-info .label { color: #888; font-size: 0.9rem; font-weight: 500; }
+
+    .email-note {
+        font-size: 0.85rem;
+        color: #999;
+    }
+
+    .success-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .btn-primary-gold {
+        background: #222;
+        color: #fff;
+        padding: 18px 30px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+    .btn-primary-gold:hover {
+        background: #c5a059;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(197, 160, 89, 0.4);
+        color: #fff;
+    }
+
+    .btn-outline-dark {
+        background: transparent;
+        color: #222;
+        border: 1.5px solid #222;
+        padding: 17px 30px;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+    .btn-outline-dark:hover {
+        background: #222;
+        color: #fff;
+    }
+
+    .success-footer {
+        margin-top: 40px;
+        font-size: 0.9rem;
+        color: #aaa;
+    }
+
+    .brand {
+        font-weight: 700;
+        color: #c5a059;
+        letter-spacing: 1px;
+    }
+
+    /* Confetti Animation */
+    .confetti-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .confetti {
+        width: 10px;
+        height: 10px;
+        background-color: #f2d74c;
+        position: absolute;
+        top: -20px;
+        border-radius: 2px;
+        animation: fall 3s infinite linear;
+    }
+
+    .confetti:nth-child(2n) { background-color: #95c3de; }
+    .confetti:nth-child(3n) { background-color: #ff9a91; }
+    .confetti:nth-child(4n) { background-color: #f2d74c; }
+    .confetti:nth-child(5n) { background-color: #c5a059; }
+
+    @keyframes fall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    .confetti:nth-child(1) { left: 5%; animation-delay: 0.1s; animation-duration: 2.5s; }
+    .confetti:nth-child(2) { left: 10%; animation-delay: 1.2s; animation-duration: 3s; }
+    .confetti:nth-child(3) { left: 15%; animation-delay: 0.5s; animation-duration: 2.2s; }
+    .confetti:nth-child(4) { left: 20%; animation-delay: 2.1s; animation-duration: 2.8s; }
+    .confetti:nth-child(5) { left: 25%; animation-delay: 0.8s; animation-duration: 3.2s; }
+    .confetti:nth-child(6) { left: 30%; animation-delay: 1.5s; animation-duration: 2.4s; }
+    .confetti:nth-child(7) { left: 35%; animation-delay: 0.3s; animation-duration: 2.9s; }
+    .confetti:nth-child(8) { left: 40%; animation-delay: 1.7s; animation-duration: 3.5s; }
+    .confetti:nth-child(9) { left: 45%; animation-delay: 0.9s; animation-duration: 2.1s; }
+    .confetti:nth-child(10) { left: 50%; animation-delay: 2.3s; animation-duration: 3.1s; }
+    .confetti:nth-child(11) { left: 55%; animation-delay: 0.4s; animation-duration: 2.6s; }
+    .confetti:nth-child(12) { left: 60%; animation-delay: 1.1s; animation-duration: 3.3s; }
+    .confetti:nth-child(13) { left: 65%; animation-delay: 0.6s; animation-duration: 2.3s; }
+    .confetti:nth-child(14) { left: 70%; animation-delay: 1.9s; animation-duration: 2.7s; }
+    .confetti:nth-child(15) { left: 75%; animation-delay: 0.2s; animation-duration: 3.4s; }
+    .confetti:nth-child(16) { left: 80%; animation-delay: 1.4s; animation-duration: 2.2s; }
+    .confetti:nth-child(17) { left: 85%; animation-delay: 0.7s; animation-duration: 3s; }
+    .confetti:nth-child(18) { left: 90%; animation-delay: 2s; animation-duration: 2.9s; }
+    .confetti:nth-child(19) { left: 95%; animation-delay: 0.5s; animation-duration: 3.2s; }
+    .confetti:nth-child(20) { left: 98%; animation-delay: 1.3s; animation-duration: 2.5s; }
+
+    .animate-fade-in {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+        .success-actions { flex-direction: column; }
+        .rounded-card { padding: 30px 20px; }
+    }
+</style>
+{% endblock %}

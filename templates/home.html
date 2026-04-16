@@ -389,6 +389,7 @@
               {% endif %}
             </div>
             <div class="product-info">
+              <span style="font-size: 0.6rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.15em; display: block; margin-bottom: 0.3rem;">{{ item.category.name|default:"No Category" }}</span>
               <h4>{{ item.title }}</h4>
               <div class="product-price">
                 ₹{{ item.price_per_day }} <span>/ day</span>

@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="rental-bag-container">
+    <div class="bag-header">
+        <h1>Your <span class="gold">Rental Bag</span></h1>
+        <p class="bag-count">{{ items.count }} Stunning pieces selected</p>
+    </div>
+
+    {% if items %}
+    <div class="bag-layout">
+        <!-- ITEM LIST SECTION -->
+        <div class="bag-items-grid">
+            {% for item in items %}
+            <div class="rental-card">
+                <!-- Left: Image -->
+                <div class="card-image">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}">
+                </div>
+
+                <!-- Middle: Description & Inputs -->
+                <div class="card-description">
+                    <div class="item-id-row">
+                        <span class="brand-tag">{{ item.product.brand }}</span>
+                    </div>
+                    <h3 class="product-title">{{ item.product.title }}</h3>
+                    <div class="meta-info">
+                        <span class="size-label">Size: <strong>{{ item.size }}</strong></span>
+                    </div>
+
+                    <!-- Rental Duration & Quantity Form -->
+                    <div class="rental-form-inputs">
+                        <div class="duration-inputs">
+                            <div class="field-item">
+                                <label>Start Date</label>
+                                <input type="date" value="{{ item.start_date|date:'Y-m-d' }}" 
+                                       onchange="updateCartItem({{ item.id }}, {start_date: this.value})">
+                            </div>
+                            <div class="field-item">
+                                <label>Days</label>
+                                <input type="number" value="{{ item.rental_days }}" min="1" max="30"
+                                       onchange="updateCartItem({{ item.id }}, {rental_days: this.value})">
+                            </div>
+                        </div>
+                        
+                        <!-- QUANTITY CONTROL -->
+                        <div class="quantity-control-wrap">
+                            <label class="qty-label">Quantity</label>
+                            <div class="qty-stepper">
+                                <button type="button" class="qty-btn" onclick="changeQty({{ item.id }}, -1)">−</button>
+                                <input type="number" id="qty-input-{{ item.id }}" value="{{ item.quantity }}" readonly>
+                                <button type="button" class="qty-btn" onclick="changeQty({{ item.id }}, 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Pricing & Actions -->
+                <div class="card-pricing">
+                    <div class="pricing-breakdown">
+                        <div class="price-line">
+                            <span class="label">Rental Price</span>
+                            <span class="value">₹{{ item.product.price_per_day|floatformat:0 }} <small>/ day</small></span>
+                        </div>
+                        <div class="price-line">
+                            <span class="label">Security Deposit</span>
+                            <span class="value gold-text">+ ₹{{ item.product.security_deposit|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-total-box">
+                        <span class="total-label">Subtotal</span>
+                        <h4 class="total-value" id="item-subtotal-{{ item.id }}">₹{{ item.get_total_price|add:item.get_deposit_total|floatformat:0 }}</h4>
+                    </div>
+
+                    <a href="{% url 'remove_from_cart' item.id %}" class="remove-action">
+                        <span class="icon">✕</span> Remove Piece
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- RIGHT SIDE SUMMARY PANEL -->
+        <div class="bag-summary-panel">
+            <div class="summary-card sticky-element">
+                <h2 class="summary-title">Luxury Selection</h2>
+                <div class="summary-rows">
+                    <div class="summary-row">
+                        <span>Items Subtotal</span>
+                        <span id="bag-subtotal">₹{{ subtotal|floatformat:0 }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Security Deposits Total</span>
+                        <span id="bag-deposit">₹{{ deposit_total|floatformat:0 }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Service Fee</span>
+                        <span class="complimentary-badge">Complimentary</span>
+                    </div>
+                </div>
+                
+                <div class="total-payable-row">
+                    <span class="final-label">Total Payable</span>
+                    <h3 class="final-value" id="bag-total">₹{{ total|floatformat:0 }}</h3>
+                </div>
+
+                <div class="summary-actions">
+                    <a href="{% url 'checkout' %}" class="btn-checkout-link">
+                        <button class="btn-checkout">PROCEED TO SECURE CHECKOUT</button>
+                    </a>
+                    <div class="trust-badges">
+                        <span>🔒 100% Secure Payments</span>
+                        <span>🛡️ Quality Guarantee</span>
+                    </div>
+                </div>
+
+                <a href="{% url 'browse' %}" class="btn-continue-shopping">← Continue Curating Bag</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-bag-state">
+        <div class="empty-icon-wrap">
+            <span class="empty-icon">👜</span>
+        </div>
+        <h2>Your Bag is Waiting</h2>
+        <p>Explore our exclusive collection and select your centerpiece.</p>
+        <a href="{% url 'browse' %}" class="btn-primary">Browse Collection</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .quantity-control-wrap {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .qty-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: #888;
+        font-weight: 600;
+    }
+    .qty-stepper {
+        display: flex;
+        align-items: center;
+        border: 1px solid #eee;
+        width: fit-content;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .qty-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .qty-btn:hover { background: #f8f8f8; }
+    .qty-stepper input {
+        width: 40px;
+        height: 32px;
+        border: none;
+        border-left: 1px solid #eee;
+        border-right: 1px solid #eee;
+        text-align: center;
+        font-weight: 700;
+        font-family: inherit;
+        outline: none;
+    }
+</style>
+
+<script>
+async function updateCartItem(itemId, fields) {
+    const formData = new FormData();
+    for (const [k, v] of Object.entries(fields)) {
+        formData.append(k, v);
+    }
+
+    try {
+        const response = await fetch(`/cart/update/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            // Update Totals
+            document.getElementById(`item-subtotal-${itemId}`).innerText = `₹${Math.round(data.item_subtotal)}`;
+            document.getElementById('bag-subtotal').innerText = `₹${Math.round(data.bag_subtotal)}`;
+            document.getElementById('bag-deposit').innerText = `₹${Math.round(data.bag_deposit)}`;
+            document.getElementById('bag-total').innerText = `₹${Math.round(data.bag_total)}`;
+            
+            // Sync Navbar
+            if (typeof updateCartCount === 'function') {
+                updateCartCount(data.cart_count);
+            }
+        }
+    } catch (err) {
+        console.error('Update failed:', err);
+    }
+}
+
+function changeQty(itemId, delta) {
+    const input = document.getElementById(`qty-input-${itemId}`);
+    let val = parseInt(input.value) + delta;
+    if (val < 1) return;
+    input.value = val;
+    updateCartItem(itemId, {quantity: val});
+}
+</script>
+{% endblock %}

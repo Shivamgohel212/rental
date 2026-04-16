@@ -22,9 +22,24 @@ PAYMENT_STATUS_CHOICES = [
 ]
 
 ORDER_STATUS_CHOICES = [
-    ('pending', 'Pending'),
     ('confirmed', 'Confirmed'),
+    ('shipped', 'Shipped'),
+    ('delivered', 'Delivered'),
+    ('returned', 'Returned'),
     ('cancelled', 'Cancelled'),
+]
+
+TRANSACTION_TYPE_CHOICES = [
+    ('deposit', 'Deposit'),
+    ('withdraw', 'Withdraw'),
+    ('payment', 'Rental Payment'),
+    ('refund', 'Refund'),
+]
+
+TRANSACTION_STATUS_CHOICES = [
+    ('pending', 'Pending'),
+    ('completed', 'Completed'),
+    ('failed', 'Failed'),
 ]
 
 DEPOSIT_REFUND_STATUS_CHOICES = [
@@ -37,6 +52,7 @@ PAYMENT_METHOD_CHOICES = [
     ('upi', 'UPI'),
     ('card', 'Card'),
     ('cod', 'Cash on Delivery'),
+    ('wallet', 'Wallet'),
 ]
 
 GENDER_CHOICES = (
@@ -59,10 +75,42 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
     if hasattr(instance, 'userprofile'):
         instance.userprofile.save()
+
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wallet')
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Wallet - ₹{self.balance}"
+
+class WalletTransaction(models.Model):
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transactions')
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=TRANSACTION_STATUS_CHOICES, default='pending')
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.transaction_type.title()} - ₹{self.amount} ({self.status})"
+
+@receiver(post_save, sender=User)
+def create_wallet(sender, instance, created, **kwargs):
+    if created:
+        Wallet.objects.get_or_create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_wallet(sender, instance, **kwargs):
+    if hasattr(instance, 'wallet'):
+        instance.wallet.save()
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -183,6 +231,8 @@ class RentalOrder(models.Model):
     status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='confirmed')
     deposit_refund_status = models.CharField(max_length=20, choices=DEPOSIT_REFUND_STATUS_CHOICES, default='pending')
     razorpay_refund_id = models.CharField(max_length=100, blank=True, null=True)
+    size = models.CharField(max_length=10, blank=True, null=True)
+    tracking_status = models.IntegerField(default=1) # 1: Ordered, 2: Packed, 3: Shipped, 4: On Way, 5: Arrived
     order_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -233,3 +283,33 @@ class RazorpayPayment(models.Model):
 
     def __str__(self):
         return f"RazorpayPayment – Order #{self.order_id} – {'✓' if self.is_verified else '✗'}"
+
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Cart - {self.user.username}"
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Clothing, on_delete=models.CASCADE)
+    size = models.CharField(max_length=10)
+    quantity = models.PositiveIntegerField(default=1)
+    # Rental duration fields
+    start_date = models.DateField(null=True, blank=True)
+    rental_days = models.PositiveIntegerField(default=4)
+    
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def get_total_price(self):
+        # Total = (Price Per Day * Rental Days) * Quantity
+        return (self.product.price_per_day * self.rental_days) * self.quantity
+
+    @property
+    def get_deposit_total(self):
+        return self.product.security_deposit * self.quantity
+
+    def __str__(self):
+        return f"{self.product.title} ({self.size}) in {self.cart.user.username}'s Cart"

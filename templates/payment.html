@@ -297,8 +297,7 @@
                         <img src="{{ product.image.url }}" alt="">
                         <div>
                             <span
-                                style="font-size: 0.7rem; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase;">{{
-                                product.category.name }}</span>
+                                style="font-size: 0.7rem; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase;">{{ product.category.name|default:"No Category" }}</span>
                             <h4 style="margin: 0.3rem 0;">{{ product.title }}</h4>
                             <p style="font-size: 0.85rem; color: var(--muted);">₹{{ product.price_per_day }} / day</p>
                         </div>

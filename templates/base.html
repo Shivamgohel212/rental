@@ -90,6 +90,18 @@
         display: block !important;
       }
     }
+    .wallet-nav {
+      font-family: 'Jost', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #f0d060;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-right: 15px;
+      border: 1px solid rgba(240, 208, 96, 0.3);
+      cursor: help;
+    }
   </style>
   <nav>
     <div class="nav-inner">
@@ -100,19 +112,30 @@
         <li><a href="{% url 'how_it_works' %}">How It Works</a></li>
       </ul>
       <div class="nav-actions">
-        <button class="cart-btn" onclick="showToast('Cart feature coming soon!', '🛒')" title="Cart">
+        <a href="{% url 'cart_view' %}" class="cart-btn" title="Cart" style="text-decoration: none;">
           🛍️
-          <span class="cart-count" id="cartCount">0</span>
-        </button>
+          <span class="cart-count" id="cartCount">
+            {{ cart_count }}
+          </span>
+        </a>
 
         {% if user.is_authenticated %}
+        <a href="{% url 'wallet_dashboard' %}" class="wallet-nav" title="Wallet Balance">
+          👛 ₹{{ user.wallet.balance|floatformat:0 }}
+        </a>
         <a href="{% url 'my_orders' %}"
           style="font-family:'Jost',sans-serif; font-size:0.85rem; color:var(--gold); margin-right: 20px; text-decoration: none;">My
           Orders</a>
-        <span style="font-family:'Jost',sans-serif; font-size:0.85rem; color:white; margin-right: 15px;">Hello, {{
-          user.first_name|default:user.username }}!</span>
+        <span style="font-family:'Jost',sans-serif; font-size:0.85rem; color:white; margin-right: 15px;">Hello, {{ user.first_name|default:user.username }}!</span>
         <a href="{% url 'logout' %}" class="btn-primary" style="text-decoration: none;">Logout</a>
+        {% if user.userprofile.is_owner %}
+        <a href="{% url 'admin_dashboard' %}" 
+           style="background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none; margin-left: 10px; border: 1px solid var(--gold);">
+           Manage Orders
+        </a>
+        {% endif %}
         {% else %}
+        <span style="font-family:'Jost',sans-serif; font-size:0.85rem; color:white; margin-right: 15px;">Hello, Guest</span>
         <a href="{% url 'login' %}" class="btn-primary" style="text-decoration: none;">Login</a>
         <a href="{% url 'register' %}" class="btn-primary" style="text-decoration: none; margin-left:10px;">Register</a>
         {% endif %}
@@ -174,8 +197,8 @@
           <ul>
             <li><a href="{% url 'login' %}">Login</a></li>
             <li><a href="{% url 'register' %}">Register</a></li>
-            <li><a onclick="showToast('Cart feature coming soon!', '🛒')">My Cart</a></li>
-            <li><a onclick="showToast('Orders page coming soon!')">My Orders</a></li>
+            <li><a href="{% url 'cart_view' %}" style="text-decoration:none; color:inherit;">My Cart</a></li>
+            <li><a href="{% url 'my_orders' %}" style="text-decoration:none; color:inherit;">My Orders</a></li>
           </ul>
         </div>
         <div class="footer-col">

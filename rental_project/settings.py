@@ -63,6 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'store.context_processors.cart_count',
             ],
         },
     },
@@ -151,65 +152,130 @@ MESSAGE_TAGS = {
 
 # JAZZMIN SETTINGS
 JAZZMIN_SETTINGS = {
+    # ── Branding ────────────────────────────────────────────────────────────
     "site_title": "PRORENT Admin",
     "site_header": "PRORENT",
-    "site_brand": "PRORENT Admin",
+    "site_brand": "PRORENT",
     "site_logo": None,
-    "welcome_sign": "Welcome to the PRORENT Admin Panel",
-    "copyright": "PRORENT Ltd",
-    "search_model": ["auth.User", "store.Clothing"],
+    "site_logo_classes": "img-circle",
+    "site_icon": None,
+    "welcome_sign": "Welcome back to PRORENT Admin",
+    "copyright": "© 2025 PRORENT Ltd. All rights reserved.",
+
+    # ── Top Search ───────────────────────────────────────────────────────────
+    "search_model": ["auth.User", "store.Clothing", "store.RentalOrder"],
     "user_avatar": None,
+
+    # ── Top Menu Links ───────────────────────────────────────────────────────
     "topmenu_links": [
-        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "View Site", "url": "/", "new_window": True},
         {"model": "auth.User"},
+        {"model": "store.RentalOrder"},
         {"model": "store.Clothing"},
     ],
+
+    # ── User Menu (top-right dropdown) ───────────────────────────────────────
+    "usermenu_links": [
+        {"name": "View Site", "url": "/", "new_window": True, "icon": "fas fa-home"},
+    ],
+
+    # ── Sidebar ──────────────────────────────────────────────────────────────
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
     "hide_models": [],
-    "icons": {
-        "auth": "fas fa-users-cog",
-        "auth.user": "fas fa-user",
-        "auth.group": "fas fa-users",
-        "store.userprofile": "fas fa-user-circle",
-        "store.category": "fas fa-th-list",
-        "store.clothing": "fas fa-tshirt",
-        "store.booking": "fas fa-calendar-alt",
-        "store.payment": "fas fa-credit-card",
-        "store.review": "fas fa-star",
-        "store.useraddress": "fas fa-map-marker-alt",
-        "store.rentalorder": "fas fa-shopping-basket",
+
+    # Custom app ordering in sidebar
+    "order_with_respect_to": [
+        "auth",
+        "store",
+        "store.Clothing",
+        "store.Category",
+        "store.RentalOrder",
+        "store.RazorpayPayment",
+        "store.Booking",
+        "store.UserProfile",
+        "store.UserAddress",
+        "store.Review",
+        "store.Payment",
+    ],
+
+    # Custom links added to specific app groups
+    "custom_links": {
+        "store": [{
+            "name": "View Store",
+            "url": "/browse/",
+            "icon": "fas fa-store",
+            "new_window": True,
+        }],
     },
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-circle",
-    "related_modal_active": True,
-    "custom_js": None,
-    "show_ui_builder": False,
-    "changeform_format": "horizontal_tabs",
-    "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
+
+    # ── Icons ────────────────────────────────────────────────────────────────
+    "icons": {
+        "auth":                     "fas fa-shield-alt",
+        "auth.user":                "fas fa-user",
+        "auth.group":               "fas fa-users",
+        "store.userprofile":        "fas fa-id-card",
+        "store.category":           "fas fa-layer-group",
+        "store.clothing":           "fas fa-tshirt",
+        "store.booking":            "fas fa-calendar-check",
+        "store.payment":            "fas fa-credit-card",
+        "store.review":             "fas fa-star",
+        "store.useraddress":        "fas fa-map-marker-alt",
+        "store.rentalorder":        "fas fa-shopping-basket",
+        "store.razorpaypayment":    "fas fa-rupee-sign",
+        "store.cart":               "fas fa-shopping-cart",
+        "store.cartitem":           "fas fa-box",
+    },
+    "default_icon_parents":  "fas fa-caret-right",
+    "default_icon_children": "fas fa-circle-notch",
+
+    # ── Misc ─────────────────────────────────────────────────────────────────
+    "related_modal_active":         True,
+    "custom_css":                   None,
+    "custom_js":                    None,
+    "use_google_fonts_cdn":         True,
+    "show_ui_builder":              False,
+    "changeform_format":            "horizontal_tabs",
+    "changeform_format_overrides": {
+        "auth.user":  "collapsible",
+        "auth.group": "vertical_tabs",
+    },
+    "language_chooser": False,
 }
 
 JAZZMIN_UI_TWEAKS = {
-    "theme": "flatly",
-    "dark_mode_theme": None,
-    "navbar_fixed": True,
-    "sidebar_fixed": True,
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "navbar": "navbar-white navbar-light",
-    "no_navbar_border": False,
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-dark",
-    "accent": "accent-primary",
+    # ── Bootswatch Dark Theme ────────────────────────────────────────────────
+    "theme":              "darkly",      # Full dark Bootswatch theme
+    "default_theme_mode": "dark",        # Always start in dark mode
+
+    # ── Navbar ───────────────────────────────────────────────────────────────
+    "navbar":             "navbar-dark",
+    "navbar_fixed":        True,
+    "no_navbar_border":    True,
+    "navbar_small_text":   False,
+
+    # ── Brand ────────────────────────────────────────────────────────────────
+    "brand_colour":       "navbar-dark",
+    "brand_small_text":   False,
+
+    # ── Sidebar ──────────────────────────────────────────────────────────────
+    "sidebar":                    "sidebar-dark-warning",
+    "sidebar_fixed":               True,
+    "sidebar_nav_small_text":      False,
+    "sidebar_disable_expand":      False,
+    "sidebar_nav_child_indent":    True,
+    "sidebar_nav_compact_style":   True,
+    "sidebar_nav_legacy_style":    False,
+    "sidebar_nav_flat_style":      False,
+
+    # ── Accent / Buttons ─────────────────────────────────────────────────────
+    "accent":             "accent-warning",
+
+    # ── Body ─────────────────────────────────────────────────────────────────
+    "body_small_text":    False,
+    "footer_small_text":  False,
 }
 
 # ── Razorpay ──────────────────────────────────────────────────────────────────

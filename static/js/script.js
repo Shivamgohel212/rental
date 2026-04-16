@@ -46,16 +46,71 @@ function wishlist(btn) {
   }
 }
 
-// CART COUNTER (Placeholder for future cart system)
-function updateCartCount(count = 0) {
+// CART COUNTER
+function updateCartCount(count) {
   const cartCountEl = document.getElementById('cartCount');
-  if (cartCountEl) cartCountEl.textContent = count;
+  if (cartCountEl) {
+    cartCountEl.textContent = count;
+    // Add a small scale animation for feedback
+    cartCountEl.style.transform = 'scale(1.3)';
+    setTimeout(() => cartCountEl.style.transform = 'scale(1)', 200);
+  }
+}
+
+// AJAX ADD TO CART
+function initAddToCart() {
+  const form = document.getElementById('addToCartForm');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerText;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'adding...';
+
+    const formData = new FormData(form);
+    
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        updateCartCount(data.cart_count);
+        showToast(data.message || 'Added to bag');
+      } else {
+        showToast(data.error || 'Could not add item', '✕');
+      }
+    } catch (err) {
+      console.error('Cart Error:', err);
+      showToast('Connection error', '✕');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerText = originalText;
+    }
+  });
 }
 
 // INITIALIZATION
 document.addEventListener('DOMContentLoaded', () => {
-  // Update cart count if needed
-  updateCartCount(0);
+  // Initialize Add to Cart AJAX
+  initAddToCart();
   
-  // Initialize any other UI components
+  // Transition logic for navbar scroll
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    if (window.scrollY > 50) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  });
 });

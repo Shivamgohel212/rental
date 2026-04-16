@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .wallet-wrapper {
+        background-color: #fafafa;
+        min-height: 90vh;
+        padding: 60px 20px;
+        font-family: 'Outfit', 'Inter', sans-serif;
+    }
+
+    .wallet-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .dashboard-header {
+        margin-bottom: 40px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 30px;
+    }
+
+    .balance-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .balance-card::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: rgba(201, 162, 39, 0.1);
+        border-radius: 50%;
+    }
+
+    .balance-label {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #999;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .balance-amount {
+        font-size: 3.5rem;
+        font-weight: 800;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .currency { color: #c9a227; font-size: 2rem; margin-right: 5px; }
+
+    /* Action Cards */
+    .action-card {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-top: 30px;
+        border: 1px solid #f1f1f1;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+
+    .action-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .input-group label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #777;
+        text-transform: uppercase;
+    }
+
+    .input-group input {
+        padding: 15px;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .input-group input:focus { border-color: #c9a227; }
+
+    .btn-action {
+        width: 100%;
+        padding: 15px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-deposit { background: #c9a227; color: white; }
+    .btn-withdraw { background: transparent; border: 2px solid #222; color: #222; }
+
+    .btn-deposit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(201, 162, 39, 0.3); }
+    .btn-withdraw:hover { background: #222; color: white; }
+
+    /* Transaction Table */
+    .transactions-card {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        border: 1px solid #f1f1f1;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .history-table th {
+        text-align: left;
+        padding: 15px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: #999;
+        border-bottom: 2px solid #fafafa;
+    }
+
+    .history-table td {
+        padding: 20px 15px;
+        border-bottom: 1px solid #f9f9f9;
+        font-size: 0.95rem;
+    }
+
+    .badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .type-deposit { color: #28a745; }
+    .type-withdraw { color: #dc3545; }
+    .type-payment { color: #c9a227; }
+
+    .status-completed { background: #e8f5e9; color: #2e7d32; }
+    .status-pending { background: #fff3e0; color: #ef6c00; }
+    .status-failed { background: #ffebee; color: #c62828; }
+
+    .amount-positive { color: #28a745; font-weight: 700; }
+    .amount-negative { color: #1a1a1a; font-weight: 700; }
+
+    .transaction-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    .icon-deposit { background: #e8f5e9; color: #2e7d32; }
+    .icon-withdraw { background: #fff3e0; color: #ef6c00; }
+    .icon-payment { background: #f3e5f5; color: #7b1fa2; }
+    .icon-refund { background: #e3f2fd; color: #1976d2; }
+
+    .withdrawal-note {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 10px;
+        display: block;
+        line-height: 1.4;
+    }
+
+    @media (max-width: 900px) {
+        .dashboard-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<div class="wallet-wrapper">
+    <div class="wallet-container">
+        <div class="dashboard-header animate-fade-in">
+            <h1>My <span class="gold">Wallet</span></h1>
+            <p>Securely manage your funds and rental history.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Sidebar Actions -->
+            <div class="sidebar-actions">
+                <div class="balance-card animate-fade-in">
+                    <span class="balance-label">Available Balance</span>
+                    <span class="balance-amount"><span class="currency">₹</span>{{ wallet.balance|floatformat:0 }}</span>
+                    <p style="color: #666; font-size: 0.8rem; margin: 0;">Last updated: {{ wallet.created_at|date:"M d, Y" }}</p>
+                </div>
+
+                <div class="action-card animate-fade-in" style="animation-delay: 0.1s;">
+                    <span class="action-title">💰 Add Funds</span>
+                    <div class="input-group">
+                        <label for="deposit-amount">Amount to Add (₹)</label>
+                        <input type="number" id="deposit-amount" placeholder="Min ₹10" min="10">
+                        <button class="btn-action btn-deposit" id="btn-deposit">Add to Wallet</button>
+                    </div>
+                </div>
+
+                <div class="action-card animate-fade-in" style="animation-delay: 0.2s;">
+                    <span class="action-title">🏦 Withdraw Funds</span>
+                    <div class="input-group">
+                        <label for="withdraw-amount">Amount to Withdraw (₹)</label>
+                        <input type="number" id="withdraw-amount" placeholder="Min ₹100" min="100">
+                        <button class="btn-action btn-withdraw" id="btn-withdraw">Request Payout</button>
+                        <span class="withdrawal-note">
+                            ℹ️ Withdrawal requests are typically processed by our team within 24 hours.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="transactions-card animate-fade-in" style="animation-delay: 0.3s;">
+                <span class="action-title">📜 Transaction History</span>
+                <div style="overflow-x: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in transactions %}
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 15px;">
+                                        <div class="transaction-icon icon-{{ tx.transaction_type }}">
+                                            {% if tx.transaction_type == 'deposit' %}💸{% elif tx.transaction_type == 'withdraw' %}🏦{% elif tx.transaction_type == 'refund' %}↩{% else %}🛍️{% endif %}
+                                        </div>
+                                        <div>
+                                            <span style="display: block; font-weight: 700;">{{ tx.get_transaction_type_display }}</span>
+                                            <small style="color: #999;">{{ tx.created_at|date:"d M, Y" }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #444; font-size: 0.9rem;">{{ tx.description }}</span></td>
+                                <td class="amount-{% if tx.transaction_type == 'deposit' or tx.transaction_type == 'refund' %}positive{% else %}negative{% endif %}" style="font-size: 1.1rem;">
+                                    {% if tx.transaction_type == 'deposit' or tx.transaction_type == 'refund' %}+{% else %}-{% endif %}₹{{ tx.amount|floatformat:0 }}
+                                </td>
+                                <td>
+                                    <span class="badge status-{{ tx.status }}">{{ tx.status }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #999;">No transactions found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnDeposit = document.getElementById('btn-deposit');
+    const btnWithdraw = document.getElementById('btn-withdraw');
+
+    // ADD FUNDS
+    btnDeposit.addEventListener('click', async function() {
+        const amount = document.getElementById('deposit-amount').value;
+        if (!amount || amount < 10) {
+            alert('Please enter a valid amount (Min ₹10)');
+            return;
+        }
+
+        btnDeposit.disabled = true;
+        btnDeposit.innerText = 'Connecting...';
+
+        try {
+            const response = await fetch('{% url "add_funds" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ amount: amount })
+            });
+
+            const data = await response.json();
+            if (data.error) {
+                alert(data.error);
+                btnDeposit.disabled = false;
+                btnDeposit.innerText = 'Add to Wallet';
+                return;
+            }
+
+            const options = {
+                "key": data.key_id,
+                "amount": data.amount,
+                "currency": "INR",
+                "name": "PRORENT WALLET",
+                "description": "Funding your luxury experiences",
+                "order_id": data.order_id,
+                "handler": function (rzpResponse) {
+                    verifyDeposit(rzpResponse);
+                },
+                "modal": {
+                    "ondismiss": function() {
+                        btnDeposit.disabled = false;
+                        btnDeposit.innerText = 'Add to Wallet';
+                    }
+                },
+                "theme": { "color": "#c9a227" }
+            };
+            const rzp = new Razorpay(options);
+            rzp.open();
+
+        } catch (error) {
+            console.error('Error:', error);
+            btnDeposit.disabled = false;
+            btnDeposit.innerText = 'Add to Wallet';
+        }
+    });
+
+    async function verifyDeposit(rzpResponse) {
+        btnDeposit.innerText = 'Verifying...';
+        const response = await fetch('{% url "verify_wallet_payment" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                razorpay_order_id: rzpResponse.razorpay_order_id,
+                razorpay_signature: rzpResponse.razorpay_signature
+            })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert('Verification failed. Contact support.');
+            btnDeposit.disabled = false;
+            btnDeposit.innerText = 'Add to Wallet';
+        }
+    }
+
+    // WITHDRAW FUNDS
+    btnWithdraw.addEventListener('click', async function() {
+        const amount = document.getElementById('withdraw-amount').value;
+        if (!amount || amount < 100) {
+            alert('Please enter a valid amount (Min ₹100)');
+            return;
+        }
+
+        if(!confirm(`Are you sure you want to withdraw ₹${amount}?`)) return;
+
+        btnWithdraw.disabled = true;
+        btnWithdraw.innerText = 'Processing...';
+
+        try {
+            const response = await fetch('{% url "withdraw_funds" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ amount: amount })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.error || 'Withdrawal failed.');
+                btnWithdraw.disabled = false;
+                btnWithdraw.innerText = 'Withdraw';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            btnWithdraw.disabled = false;
+            btnWithdraw.innerText = 'Withdraw';
+        }
+    });
+});
+</script>
+{% endblock %}

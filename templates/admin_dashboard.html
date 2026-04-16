@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .admin-wrapper {
+        background-color: #f4f4f4;
+        min-height: 100vh;
+        padding: 40px 20px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+    .admin-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1a1a1a;
+    }
+
+    .card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Table Styles */
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .admin-table th {
+        text-align: left;
+        padding: 15px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #888;
+        border-bottom: 2px solid #f8f8f8;
+    }
+
+    .admin-table td {
+        padding: 20px 15px;
+        border-bottom: 1px solid #f8f8f8;
+        font-size: 0.9rem;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-confirmed { background: #e3f2fd; color: #1976d2; }
+    .status-shipped { background: #f3e5f5; color: #7b1fa2; }
+    .status-delivered { background: #e8f5e9; color: #2e7d32; }
+    .status-returned { background: #fff3e0; color: #ef6c00; }
+    .status-cancelled { background: #ffebee; color: #c62828; }
+
+    .btn-status {
+        padding: 8px 15px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-status:hover {
+        background: #1a1a1a;
+        color: white;
+        border-color: #1a1a1a;
+    }
+
+    .btn-approve {
+        background: #c9a227;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 0.8rem;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        background: #eee;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.7rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-wrapper">
+    <div class="admin-container">
+        <div class="header-flex">
+            <h1 class="admin-title">Owner <span class="gold">Dashboard</span></h1>
+            <div class="stats-pills" style="display: flex; gap: 15px;">
+                <div class="card" style="padding: 15px 25px; margin: 0;">
+                    <span style="font-size: 0.7rem; display: block; color: #999;">PENDING REFUNDS</span>
+                    <span style="font-weight: 800; font-size: 1.2rem;">{{ orders.count }} Orders</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Management -->
+        <div class="card">
+            <h2 class="section-title">📦 Active Rental Management</h2>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Rental Period</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr id="order-row-{{ order.id }}">
+                            <td>#{{ order.id }}</td>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">{{ order.user.username|slice:":1"|upper }}</div>
+                                    <span>{{ order.user.get_full_name|default:order.user.username }}</span>
+                                </div>
+                            </td>
+                            <td><strong>{{ order.product.title }}</strong><br><small>{{ order.size }}</small></td>
+                            <td>{{ order.start_date|date:"d M" }} - {{ order.end_date|date:"d M" }}</td>
+                            <td>
+                                <span class="status-badge status-{{ order.status }}" id="badge-{{ order.id }}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 5px;">
+                                    {% if order.status == 'confirmed' %}
+                                        <button class="btn-status" onclick="updateStatus({{ order.id }}, 'shipped')">Ship</button>
+                                    {% elif order.status == 'shipped' %}
+                                        <button class="btn-status" onclick="updateStatus({{ order.id }}, 'delivered')">Deliver</button>
+                                    {% elif order.status == 'delivered' %}
+                                        <button class="btn-status" onclick="updateStatus({{ order.id }}, 'returned')">Process Return</button>
+                                    {% elif order.status == 'returned' %}
+                                        <span style="color: #28a745; font-size: 0.8rem; font-weight: 700;">✓ Refunded</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Withdrawal Approvals -->
+        <div class="card">
+            <h2 class="section-title">💸 Withdrawal Requests</h2>
+            {% if pending_withdrawals %}
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Requested Amount</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tx in pending_withdrawals %}
+                        <tr>
+                            <td>{{ tx.wallet.user.username }}</td>
+                            <td class="gold" style="font-weight: 800;">₹{{ tx.amount }}</td>
+                            <td>{{ tx.created_at|date:"d M, Y" }}</td>
+                            <td>
+                                <a href="{% url 'approve_withdrawal' tx.id %}" class="btn-approve">Approve Payout</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: #999; padding: 20px;">No pending withdrawal requests.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+async function updateStatus(orderId, status) {
+    if (status === 'returned') {
+        if (!confirm('Marking this as returned will AUTO-REFUND the security deposit to the user wallet. Proceed?')) {
+            return;
+        }
+    }
+
+    try {
+        const response = await fetch(`/manage/order/${orderId}/status/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ status: status })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || 'Update failed.');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Network error.');
+    }
+}
+</script>
+{% endblock %}

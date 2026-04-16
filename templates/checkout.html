@@ -1,0 +1,587 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<div class="checkout-premium-wrapper">
+    <div class="checkout-container">
+        <!-- HEADER -->
+        <div class="checkout-header">
+            <h1>Secure <span class="gold">Checkout</span></h1>
+            <p>Finalize your selection and prepare for elegance.</p>
+        </div>
+
+        <div class="checkout-layout">
+            <!-- LEFT: DELIVERY & PAYMENT -->
+            <div class="checkout-main">
+                <!-- SEGMENT 1: DELIVERY -->
+                <div class="checkout-section rounded-card shadow-sm">
+                    <div class="section-icon-header">
+                        <span class="section-icon">📍</span>
+                        <h2>Delivery Destination</h2>
+                    </div>
+                    <form id="checkout-form" class="checkout-form-grid">
+                        {% csrf_token %}
+                        <div class="form-group full-width">
+                            <label for="full_name">Full Name</label>
+                            <input type="text" id="full_name" name="full_name" placeholder="E.g. Shivam Gohel" 
+                                   value="{{ last_address.full_name|default:user.get_full_name|default:user.username }}" required>
+                        </div>
+                        <div class="form-group split">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+91 00000 00000" 
+                                   value="{{ last_address.phone_number }}" required>
+                        </div>
+                        <div class="form-group split">
+                            <label for="pincode">Pincode</label>
+                            <input type="text" id="pincode" name="pincode" placeholder="000 000" 
+                                   value="{{ last_address.pincode }}" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" rows="3" placeholder="Enter your full address" required>{{ last_address.address_line }}</textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" placeholder="E.g. Mumbai" 
+                                   value="{{ last_address.city }}" required>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- SEGMENT 2: PAYMENT -->
+                <div class="checkout-section rounded-card shadow-sm mt-4">
+                    <div class="section-icon-header">
+                        <span class="section-icon">💳</span>
+                        <h2>Payment Experience</h2>
+                    </div>
+                    <div class="payment-options">
+                        <label class="payment-option-card">
+                            <input type="radio" name="payment_method" value="wallet" checked>
+                            <div class="option-content">
+                                <span class="option-icon">👛</span>
+                                <div class="option-text">
+                                    <span class="option-title">Wallet Balance</span>
+                                    <span class="option-sub">Current Balance: ₹{{ user.wallet.balance|floatformat:2 }}</span>
+                                </div>
+                                <span class="select-indicator"></span>
+                            </div>
+                        </label>
+                        <label class="payment-option-card">
+                            <input type="radio" name="payment_method" value="razorpay">
+                            <div class="option-content">
+                                <span class="option-icon">✨</span>
+                                <div class="option-text">
+                                    <span class="option-title">Online Payment</span>
+                                    <span class="option-sub">Razorpay, Cards, UPI & Netbanking</span>
+                                </div>
+                                <span class="select-indicator"></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: SUMMARY & PRICING -->
+            <div class="checkout-sidebar">
+                <div class="summary-card sticky-sidebar rounded-card shadow-sm">
+                    <h2 class="sidebar-title">Rental Summary</h2>
+                    
+                    <div class="summary-items-list">
+                        {% for item in items %}
+                        <div class="summary-item">
+                            <div class="summary-item-img">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}">
+                            </div>
+                            <div class="summary-item-info">
+                                <h4 class="summary-item-title">{{ item.product.title }}</h4>
+                                <p class="summary-item-dates">{{ item.start_date|date:"M d" }} — {{ item.get_end_date|date:"M d" }}</p>
+                                <div class="summary-item-meta">
+                                    <span>Size: {{ item.size }}</span>
+                                    <span class="summary-item-price">₹{{ item.get_total_price|floatformat:0 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="price-breakdown-box">
+                        <div class="price-row">
+                            <span>Subtotal</span>
+                            <span>₹{{ subtotal|floatformat:0 }}</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Security Deposit</span>
+                            <span>₹{{ deposit_total|floatformat:0 }}</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Delivery</span>
+                            <span class="free-tag">FREE</span>
+                        </div>
+                        <div class="price-row grand-total">
+                            <span>Grand Total</span>
+                            <span>₹{{ total|floatformat:0 }}</span>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btn-place-order" class="btn-select-payment">
+                        CONFIRM & PAY
+                        <span class="btn-arrow">→</span>
+                    </button>
+                    
+                    <div class="security-note">
+                        <span class="lock-icon">🔒</span>
+                        Secure SSL Encrypted Checkout
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnPlaceOrder = document.getElementById('btn-place-order');
+    const checkoutForm = document.getElementById('checkout-form');
+
+    btnPlaceOrder.addEventListener('click', function() {
+        // Basic Validation
+        const fullName = document.getElementById('full_name').value;
+        const phone = document.getElementById('phone').value;
+        const address = document.getElementById('address').value;
+        const city = document.getElementById('city').value;
+        const pincode = document.getElementById('pincode').value;
+
+        if (!fullName || !phone || !address || !city || !pincode) {
+            alert('Please fill in all delivery details.');
+            return;
+        }
+
+        const addressData = {
+            full_name: fullName,
+            phone: phone,
+            address: address,
+            city: city,
+            pincode: pincode
+        };
+
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+        if (paymentMethod === 'wallet') {
+            handleWalletPayment(addressData);
+        } else {
+            handleRazorpayPayment(addressData);
+        }
+    });
+
+    async function handleWalletPayment(addressData) {
+        btnPlaceOrder.disabled = true;
+        btnPlaceOrder.innerText = 'Processing...';
+
+        try {
+            const response = await fetch('{% url "checkout_wallet_payment" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ address: addressData })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert(data.error || 'Wallet payment failed.');
+                btnPlaceOrder.disabled = false;
+                btnPlaceOrder.innerText = 'CONFIRM & PAY';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Something went wrong. Please try again.');
+            btnPlaceOrder.disabled = false;
+            btnPlaceOrder.innerText = 'CONFIRM & PAY';
+        }
+    }
+
+    async function handleRazorpayPayment(addressData) {
+        btnPlaceOrder.disabled = true;
+        btnPlaceOrder.innerText = 'Connecting...';
+
+        try {
+            // 1. Create Order on Backend
+            const response = await fetch('{% url "checkout_create_razorpay_order" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+
+            const orderData = await response.json();
+            if (orderData.error) {
+                alert(orderData.error);
+                btnPlaceOrder.disabled = false;
+                btnPlaceOrder.innerText = 'CONFIRM & PAY';
+                return;
+            }
+
+            // 2. Open Razorpay Popup
+            const options = {
+                "key": orderData.key_id,
+                "amount": orderData.amount,
+                "currency": orderData.currency,
+                "name": "PRORENT",
+                "description": "Premium Clothing Rental",
+                "order_id": orderData.order_id,
+                "handler": function (response) {
+                    verifyPayment(response, addressData);
+                },
+                "prefill": {
+                    "name": addressData.full_name,
+                    "contact": addressData.phone
+                },
+                "theme": {
+                    "color": "#c5a059"
+                },
+                "modal": {
+                    "ondismiss": function() {
+                        btnPlaceOrder.disabled = false;
+                        btnPlaceOrder.innerText = 'CONFIRM & PAY';
+                    }
+                }
+            };
+            const rzp = new Razorpay(options);
+            rzp.open();
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Could not initiate Razorpay. Please try again.');
+            btnPlaceOrder.disabled = false;
+            btnPlaceOrder.innerText = 'CONFIRM & PAY';
+        }
+    }
+
+    async function verifyPayment(rzpResponse, addressData) {
+        btnPlaceOrder.innerText = 'Verifying...';
+        try {
+            const response = await fetch('{% url "checkout_verify_payment" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                    razorpay_order_id: rzpResponse.razorpay_order_id,
+                    razorpay_signature: rzpResponse.razorpay_signature,
+                    address: addressData
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = result.redirect_url;
+            } else {
+                alert(result.error || 'Verification failed.');
+                btnPlaceOrder.disabled = false;
+                btnPlaceOrder.innerText = 'CONFIRM & PAY';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Verification failed. Please contact support.');
+            btnPlaceOrder.disabled = false;
+            btnPlaceOrder.innerText = 'CONFIRM & PAY';
+        }
+    }
+});
+</script>
+
+<style>
+    /* Premium Checkout Styles */
+    .checkout-premium-wrapper {
+        background-color: #fcfcfc;
+        min-height: 100vh;
+        padding: 40px 20px;
+        color: #222;
+        font-family: 'Outfit', 'Inter', sans-serif;
+    }
+
+    .checkout-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .checkout-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+    }
+
+    .gold { color: #c5a059; }
+    .mt-4 { margin-top: 1.5rem; }
+
+    .checkout-layout {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 30px;
+        align-items: start;
+    }
+
+    .rounded-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .checkout-section {
+        padding: 30px;
+    }
+
+    .section-icon-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 15px;
+    }
+
+    .section-icon {
+        font-size: 1.5rem;
+    }
+
+    .section-icon-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .checkout-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group.full-width { grid-column: span 2; }
+    
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-group input, .form-group textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+        outline: none;
+        border-color: #c5a059;
+    }
+
+    /* Payment Options */
+    .payment-options {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .payment-option-card {
+        cursor: pointer;
+        position: relative;
+    }
+
+    .payment-option-card input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .option-content {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        transition: all 0.2s;
+        gap: 15px;
+    }
+
+    .payment-option-card input:checked + .option-content {
+        border-color: #c5a059;
+        background-color: #fffaf0;
+        box-shadow: 0 4px 12px rgba(197, 160, 89, 0.1);
+    }
+
+    .option-icon { font-size: 1.5rem; }
+    .option-text { flex-grow: 1; }
+    .option-title { display: block; font-weight: 700; font-size: 1rem; }
+    .option-sub { display: block; font-size: 0.8rem; color: #777; }
+
+    .select-indicator {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 50%;
+        position: relative;
+    }
+
+    .payment-option-card input:checked + .option-content .select-indicator {
+        border-color: #c5a059;
+        background: #c5a059;
+    }
+
+    .payment-option-card input:checked + .option-content .select-indicator::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 6px;
+        height: 6px;
+        background: #fff;
+        border-radius: 50%;
+    }
+
+    /* Sidebar Summary */
+    .sticky-sidebar {
+        position: sticky;
+        top: 100px;
+        padding: 25px;
+    }
+
+    .sidebar-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .summary-items-list {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 25px;
+        padding-right: 5px;
+    }
+
+    .summary-items-list::-webkit-scrollbar { width: 4px; }
+    .summary-items-list::-webkit-scrollbar-thumb { background: #eee; border-radius: 10px; }
+
+    .summary-item {
+        display: flex;
+        gap: 15px;
+        padding: 15px 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .summary-item-img {
+        width: 70px;
+        height: 85px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .summary-item-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .summary-item-info { flex-grow: 1; }
+    .summary-item-title { font-size: 0.95rem; font-weight: 600; margin: 0 0 4px 0; }
+    .summary-item-dates { font-size: 0.8rem; color: #888; margin: 0 0 8px 0; }
+    .summary-item-meta { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; }
+    .summary-item-price { color: #c5a059; }
+
+    .price-breakdown-box {
+        background: #fdfdfd;
+        padding: 20px 0;
+        margin-bottom: 25px;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .free-tag { color: #28a745; font-weight: 700; }
+    
+    .price-row.grand-total {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px dashed #eee;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #222;
+    }
+
+    .btn-select-payment {
+        width: 100%;
+        background: #222;
+        color: #fff;
+        border: none;
+        padding: 18px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s;
+    }
+
+    .btn-select-payment:hover {
+        background: #c5a059;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(197, 160, 89, 0.3);
+    }
+
+    .security-note {
+        text-align: center;
+        font-size: 0.75rem;
+        color: #999;
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    @media (max-width: 900px) {
+        .checkout-layout {
+            grid-template-columns: 1fr;
+        }
+        .checkout-sidebar {
+            order: -1;
+        }
+    }
+</style>
+{% endblock %}

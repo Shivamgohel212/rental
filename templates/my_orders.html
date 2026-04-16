@@ -5,167 +5,705 @@
 
 {% block extra_css %}
 <style>
-    .orders-container {
-        max-width: 1000px;
-        margin: 4rem auto;
-        padding: 0 2rem;
+  /* ── Google Fonts ───────────────────────────────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Jost:wght@300;400;500;600&display=swap');
+
+  /* ── Scoped to .prd (Premium Rental Dashboard) ─────────────────────────── */
+
+  .prd {
+    max-width: 1080px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+    font-family: 'Jost', sans-serif;
+  }
+
+  /* ── Page Header ─────────────────────────────────────────────────────────── */
+  .prd-header {
+    text-align: center;
+    padding: 3rem 0 4rem;
+    position: relative;
+  }
+
+  .prd-header::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, #c9a227, #f0d060);
+    margin: 1.2rem auto 0;
+    border-radius: 2px;
+  }
+
+  .prd-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+
+  .prd-header p {
+    font-size: 0.95rem;
+    color: #888;
+    letter-spacing: 0.05em;
+    font-weight: 300;
+  }
+
+  /* ── Cards ───────────────────────────────────────────────────────────────── */
+  .prd-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .prd-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07), 0 1px 4px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    border: 1px solid #f0ece4;
+  }
+
+  .prd-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+  }
+
+  /* ── Card Header ─────────────────────────────────────────────────────────── */
+  .prd-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1.1rem 2rem;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+    color: white;
+  }
+
+  .prd-order-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .prd-order-id {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #f0d060;
+    letter-spacing: 0.05em;
+  }
+
+  .prd-order-date {
+    font-size: 0.82rem;
+    color: #b0b0b0;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+
+  /* Status Badges */
+  .prd-badge {
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .prd-badge-confirmed {
+    background: rgba(46, 125, 50, 0.2);
+    color: #66bb6a;
+    border: 1px solid rgba(46, 125, 50, 0.4);
+  }
+
+  .prd-badge-cancelled {
+    background: rgba(198, 40, 40, 0.2);
+    color: #ef9a9a;
+    border: 1px solid rgba(198, 40, 40, 0.4);
+  }
+
+  .prd-badge-pending {
+    background: rgba(245, 127, 23, 0.2);
+    color: #ffcc80;
+    border: 1px solid rgba(245, 127, 23, 0.4);
+  }
+
+  /* ── Card Body ───────────────────────────────────────────────────────────── */
+  .prd-card-body {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 0;
+  }
+
+  /* Product Image */
+  .prd-img-wrap {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #faf9f5;
+    border-right: 1px solid #f0ece4;
+  }
+
+  .prd-img-wrap img {
+    width: 160px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+
+  /* Product Details */
+  .prd-details {
+    padding: 1.8rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .prd-product-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .prd-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.8rem;
+    margin-top: 0.3rem;
+  }
+
+  .prd-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .prd-info-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #c9a227;
+    font-weight: 600;
+  }
+
+  .prd-info-value {
+    font-size: 0.92rem;
+    color: #333;
+    font-weight: 400;
+  }
+
+  /* ── Tracking Progress Bar ───────────────────────────────────────────────── */
+  .prd-tracking-wrap {
+    padding: 1.5rem 2rem 0;
+    border-top: 1px solid #f0ece4;
+    margin-top: auto;
+  }
+
+  .prd-tracking-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #999;
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+
+  .prd-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .prd-progress-line {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e8e4da;
+    z-index: 0;
+  }
+
+  .prd-progress-fill {
+    height: 2px;
+    background: linear-gradient(90deg, #c9a227, #f0d060);
+    transition: width 0.6s ease;
+  }
+
+  .prd-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    position: relative;
+    z-index: 1;
+    min-width: 60px;
+  }
+
+  .prd-step-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #e0d9cc;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  .prd-step-label {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #bbb;
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  /* Active step */
+  .prd-step.active .prd-step-dot {
+    border-color: #c9a227;
+    background: linear-gradient(135deg, #c9a227, #f0d060);
+    box-shadow: 0 0 0 6px rgba(201, 162, 39, 0.15), 0 4px 12px rgba(201, 162, 39, 0.4);
+  }
+
+  .prd-step.active .prd-step-label {
+    color: #c9a227;
+    font-weight: 600;
+  }
+
+  /* Completed step */
+  .prd-step.completed .prd-step-dot {
+    border-color: #c9a227;
+    background: #c9a227;
+  }
+
+  .prd-step.completed .prd-step-label {
+    color: #888;
+  }
+
+  /* ── Cancelled Alert ─────────────────────────────────────────────────────── */
+  .prd-cancel-alert {
+    margin: 1.2rem 2rem;
+    padding: 1rem 1.5rem;
+    background: #fff5f5;
+    border: 1px solid #fca5a5;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.88rem;
+    color: #b91c1c;
+    font-weight: 500;
+  }
+
+  .prd-cancel-alert-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Card Footer ─────────────────────────────────────────────────────────── */
+  .prd-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1.2rem 2rem;
+    border-top: 1px solid #f0ece4;
+    background: #faf9f5;
+    margin-top: 1.5rem;
+  }
+
+  .prd-total-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #999;
+    font-weight: 500;
+  }
+
+  .prd-total-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1;
+  }
+
+  .prd-footer-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .prd-btn {
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: none;
+  }
+
+  .prd-btn-invoice {
+    background: #1a1a1a;
+    color: #fff;
+  }
+
+  .prd-btn-invoice:hover {
+    background: #2c2c2c;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .prd-btn-cancel {
+    background: transparent;
+    color: #ef4444;
+    border: 1.5px solid #ef4444;
+  }
+
+  .prd-btn-cancel:hover {
+    background: #ef4444;
+    color: #fff;
+  }
+
+  /* ── Empty State ─────────────────────────────────────────────────────────── */
+  .prd-empty {
+    text-align: center;
+    padding: 6rem 0;
+  }
+
+  .prd-empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  .prd-empty h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    color: #1a1a1a;
+    margin-bottom: 0.75rem;
+  }
+
+  .prd-empty p {
+    color: #999;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+
+  .prd-empty-btn {
+    display: inline-block;
+    padding: 0.9rem 2.4rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #c9a227, #f0d060);
+    color: #1a1a1a;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(201, 162, 39, 0.4);
+  }
+
+  .prd-empty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(201, 162, 39, 0.5);
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .prd-card-body {
+      grid-template-columns: 1fr;
     }
 
-    .orders-header {
-        text-align: center;
-        margin-bottom: 4rem;
+    .prd-img-wrap {
+      border-right: none;
+      border-bottom: 1px solid #f0ece4;
+      padding: 1.5rem;
     }
 
-    .orders-header h1 {
-        font-size: 3rem;
-        margin-bottom: 1rem;
+    .prd-img-wrap img {
+      width: 100%;
+      max-width: 280px;
+      height: 240px;
     }
 
-    .orders-list {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
+    .prd-card-header {
+      padding: 1rem 1.25rem;
     }
 
-    .order-card {
-        background: white;
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        overflow: hidden;
-        display: grid;
-        grid-template-columns: 200px 1fr 250px;
-        transition: transform var(--transition);
+    .prd-details {
+      padding: 1.4rem 1.25rem;
     }
 
-    .order-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow);
+    .prd-tracking-wrap {
+      padding: 1.2rem 1.25rem 0;
     }
 
-    .order-img {
-        width: 100%;
-        height: 250px;
-        object-fit: cover;
-        background: var(--cream);
+    .prd-card-footer {
+      padding: 1.1rem 1.25rem;
+      flex-direction: column;
+      align-items: flex-start;
     }
 
-    .order-body {
-        padding: 2rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+    .prd-footer-actions {
+      width: 100%;
     }
 
-    .order-cat {
-        font-size: 0.7rem;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        color: var(--gold);
-        margin-bottom: 0.5rem;
+    .prd-btn {
+      flex: 1;
+      justify-content: center;
     }
 
-    .order-title {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
+    .prd-cancel-alert {
+      margin: 1rem 1.25rem;
     }
 
-    .order-meta {
-        font-size: 0.85rem;
-        color: var(--muted);
-        display: flex;
-        gap: 1.5rem;
+    .prd-step-label {
+      font-size: 0.55rem;
     }
 
-    .order-sidebar {
-        padding: 2rem;
-        background: var(--warm-white);
-        border-left: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-end;
+    .prd-progress {
+      gap: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .prd-order-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
     }
 
-    .order-status {
-        font-size: 0.75rem;
-        padding: 0.4rem 1rem;
-        border-radius: 20px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-bottom: 1.5rem;
+    .prd-info-grid {
+      grid-template-columns: 1fr 1fr;
     }
 
-    .status-confirmed { background: #e8f5e9; color: #2e7d32; }
-    .status-pending { background: #fff3e0; color: #ef6c00; }
-    .status-cancelled { background: #ffebee; color: #c62828; }
-
-    .order-total {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 1.8rem;
-        color: var(--charcoal);
-        margin-bottom: 1.5rem;
+    .prd-step-dot {
+      width: 28px;
+      height: 28px;
+      font-size: 0.75rem;
     }
 
-    .view-btn {
-        font-size: 0.75rem;
-        padding: 0.6rem 1.5rem;
+    .prd-progress-line {
+      top: 14px;
     }
-
-    .empty-orders {
-        text-align: center;
-        padding: 5rem 0;
-    }
-
-    @media (max-width: 800px) {
-        .order-card {
-            grid-template-columns: 1fr;
-        }
-        .order-img {
-            height: 300px;
-        }
-        .order-sidebar {
-            border-left: none;
-            border-top: 1px solid var(--border);
-            align-items: flex-start;
-        }
-    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="orders-container">
-    <div class="orders-header">
-        <h1>My Rental History</h1>
-        <p style="color: var(--muted);">Track your luxury reservations and past styles.</p>
-    </div>
+<div class="prd">
 
-    <div class="orders-list">
-        {% for order in orders %}
-            <div class="order-card">
-                <img src="{{ order.product.image.url }}" alt="{{ order.product.title }}" class="order-img">
-                <div class="order-body">
-                    <span class="order-cat">{{ order.product.category.name }}</span>
-                    <h3 class="order-title">{{ order.product.title }}</h3>
-                    <div class="order-meta">
-                        <span>📅 {{ order.order_date|date:"M d, Y" }}</span>
-                        <span>⏳ {{ order.rental_days }} Day{{ order.rental_days|pluralize }}</span>
-                    </div>
-                    <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--muted);">Rental Period Rate: ₹{{ order.price_per_day }}/day</p>
-                </div>
-                <div class="order-sidebar">
-                    <div class="order-status status-{{ order.status|lower }}">{{ order.status }}</div>
-                    <div class="order-total">₹{{ order.total_amount }}</div>
-                    <a href="{% url 'order_success' order.id %}" class="btn-outline view-btn">View Receipt</a>
-                </div>
+  <!-- Page Header -->
+  <div class="prd-header">
+    <h1>My Rental History</h1>
+    <p>Track your luxury reservations and past styles.</p>
+  </div>
+
+  <div class="prd-list">
+    {% for order in orders %}
+
+      <!-- ── Determine tracking step classes ── -->
+      {% with ts=order.tracking_status %}
+      <div class="prd-card">
+
+        <!-- ── Header ── -->
+        <div class="prd-card-header">
+          <div class="prd-order-meta">
+            <span class="prd-order-id">#{{ order.id }}</span>
+            <span class="prd-order-date">Ordered on {{ order.order_date|date:"D, d M Y" }}</span>
+          </div>
+          {% if order.status == 'confirmed' %}
+            <span class="prd-badge prd-badge-confirmed">✓ Confirmed</span>
+          {% elif order.status == 'shipped' %}
+            <span class="prd-badge prd-badge-shipped" style="background: #f3e5f5; color: #7b1fa2;">📦 Shipped</span>
+          {% elif order.status == 'delivered' %}
+            <span class="prd-badge prd-badge-delivered" style="background: #e8f5e9; color: #2e7d32;">🏠 Delivered</span>
+          {% elif order.status == 'returned' %}
+            <span class="prd-badge prd-badge-returned" style="background: #fff3e0; color: #ef6c00;">↩ Returned</span>
+          {% elif order.status == 'cancelled' %}
+            <span class="prd-badge prd-badge-cancelled">✕ Cancelled</span>
+          {% else %}
+            <span class="prd-badge prd-badge-pending">⏳ Pending</span>
+          {% endif %}
+        </div>
+
+        <!-- ── Body ── -->
+        <div class="prd-card-body">
+          <!-- Product Image -->
+          <div class="prd-img-wrap">
+            {% if order.product.image %}
+              <img src="{{ order.product.image.url }}" alt="{{ order.product.title }}">
+            {% else %}
+              <img src="{% static 'images/placeholder.jpg' %}" alt="No Image">
+            {% endif %}
+          </div>
+
+          <!-- Details + Tracking -->
+          <div class="prd-details">
+            <h2 class="prd-product-name">{{ order.product.title }}</h2>
+
+            <div class="prd-info-grid">
+              <div class="prd-info-item">
+                <span class="prd-info-label">Rental Period</span>
+                <span class="prd-info-value">{{ order.start_date|date:"d M" }} → {{ order.end_date|date:"d M Y" }}</span>
+              </div>
+              <div class="prd-info-item">
+                <span class="prd-info-label">Duration</span>
+                <span class="prd-info-value">{{ order.rental_days }} Day{% if order.rental_days != 1 %}s{% endif %}</span>
+              </div>
+              <div class="prd-info-item">
+                <span class="prd-info-label">Size</span>
+                <span class="prd-info-value">{{ order.size|default:"—" }}</span>
+              </div>
+              <div class="prd-info-item">
+                <span class="prd-info-label">Payment Method</span>
+                <span class="prd-info-value">{{ order.get_payment_method_display }}</span>
+              </div>
             </div>
-        {% empty %}
-            <div class="empty-orders">
-                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🧥</div>
-                <h3>No Orders Yet</h3>
-                <p style="color: var(--muted); margin-bottom: 2rem;">Your luxury journey starts with your first rental.</p>
-                <a href="{% url 'browse' %}" class="btn-primary">Browse Collection</a>
+
+            <!-- Tracking Bar -->
+            {% if order.status != 'cancelled' %}
+            <div class="prd-tracking-wrap">
+              <p class="prd-tracking-title">Order Lifecycle</p>
+              <div class="prd-progress" id="progress-{{ order.id }}">
+                {% with status=order.status %}
+                <div class="prd-progress-line">
+                  <div class="prd-progress-fill" style="width: {% if status == 'shipped' %}33%{% elif status == 'delivered' %}66%{% elif status == 'returned' %}100%{% else %}0%{% endif %}%"></div>
+                </div>
+
+                <!-- Step 1: Confirmed -->
+                <div class="prd-step completed">
+                  <div class="prd-step-dot">✓</div>
+                  <span class="prd-step-label">Ordered</span>
+                </div>
+
+                <!-- Step 2: Shipped -->
+                <div class="prd-step {% if status == 'shipped' %}active{% elif status == 'delivered' or status == 'returned' %}completed{% endif %}">
+                  <div class="prd-step-dot">{% if status == 'delivered' or status == 'returned' %}✓{% else %}🚚{% endif %}</div>
+                  <span class="prd-step-label">Shipped</span>
+                </div>
+
+                <!-- Step 3: Delivered -->
+                <div class="prd-step {% if status == 'delivered' %}active{% elif status == 'returned' %}completed{% endif %}">
+                  <div class="prd-step-dot">{% if status == 'returned' %}✓{% else %}🏠{% endif %}</div>
+                  <span class="prd-step-label">Delivered</span>
+                </div>
+
+                <!-- Step 4: Returned -->
+                <div class="prd-step {% if status == 'returned' %}active completed{% endif %}">
+                  <div class="prd-step-dot">{% if status == 'returned' %}✓{% else %}↩{% endif %}</div>
+                  <span class="prd-step-label">Returned</span>
+                </div>
+                {% endwith %}
+              </div>
             </div>
-        {% endfor %}
-    </div>
-</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- ── Cancelled Alert ── -->
+        {% if order.status == 'cancelled' %}
+        <div class="prd-cancel-alert">
+          <span class="prd-cancel-alert-icon">⚠️</span>
+          <span>This order was cancelled. The amount has been credited back to your wallet.</span>
+        </div>
+        {% endif %}
+
+        <!-- ── Footer ── -->
+        <div class="prd-card-footer">
+          <div>
+            <div class="prd-total-label">Total Transaction</div>
+            <div class="prd-total-amount">₹{{ order.total_amount }}</div>
+          </div>
+          <div class="prd-footer-actions">
+            <a href="{% url 'order_success' order.id %}" class="prd-btn prd-btn-invoice" title="View Tax Invoice">
+              🧾 Tax Invoice
+            </a>
+            {% if order.status == 'confirmed' and ts < 3 %}
+              <button type="button" class="prd-btn prd-btn-cancel"
+                onclick="confirmCancel({{ order.id }})" title="Cancel Order">
+                ✕ Cancel Order
+              </button>
+            {% endif %}
+          </div>
+        </div>
+
+      </div><!-- end .prd-card -->
+      {% endwith %}
+
+    {% empty %}
+      <div class="prd-empty">
+        <span class="prd-empty-icon">🧥</span>
+        <h3>No Orders Yet</h3>
+        <p>Your luxury journey starts with your first rental.</p>
+        <a href="{% url 'browse' %}" class="prd-empty-btn">Browse Collection</a>
+      </div>
+    {% endfor %}
+  </div>
+</div><!-- end .prd -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  async function confirmCancel(orderId) {
+    if (!confirm('Are you sure you want to cancel this order? The amount will be refunded to your wallet.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/order/${orderId}/cancel/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        if (typeof showToast === 'function') {
+          showToast('Order cancelled successfully!', '✓');
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          alert('Order cancelled and refund processed.');
+          window.location.reload();
+        }
+      } else {
+        alert(data.error || 'Cancellation failed.');
+      }
+    } catch (error) {
+      console.error('Cancellation Error:', error);
+      alert('An error occurred. Please try again.');
+    }
+  }
+</script>
 {% endblock %}
