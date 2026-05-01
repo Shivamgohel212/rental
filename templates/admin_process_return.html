@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Return | Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-return-wrap {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 20px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .grid-admin {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 30px;
+    }
+
+    .card-admin {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+    }
+
+    .header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .badge-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .p-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f8f8f8;
+    }
+
+    .p-row label { color: #888; font-size: 0.9rem; }
+    .p-row span { font-weight: 600; color: #1a1a1a; }
+
+    .action-section {
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 1px solid #eee;
+    }
+
+    .btn-admin {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+        margin-bottom: 10px;
+        border: none;
+        transition: 0.2s;
+    }
+
+    .btn-primary-admin { background: #1a1a1a; color: white; }
+    .btn-danger-admin { background: #ffebee; color: #c62828; }
+    .btn-success-admin { background: #c9a227; color: white; }
+
+    .input-admin {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+    }
+
+    .damage-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .damage-option {
+        flex: 1;
+        text-align: center;
+        padding: 15px;
+        border: 2px solid #eee;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .damage-option.active {
+        border-color: #c9a227;
+        background: #fcf9f0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-return-wrap">
+    <div class="header-info">
+        <h1>Process Return <span class="gold">#{{ return_req.id }}</span></h1>
+        <a href="{% url 'admin_dashboard' %}" style="text-decoration: none; color: #888;">← Back to Dashboard</a>
+    </div>
+
+    <div class="grid-admin">
+        <div class="card-admin">
+            <h3>Order Details</h3>
+            <div class="p-row"><label>Customer</label><span>{{ order.user.username }}</span></div>
+            <div class="p-row"><label>Product</label><span>{{ order.product.title }}</span></div>
+            <div class="p-row"><label>Size</label><span>{{ order.size }}</span></div>
+            <div class="p-row"><label>Rental End Date</label><span>{{ order.end_date|date:"d M Y" }}</span></div>
+            <div class="p-row"><label>Total Paid Amount</label><span>₹{{ order.total_amount }}</span></div>
+            <div class="p-row">
+                <label>Current Status</label>
+                <span class="badge-status" style="background:#eee;">{{ order.get_status_display }}</span>
+            </div>
+
+            <div class="action-section">
+                <h3>Return Logistics</h3>
+                <div class="p-row"><label>Return Method</label><span>{{ return_req.get_return_method_display }}</span></div>
+                <div class="p-row"><label>Request Date</label><span>{{ return_req.created_at|date:"d M, H:i" }}</span></div>
+                
+                <form method="POST" style="margin-top: 20px;">
+                    {% csrf_token %}
+                    <label>Admin Internal Notes</label>
+                    <textarea name="admin_notes" class="input-admin" rows="3">{{ return_req.admin_notes|default:"" }}</textarea>
+
+                    {% if return_req.status == 'pending' %}
+                        <button type="submit" name="action" value="approve" class="btn-admin btn-success-admin">Approve Request</button>
+                        <button type="submit" name="action" value="reject" class="btn-admin btn-danger-admin">Reject Request</button>
+                    {% elif return_req.status == 'approved' and order.status != 'returned' %}
+                        <div style="background: #fff8e1; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                            <p style="margin: 0; font-size: 0.9rem;">Waiting for product pickup/delivery.</p>
+                        </div>
+                        <button type="submit" name="action" value="mark_returned" class="btn-admin btn-primary-admin">Mark as Received @ Warehouse</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <div class="card-admin">
+            <h3>Condition Check & Refund</h3>
+            {% if order.status == 'returned' and return_req.status != 'completed' %}
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="complete_check">
+                
+                <div class="form-group">
+                    <label>Item Condition</label>
+                    <select name="condition" class="input-admin" required>
+                        <option value="good">Good Condition / Normal Wear</option>
+                        <option value="damaged">Damaged / Major Stains</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Damage Penalty (if any)</label>
+                    <input type="number" name="damage_penalty" class="input-admin" value="0" step="0.01">
+                </div>
+
+                <div style="background: #fafaf9; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <p style="margin: 0 0 10px 0; font-size: 0.8rem; color: #888;">AUTOMATED CHARGES (Applied at Process)</p>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Late Return Fee</span>
+                        <span style="font-weight: 700; color: {% if is_late %}#c62828{% else %}#28a745{% endif %};">
+                            {% if is_late %}
+                                {% with days_late=today|date:"U"|add:"-"|add:order.end_date|date:"U" %}
+                                    {# This is complex in pure django template without custom filters, let's keep it simple with indicator #}
+                                    Yes (Past {{ order.end_date|date:"d M" }})
+                                {% endwith %}
+                            {% else %}
+                                ₹0.00
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-admin btn-success-admin" style="padding: 20px; font-size: 1.1rem;">
+                    Finalize & Process Refund
+                </button>
+                <p style="font-size: 0.75rem; color: #999; text-align: center;">Refund will be credited to user wallet balance instantly.</p>
+            </form>
+            {% elif return_req.status == 'completed' %}
+                <div style="text-align: center; padding: 20px;">
+                    <span style="font-size: 3rem;">✅</span>
+                    <h4 style="margin: 10px 0;">Return Completed</h4>
+                    <p style="font-size: 0.9rem; color: #888;">Refund record #{{ order.refund.id }} created.</p>
+                </div>
+            {% else %}
+                <p style="color: #999; font-size: 0.9rem; text-align: center; padding: 40px 0;">
+                    Complete logistics steps first to enable condition check.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

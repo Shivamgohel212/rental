@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import UserAddress
+from .models import UserAddress, Clothing
 
 class UserRegistrationForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30, required=True, widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
@@ -40,4 +40,18 @@ class AddressForm(forms.ModelForm):
             'address_line': forms.Textarea(attrs={'placeholder': 'Full Street Address', 'rows': 3}),
             'city': forms.TextInput(attrs={'placeholder': 'City'}),
             'pincode': forms.TextInput(attrs={'placeholder': 'Pincode'}),
+        }
+
+class ClothingForm(forms.ModelForm):
+    class Meta:
+        model = Clothing
+        fields = ['title', 'description', 'category', 'gender', 'size', 'brand', 'price_per_day', 'security_deposit', 'image', 'stock']
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. Designer Saree'}),
+            'description': forms.Textarea(attrs={'placeholder': 'Describe the outfit, fabric, and occasion...', 'rows': 4}),
+            'brand': forms.TextInput(attrs={'placeholder': 'e.g. Sabyasachi'}),
+            'price_per_day': forms.NumberInput(attrs={'placeholder': '₹ Per Day'}),
+            'security_deposit': forms.NumberInput(attrs={'placeholder': '₹ Security Deposit'}),
+            'size': forms.TextInput(attrs={'placeholder': 'e.g. M, L, XL or 38, 40'}),
+            'stock': forms.NumberInput(attrs={'min': 1}),
         }

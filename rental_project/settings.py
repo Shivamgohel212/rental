@@ -283,3 +283,4 @@ JAZZMIN_UI_TWEAKS = {
 # Test keys start with rzp_test_  |  Live keys start with rzp_live_
 RAZORPAY_KEY_ID     = 'rzp_test_SWD6XmdT3zYnrA'       # exposed to frontend
 RAZORPAY_KEY_SECRET = 'NJCzSc3NPtg3sHxbaggPcEnS'             # NEVER expose this
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

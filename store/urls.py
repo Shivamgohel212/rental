@@ -11,6 +11,7 @@ urlpatterns = [
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),
     path('logout/', views.logout_user, name='logout'),
+    path('list-outfit/', views.list_outfit, name='list_outfit'),
 
     # Payment
     path('product/<int:product_id>/payment/', views.payment_page, name='payment_page'),
@@ -44,4 +45,15 @@ urlpatterns = [
     path('manage/', views.admin_dashboard, name='admin_dashboard'),
     path('manage/order/<int:order_id>/status/', views.update_order_status, name='update_order_status'),
     path('manage/withdrawal/<int:tx_id>/approve/', views.approve_withdrawal, name='approve_withdrawal'),
+    path('manage/withdrawal/<int:tx_id>/reject/', views.reject_withdrawal, name='reject_withdrawal'),
+
+    # Post-Delivery Rental Features
+    path('order/<int:order_id>/request-return/', views.request_return, name='request_return'),
+    path('order/<int:order_id>/return-tracking/', views.return_tracking, name='return_tracking'),
+    path('manage/return/<int:return_id>/process/', views.admin_process_return, name='admin_process_return'),
+    path('manage/order/<int:order_id>/refund/', views.process_refund, name='process_refund'),
+    
+    # Wishlist
+    path('wishlist/', views.wishlist_view, name='wishlist'),
+    path('wishlist/toggle/<int:product_id>/', views.toggle_wishlist, name='toggle_wishlist'),
 ]

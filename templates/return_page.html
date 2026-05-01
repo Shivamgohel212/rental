@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Request Return | PRORENT{% endblock %}
+
+{% block extra_css %}
+<style>
+    .return-wrap {
+        max-width: 800px;
+        margin: 4rem auto;
+        padding: 0 1.5rem;
+        font-family: 'Jost', sans-serif;
+    }
+
+    .return-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        overflow: hidden;
+        border: 1px solid #f0ece4;
+    }
+
+    .return-header {
+        background: #1a1a1a;
+        color: white;
+        padding: 2.5rem;
+        text-align: center;
+    }
+
+    .return-header h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.4rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .return-header p {
+        color: #b0b0b0;
+        font-weight: 300;
+        letter-spacing: 0.05em;
+    }
+
+    .return-body {
+        padding: 3rem;
+    }
+
+    .product-preview {
+        display: flex;
+        gap: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 2rem;
+    }
+
+    .product-preview img {
+        width: 120px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+    .product-info h3 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .rental-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .meta-item label {
+        display: block;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: #999;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+    }
+
+    .meta-item span {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .warning-box {
+        background: #fff8e1;
+        border: 1px solid #ffe082;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .warning-icon { font-size: 1.5rem; }
+    .warning-text { font-size: 0.9rem; color: #856404; }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1a1a1a;
+    }
+
+    .method-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .method-option {
+        position: relative;
+    }
+
+    .method-option input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .method-label {
+        display: block;
+        padding: 1.5rem;
+        border: 2px solid #eee;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .method-option input:checked + .method-label {
+        border-color: #c9a227;
+        background: #fdfaf0;
+    }
+
+    .method-label i {
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .method-title {
+        display: block;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .method-desc {
+        font-size: 0.8rem;
+        color: #888;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1.2rem;
+        background: #1a1a1a;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background: #c9a227;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(201, 162, 39, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="return-wrap">
+    <div class="return-card">
+        <div class="return-header">
+            <h1>Request Return</h1>
+            <p>Order #{{ order.id }}</p>
+        </div>
+
+        <div class="return-body">
+            <div class="product-preview">
+                <img src="{{ order.product.image.url }}" alt="{{ order.product.title }}">
+                <div class="product-info">
+                    <h3>{{ order.product.title }}</h3>
+                    <div class="rental-meta">
+                        <div class="meta-item">
+                            <label>Rental End Date</label>
+                            <span>{{ order.end_date|date:"d M, Y" }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <label>Status</label>
+                            <span style="color: #1e88e5; font-weight: 600;">Currently In Use</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if late_days > 0 %}
+            <div class="warning-box" style="background: #fee2e2; border-color: #fca5a5;">
+                <span class="warning-icon">⚠️</span>
+                <div class="warning-text" style="color: #991b1b;">
+                    <strong>Late Return Warning:</strong> You are {{ late_days }} day(s) past your rental end date. 
+                    A penalty of <strong>₹{{ late_fee }}</strong> will be deducted from your refund (₹200/day).
+                </div>
+            </div>
+            {% else %}
+            <div class="warning-box">
+                <span class="warning-icon">ℹ️</span>
+                <div class="warning-text">
+                    Please ensure the item is dry-cleaned (if applicable) and in its original condition to receive a full refund of your security deposit.
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>How would you like to return?</label>
+                    <div class="method-selector">
+                        <div class="method-option">
+                            <input type="radio" name="return_method" value="pickup" id="pickup" checked>
+                            <label for="pickup" class="method-label">
+                                <i>🚚</i>
+                                <span class="method-title">Home Pickup</span>
+                                <span class="method-desc">Our partner will collect from your address</span>
+                            </label>
+                        </div>
+                        <div class="method-option">
+                            <input type="radio" name="return_method" value="self_return" id="self">
+                            <label for="self" class="method-label">
+                                <i>🏢</i>
+                                <span class="method-title">Self Return</span>
+                                <span class="method-desc">Drop off at our nearest outlet</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">Any notes for us? (Optional)</label>
+                    <textarea name="reason" id="reason" rows="3" style="width: 100%; border: 2px solid #eee; border-radius: 12px; padding: 1rem; font-family: inherit;"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" onclick="return confirm('Ready to return this piece? Our team will be notified.')">
+                    Confirm Return Request
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -22,12 +22,20 @@ PAYMENT_STATUS_CHOICES = [
 ]
 
 ORDER_STATUS_CHOICES = [
+    ('ordered', 'Ordered'),
     ('confirmed', 'Confirmed'),
+    ('out_for_delivery', 'Out for Delivery'),
     ('shipped', 'Shipped'),
     ('delivered', 'Delivered'),
+    ('in_use', 'In Use'),
+    ('return_requested', 'Return Requested'),
     ('returned', 'Returned'),
+    ('refund_completed', 'Refund Completed'),
     ('cancelled', 'Cancelled'),
 ]
+
+# Penalty rate for late returns (per day)
+LATE_RETURN_PENALTY_PER_DAY = 200
 
 TRANSACTION_TYPE_CHOICES = [
     ('deposit', 'Deposit'),
@@ -313,3 +321,68 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.product.title} ({self.size}) in {self.cart.user.username}'s Cart"
+
+class ReturnRequest(models.Model):
+    RETURN_METHOD_CHOICES = [
+        ('pickup', 'Pickup by Admin'),
+        ('self_return', 'Self Return'),
+    ]
+    RETURN_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    CONDITION_CHOICES = [
+        ('good', 'Good Condition'),
+        ('damaged', 'Damaged'),
+    ]
+
+    order = models.OneToOneField(RentalOrder, on_delete=models.CASCADE, related_name='return_request')
+    return_method = models.CharField(max_length=20, choices=RETURN_METHOD_CHOICES)
+    status = models.CharField(max_length=20, choices=RETURN_STATUS_CHOICES, default='pending')
+    condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, blank=True, null=True)
+    penalty_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    admin_notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Return Request – Order #{self.order.id} ({self.status})"
+
+
+class Refund(models.Model):
+    REFUND_METHOD_CHOICES = [
+        ('wallet', 'Wallet'),
+        ('upi', 'UPI'),
+    ]
+    REFUND_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+    ]
+
+    order = models.OneToOneField(RentalOrder, on_delete=models.CASCADE, related_name='refund')
+    return_request = models.OneToOneField(
+        ReturnRequest, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='refund'
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    penalty_deducted = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    method = models.CharField(max_length=20, choices=REFUND_METHOD_CHOICES, default='wallet')
+    status = models.CharField(max_length=20, choices=REFUND_STATUS_CHOICES, default='pending')
+    transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Refund – Order #{self.order.id} – ₹{self.amount} ({self.status})"
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
+    clothing = models.ForeignKey(Clothing, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'clothing')
+
+    def __str__(self):
+        return f"{self.user.username}'s Wishlist: {self.clothing.title}"

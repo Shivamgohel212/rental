@@ -13,10 +13,15 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from datetime import date, timedelta
+from decimal import Decimal
 from django.db import transaction
-
-from .forms import AddressForm, LoginForm, UserRegistrationForm
-from .models import Clothing, Category, RentalOrder, RazorpayPayment, UserAddress, Cart, CartItem, Wallet, WalletTransaction
+from django.utils import timezone
+from .forms import AddressForm, LoginForm, UserRegistrationForm, ClothingForm
+from .models import (
+    Clothing, Category, RentalOrder, RazorpayPayment, UserAddress, 
+    Cart, CartItem, Wallet, WalletTransaction, ReturnRequest, Refund, Wishlist,
+    ORDER_STATUS_CHOICES, LATE_RETURN_PENALTY_PER_DAY
+)
 
 MIN_RENTAL_DAYS = 1
 MAX_RENTAL_DAYS = 30
@@ -47,7 +52,14 @@ def how_it_works(request):
 
 def product_detail(request, id):
     product = get_object_or_404(Clothing, id=id)
-    return render(request, 'product_detail.html', {'product': product})
+    is_favourited = False
+    if request.user.is_authenticated:
+        is_favourited = Wishlist.objects.filter(user=request.user, clothing=product).exists()
+    
+    return render(request, 'product_detail.html', {
+        'product': product,
+        'is_favourited': is_favourited
+    })
 
 def category_products(request, slug):
     category = get_object_or_404(Category, slug=slug)
@@ -420,7 +432,10 @@ def order_success(request, order_id):
 @login_required
 def my_orders(request):
     orders = RentalOrder.objects.filter(user=request.user).order_by('-order_date')
-    return render(request, 'my_orders.html', {'orders': orders})
+    return render(request, 'my_orders.html', {
+        'orders': orders,
+        'today': date.today()
+    })
 
 @login_required
 def cancel_order(request, order_id):
@@ -829,7 +844,7 @@ def add_funds(request):
     
     try:
         body = json.loads(request.body)
-        amount = float(body.get('amount', 0))
+        amount = Decimal(str(body.get('amount', 0)))
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid amount'}, status=400)
     
@@ -901,7 +916,7 @@ def withdraw_funds(request):
     
     try:
         body = json.loads(request.body)
-        amount = float(body.get('amount', 0))
+        amount = Decimal(str(body.get('amount', 0)))
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid amount'}, status=400)
     
@@ -931,7 +946,7 @@ def withdraw_funds(request):
 @login_required
 def admin_dashboard(request):
     """Luxury management interface for the site owner."""
-    if not request.user.userprofile.is_owner:
+    if not (request.user.is_staff or request.user.userprofile.is_owner):
         messages.error(request, 'Access Denied.')
         return redirect('home')
     
@@ -941,15 +956,23 @@ def admin_dashboard(request):
         status='pending'
     ).order_by('-created_at')
     
+    return_requests = ReturnRequest.objects.all().order_by('-created_at')
+    pending_refunds_count = RentalOrder.objects.filter(
+        status='returned', 
+        deposit_refund_status='pending'
+    ).count()
+    
     return render(request, 'admin_dashboard.html', {
         'orders': orders,
-        'pending_withdrawals': pending_withdrawals
+        'pending_withdrawals': pending_withdrawals,
+        'return_requests': return_requests,
+        'pending_refunds_count': pending_refunds_count
     })
 
 @login_required
 def update_order_status(request, order_id):
     """Admin endpoint to move order through the rental lifecycle."""
-    if not request.user.userprofile.is_owner:
+    if not (request.user.is_staff or request.user.userprofile.is_owner):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
     if request.method != 'POST':
@@ -966,33 +989,21 @@ def update_order_status(request, order_id):
         with transaction.atomic():
             old_status = order.status
             order.status = new_status
+            
+            # Logic: If marked as 'delivered', AUTO-TRANSITION to 'in_use'
+            if new_status == 'delivered':
+                order.status = 'in_use'
+                
             order.save()
             
-            # Logic: If marked as 'returned', AUTO-REFUND security deposit to Wallet
-            if new_status == 'returned' and order.deposit_refund_status == 'pending':
-                wallet, _ = Wallet.objects.get_or_create(user=order.user)
-                wallet.balance += order.deposit
-                wallet.save()
-                
-                order.deposit_refund_status = 'refunded'
-                order.save()
-                
-                WalletTransaction.objects.create(
-                    wallet=wallet,
-                    transaction_type='refund',
-                    amount=order.deposit,
-                    status='completed',
-                    description=f'Security Deposit Refund for Order #{order.id}'
-                )
-            
-        return JsonResponse({'success': True, 'new_status': new_status})
+        return JsonResponse({'success': True, 'new_status': order.status})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
 def approve_withdrawal(request, tx_id):
     """Admin endpoint to finalize a pending user payout."""
-    if not request.user.userprofile.is_owner:
+    if not (request.user.is_staff or request.user.userprofile.is_owner):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
     tx = get_object_or_404(WalletTransaction, id=tx_id, transaction_type='withdraw')
@@ -1002,3 +1013,286 @@ def approve_withdrawal(request, tx_id):
         messages.success(request, f'Withdrawal of ₹{tx.amount} approved for {tx.wallet.user.username}.')
     
     return redirect('admin_dashboard')
+
+@login_required
+def reject_withdrawal(request, tx_id):
+    """Admin endpoint to reject a pending withdrawal and return funds to user wallet."""
+    if not (request.user.is_staff or request.user.userprofile.is_owner):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    tx = get_object_or_404(WalletTransaction, id=tx_id, transaction_type='withdraw')
+    if tx.status == 'pending':
+        with transaction.atomic():
+            tx.status = 'failed'
+            tx.save()
+            
+            # Return funds to user wallet
+            wallet = tx.wallet
+            wallet.balance += tx.amount
+            wallet.save()
+            
+            messages.warning(request, f'Withdrawal of ₹{tx.amount} rejected. Funds returned to {tx.wallet.user.username}.')
+    
+    return redirect('admin_dashboard')
+
+
+@login_required
+def request_return(request, order_id):
+    """User endpoint to request a return for an order that is 'in_use'."""
+    order = get_object_or_404(RentalOrder, id=order_id, user=request.user)
+    
+    if order.status != 'in_use' and order.status != 'delivered':
+        messages.error(request, 'Return can only be requested for orders currently in use.')
+        return redirect('my_orders')
+    
+    # Check if a request already exists
+    if hasattr(order, 'return_request'):
+        return redirect('return_tracking', order_id=order.id)
+
+    if request.method == 'POST':
+        return_method = request.POST.get('return_method')
+        if return_method not in ['pickup', 'self_return']:
+            messages.error(request, 'Please select a valid return method.')
+            return redirect('request_return', order_id=order.id)
+            
+        ReturnRequest.objects.create(
+            order=order, 
+            return_method=return_method,
+            status='pending'
+        )
+        
+        order.status = 'return_requested'
+        order.save()
+        
+        messages.success(request, 'Return request submitted successfully.')
+        return redirect('my_orders')
+        
+    # Calculate potential late fee
+    today = date.today()
+    late_days = 0
+    late_fee = Decimal('0.00')
+    if today > order.end_date:
+        late_days = (today - order.end_date).days
+        late_fee = Decimal(late_days) * Decimal(LATE_RETURN_PENALTY_PER_DAY)
+
+    return render(request, 'return_page.html', {
+        'order': order,
+        'today': today,
+        'late_days': late_days,
+        'late_fee': late_fee
+    })
+
+@login_required
+def return_tracking(request, order_id):
+    """User view to track return status and refund details."""
+    order = get_object_or_404(RentalOrder, id=order_id, user=request.user)
+    if not hasattr(order, 'return_request'):
+        return redirect('my_orders')
+        
+    return render(request, 'return_tracking.html', {
+        'order': order,
+        'return_req': order.return_request,
+        'refund': getattr(order, 'refund', None)
+    })
+
+@login_required
+def admin_process_return(request, return_id):
+    """Admin endpoint to process a return request through its lifecycle."""
+    if not (request.user.is_staff or request.user.userprofile.is_owner):
+        messages.error(request, 'Access Denied.')
+        return redirect('home')
+    
+    return_req = get_object_or_404(ReturnRequest, id=return_id)
+    order = return_req.order
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        admin_notes = request.POST.get('admin_notes', '')
+        
+        if action == 'approve':
+            return_req.status = 'approved'
+            messages.success(request, 'Return request approved.')
+            
+        elif action == 'mark_returned':
+            # Mark as physically returned to warehouse
+            order.status = 'returned'
+            order.save()
+            messages.success(request, 'Order marked as returned.')
+            
+        elif action == 'complete_check':
+            # Condition check and final refund
+            condition = request.POST.get('condition')
+            damage_penalty = Decimal(request.POST.get('damage_penalty', '0.00'))
+            
+            # Calculate Late Fee
+            actual_return_date = date.today()
+            late_days = 0
+            late_fee = Decimal('0.00')
+            if actual_return_date > order.end_date:
+                late_days = (actual_return_date - order.end_date).days
+                late_fee = Decimal(late_days) * Decimal(LATE_RETURN_PENALTY_PER_DAY)
+                
+            total_penalty = damage_penalty + late_fee
+            
+            # Maximum penalty cannot exceed the security deposit.
+            # Requirement says: Refund = Security Deposit - Penalty
+            refund_amount = order.deposit - total_penalty
+            if refund_amount < 0: refund_amount = Decimal('0.00')
+            
+            with transaction.atomic():
+                return_req.condition = condition
+                return_req.penalty_fee = total_penalty
+                return_req.status = 'completed'
+                return_req.save()
+                
+                # Create Refund record
+                refund = Refund.objects.create(
+                    order=order,
+                    return_request=return_req,
+                    amount=refund_amount,
+                    penalty_deducted=total_penalty,
+                    method='wallet',
+                    status='completed',
+                    transaction_id=f"REF-{order.id}-{timezone.now().strftime('%Y%m%d%H%M')}"
+                )
+                
+                # Process Wallet Credit
+                wallet, _ = Wallet.objects.get_or_create(user=order.user)
+                wallet.balance += refund_amount
+                wallet.save()
+                
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    transaction_type='refund',
+                    amount=refund_amount,
+                    status='completed',
+                    description=f'Security Deposit Refund for Order #{order.id} (Penalty: ₹{total_penalty})'
+                )
+                
+                order.status = 'refund_completed'
+                order.deposit_refund_status = 'refunded'
+                order.save()
+                
+            messages.success(request, f'Refund of ₹{refund_amount} processed for Order #{order.id}.')
+            return redirect('admin_dashboard')
+
+        elif action == 'reject':
+            return_req.status = 'cancelled'
+            order.status = 'in_use' # Revert to in use if rejected? Or just stay as it was.
+            order.save()
+            messages.warning(request, 'Return request rejected.')
+            
+        return_req.admin_notes = admin_notes
+        return_req.save()
+        return redirect('admin_process_return', return_id=return_req.id)
+
+    return render(request, 'admin_process_return.html', {
+        'return_req': return_req,
+        'order': order,
+        'today': date.today(),
+        'is_late': date.today() > order.end_date
+    })
+
+@login_required
+def process_refund(request, order_id):
+    """Legacy/Manual trigger for refund if the automatic flow was interrupted."""
+    if not (request.user.is_staff or request.user.userprofile.is_owner):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+    order = get_object_or_404(RentalOrder, id=order_id)
+    if order.deposit_refund_status == 'pending' and order.status == 'returned' and not hasattr(order, 'refund'):
+        # Default full refund of deposit if manual
+        refund_amount = order.deposit 
+        
+        with transaction.atomic():
+            wallet, _ = Wallet.objects.get_or_create(user=order.user)
+            wallet.balance += refund_amount
+            wallet.save()
+            
+            order.deposit_refund_status = 'refunded'
+            order.status = 'refund_completed'
+            order.save()
+            
+            # Create Refund record
+            Refund.objects.create(
+                order=order,
+                amount=refund_amount,
+                method='wallet',
+                status='completed',
+                transaction_id=f"MREF-{order.id}-{timezone.now().strftime('%Y%m%d%H%M')}"
+            )
+            
+            # Create Wallet Transaction
+            WalletTransaction.objects.create(
+                wallet=wallet,
+                transaction_type='refund',
+                amount=refund_amount,
+                status='completed',
+                description=f'Manual Security Deposit Refund for Order #{order.id}'
+            )
+            
+        messages.success(request, f'Manual refund of ₹{refund_amount} processed for Order #{order.id}.')
+    else:
+        if hasattr(order, 'refund') or order.deposit_refund_status == 'refunded':
+            messages.info(request, f'Refund for Order #{order.id} has already been processed.')
+        else:
+            messages.warning(request, f'Order #{order.id} is not eligible for refund yet (Status: {order.status}).')
+    
+    return redirect('admin_dashboard')
+
+@login_required
+def list_outfit(request):
+    if request.method == 'POST':
+        form = ClothingForm(request.POST, request.FILES)
+        if form.is_valid():
+            outfit = form.save(commit=False)
+            outfit.owner = request.user
+            outfit.save()
+            messages.success(request, 'Your outfit has been listed successfully!')
+            return redirect('browse')
+    else:
+        form = ClothingForm()
+    
+    return render(request, 'list_outfit.html', {'form': form})
+
+def toggle_wishlist(request, product_id):
+    if not request.user.is_authenticated:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'message': 'Please login to add to wishlist'
+            }, status=401)
+        return redirect('login')
+        
+    try:
+        product = get_object_or_404(Clothing, id=product_id)
+        wishlist_item = Wishlist.objects.filter(user=request.user, clothing=product)
+        
+        if wishlist_item.exists():
+            wishlist_item.delete()
+            is_favourited = False
+            message = f"Removed {product.title} from your wishlist."
+        else:
+            Wishlist.objects.create(user=request.user, clothing=product)
+            is_favourited = True
+            message = f"Added {product.title} to your wishlist."
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'is_favourited': is_favourited,
+                'message': message
+            })
+    except Exception as e:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+        messages.error(request, "Something went wrong.")
+        return redirect(request.META.get('HTTP_REFERER', 'home'))
+    
+    messages.info(request, message)
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+@login_required
+def wishlist_view(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user).order_by('-added_at')
+    return render(request, 'wishlist.html', {'items': wishlist_items})

@@ -135,11 +135,90 @@
         <div class="header-flex">
             <h1 class="admin-title">Owner <span class="gold">Dashboard</span></h1>
             <div class="stats-pills" style="display: flex; gap: 15px;">
-                <div class="card" style="padding: 15px 25px; margin: 0;">
+                <div class="card" style="padding: 15px 25px; margin: 0; min-width: 150px;">
                     <span style="font-size: 0.7rem; display: block; color: #999;">PENDING REFUNDS</span>
-                    <span style="font-weight: 800; font-size: 1.2rem;">{{ orders.count }} Orders</span>
+                    <span style="font-weight: 800; font-size: 1.2rem; color: #c9a227;">{{ pending_refunds_count }}</span>
+                </div>
+                <div class="card" style="padding: 15px 25px; margin: 0; min-width: 150px;">
+                    <span style="font-size: 0.7rem; display: block; color: #999;">PENDING PAYOUTS</span>
+                    <span style="font-weight: 800; font-size: 1.2rem; color: #2e7d32;">{{ pending_withdrawals.count }}</span>
                 </div>
             </div>
+        </div>
+
+        <!-- Action Required: Quality Checks & Refunds -->
+        {% if pending_refunds_count > 0 %}
+        <div class="card" style="border-left: 5px solid #ef6c00; background: #fffaf0;">
+            <h2 class="section-title">⚠️ Action Required: Quality Checks & Refunds</h2>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">The following orders have been returned but their security deposits are still pending refund.</p>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Deposit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            {% if order.status == 'returned' and order.deposit_refund_status == 'pending' %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.user.username }}</td>
+                                <td>{{ order.product.title }}</td>
+                                <td style="font-weight: 700;">₹{{ order.deposit }}</td>
+                                <td>
+                                    <a href="{% url 'process_refund' order.id %}" class="btn-approve" style="background: #2e7d32; text-decoration: none;" onclick="return confirm('Refund FULL deposit of ₹{{ order.deposit }} to user wallet?')">Issue Refund</a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Return Requests Management -->
+        <div class="card" style="border-left: 5px solid #c9a227;">
+            <h2 class="section-title">↩ Return Requests</h2>
+            {% if return_requests %}
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Req ID</th>
+                            <th>Order</th>
+                            <th>Customer</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in return_requests %}
+                        <tr>
+                            <td>#{{ req.id }}</td>
+                            <td>#{{ req.order.id }}</td>
+                            <td>{{ req.order.user.username }}</td>
+                            <td>{{ req.get_return_method_display }}</td>
+                            <td>
+                                <span class="status-badge" style="background: #eee; color: #555;">{{ req.get_status_display }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'admin_process_return' req.id %}" class="btn-status" style="text-decoration: none; display: inline-block;">Manage Return</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: #999; padding: 20px;">No pending return requests.</p>
+            {% endif %}
         </div>
 
         <!-- Order Management -->
@@ -177,13 +256,21 @@
                             <td>
                                 <div style="display: flex; gap: 5px;">
                                     {% if order.status == 'confirmed' %}
-                                        <button class="btn-status" onclick="updateStatus({{ order.id }}, 'shipped')">Ship</button>
+                                        <button class="btn-status" onclick="updateStatus({{ order.id }}, 'shipped')">Ship Order</button>
                                     {% elif order.status == 'shipped' %}
-                                        <button class="btn-status" onclick="updateStatus({{ order.id }}, 'delivered')">Deliver</button>
-                                    {% elif order.status == 'delivered' %}
-                                        <button class="btn-status" onclick="updateStatus({{ order.id }}, 'returned')">Process Return</button>
+                                        <button class="btn-status" onclick="updateStatus({{ order.id }}, 'delivered')">Mark Delivered</button>
+                                    {% elif order.status == 'in_use' %}
+                                        <button class="btn-status" onclick="updateStatus({{ order.id }}, 'returned')" style="border-color: #1e88e5; color: #1e88e5;">Mark Returned</button>
+                                    {% elif order.status == 'return_requested' %}
+                                        {% if order.return_request %}
+                                        <a href="{% url 'admin_process_return' order.return_request.id %}" class="btn-status" style="text-decoration: none;">Manage Return</a>
+                                        {% endif %}
                                     {% elif order.status == 'returned' %}
-                                        <span style="color: #28a745; font-size: 0.8rem; font-weight: 700;">✓ Refunded</span>
+                                        <a href="{% url 'process_refund' order.id %}" class="btn-status" style="text-decoration: none; border-color: #2e7d32; color: #2e7d32;" onclick="return confirm('Refund FULL deposit of ₹{{ order.deposit }}?')">Issue Refund</a>
+                                    {% elif order.status == 'refund_completed' %}
+                                        <span style="color: #28a745; font-size: 0.8rem; font-weight: 700;">✓ Completed</span>
+                                    {% elif order.status == 'cancelled' %}
+                                        <span style="color: #dc3545; font-size: 0.8rem; font-weight: 700;">Cancelled</span>
                                     {% endif %}
                                 </div>
                             </td>
@@ -215,7 +302,10 @@
                             <td class="gold" style="font-weight: 800;">₹{{ tx.amount }}</td>
                             <td>{{ tx.created_at|date:"d M, Y" }}</td>
                             <td>
-                                <a href="{% url 'approve_withdrawal' tx.id %}" class="btn-approve">Approve Payout</a>
+                                <div style="display: flex; gap: 10px;">
+                                    <a href="{% url 'approve_withdrawal' tx.id %}" class="btn-approve">Approve</a>
+                                    <a href="{% url 'reject_withdrawal' tx.id %}" class="btn-status" style="text-decoration: none; border-color: #dc3545; color: #dc3545;">Reject</a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -232,7 +322,7 @@
 <script>
 async function updateStatus(orderId, status) {
     if (status === 'returned') {
-        if (!confirm('Marking this as returned will AUTO-REFUND the security deposit to the user wallet. Proceed?')) {
+        if (!confirm('Marking this as returned will enable the Refund buttons for you to process. Proceed?')) {
             return;
         }
     }

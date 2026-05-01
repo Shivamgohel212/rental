@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Return Tracking | PRORENT{% endblock %}
+
+{% block extra_css %}
+<style>
+    .track-wrap {
+        max-width: 900px;
+        margin: 4rem auto;
+        padding: 0 1.5rem;
+        font-family: 'Jost', sans-serif;
+    }
+
+    .track-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+        border: 1px solid #f0ece4;
+        overflow: hidden;
+    }
+
+    .track-header {
+        background: #1a1a1a;
+        padding: 3rem 2rem;
+        color: white;
+        text-align: center;
+    }
+
+    .track-header h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Timeline Styles */
+    .timeline {
+        padding: 4rem 3rem;
+        position: relative;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 4rem;
+        bottom: 4rem;
+        left: 50% - 1px;
+        width: 2px;
+        background: #eee;
+    }
+
+    .timeline-item {
+        display: flex;
+        justify-content: flex-start;
+        width: 100%;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .timeline-item:last-child { margin-bottom: 0; }
+
+    .timeline-dot {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #eee;
+        border: 4px solid white;
+        box-shadow: 0 0 0 4px #eee;
+        z-index: 2;
+    }
+
+    .timeline-content {
+        width: 45%;
+        padding: 1.5rem;
+        background: #fcfbf8;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        border: 1px solid #f0ece4;
+    }
+
+    .timeline-item.completed .timeline-dot {
+        background: #c9a227;
+        box-shadow: 0 0 0 4px #fdf7e6;
+    }
+
+    .timeline-item.completed .timeline-content {
+        border-left: 4px solid #c9a227;
+    }
+
+    .timeline-item:nth-child(even) { justify-content: flex-end; }
+
+    .status-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #1a1a1a;
+        display: block;
+    }
+
+    .status-date {
+        font-size: 0.8rem;
+        color: #999;
+    }
+
+    /* Refund Details Card */
+    .refund-summary {
+        background: #fafaf9;
+        margin: 2rem 3rem 4rem;
+        border-radius: 20px;
+        padding: 2.5rem;
+        border: 2px dashed #e5e5e0;
+    }
+
+    .refund-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .summary-item label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #888;
+        font-weight: 600;
+    }
+
+    .summary-item .val {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        font-family: 'Cormorant Garamond', serif;
+    }
+
+    .summary-item .val.total { color: #c9a227; }
+    .summary-item .val.penalty { color: #ef4444; }
+
+    @media (max-width: 768px) {
+        .timeline::before { left: 30px; }
+        .timeline-dot { left: 30px; }
+        .timeline-content { width: calc(100% - 70px); margin-left: 70px; }
+        .timeline-item:nth-child(even) { justify-content: flex-start; }
+        .refund-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="track-wrap">
+    <div class="track-card">
+        <div class="track-header">
+            <h1>Return Status</h1>
+            <p>Order ID: #{{ order.id }} • Product: {{ order.product.title }}</p>
+        </div>
+
+        <div class="timeline">
+            <!-- Step 1: Requested -->
+            <div class="timeline-item completed">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <span class="status-title">Return Requested</span>
+                    <span class="status-date">{{ return_req.created_at|date:"d M Y, H:i" }}</span>
+                </div>
+            </div>
+
+            <!-- Step 2: Approved -->
+            <div class="timeline-item {% if return_req.status != 'pending' and return_req.status != 'cancelled' %}completed{% endif %}">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <span class="status-title">Approved</span>
+                    {% if return_req.status != 'pending' and return_req.status != 'cancelled' %}
+                        <span class="status-date">Ready for return process</span>
+                    {% else %}
+                        <span class="status-date">Waiting for admin review</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Step 3: Product Received -->
+            <div class="timeline-item {% if order.status == 'returned' or order.status == 'refund_completed' %}completed{% endif %}">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <span class="status-title">Product Received</span>
+                    <span class="status-date">Confirmed at warehouse</span>
+                </div>
+            </div>
+
+            <!-- Step 4: Quality Check & Refund -->
+            <div class="timeline-item {% if order.status == 'refund_completed' %}completed{% endif %}">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <span class="status-title">Refund Processed</span>
+                    <span class="status-date">Finalized by admin</span>
+                </div>
+            </div>
+        </div>
+
+        {% if refund %}
+        <div class="refund-summary">
+            <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 2rem;">Refund Breakdown</h3>
+            <div class="refund-grid">
+                <div class="summary-item">
+                    <label>Total Amount Paid</label>
+                    <span class="val">₹{{ order.total_amount }}</span>
+                </div>
+                <div class="summary-item">
+                    <label>Condition Penalty & Late Fees</label>
+                    <span class="val penalty">- ₹{{ refund.penalty_deducted }}</span>
+                </div>
+                <div class="summary-item" style="grid-column: span 2; border-top: 1px solid #eee; padding-top: 1.5rem;">
+                    <label>Final Refund Credited to Wallet</label>
+                    <span class="val total" style="font-size: 2.5rem;">₹{{ refund.amount }}</span>
+                </div>
+            </div>
+            <div style="margin-top: 1.5rem; font-size: 0.8rem; color: #999;">
+                Transaction ID: {{ refund.transaction_id }} • Method: Wallet Credit
+            </div>
+        </div>
+        {% elif return_req.status == 'cancelled' %}
+        <div class="refund-summary" style="background: #fffafa; border-color: #fecaca;">
+            <p style="color: #b91c1c; font-weight: 600;">Return Request Rejected/Cancelled</p>
+            <p style="font-size: 0.9rem; color: #7f1d1d;">Notes: {{ return_req.admin_notes|default:"No notes provided." }}</p>
+        </div>
+        {% endif %}
+
+        <div style="text-align: center; padding-bottom: 3rem;">
+            <a href="{% url 'my_orders' %}" style="color: #999; text-decoration: none; font-weight: 500;">← Back to My Orders</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

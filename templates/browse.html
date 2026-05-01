@@ -113,20 +113,6 @@
         width: 100%;
     }
 
-    .sort-select {
-        border: 1px solid var(--border);
-        padding: 0.55rem 0.9rem;
-        border-radius: 8px;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.85rem;
-        outline: none;
-        cursor: pointer;
-        transition: border-color 0.25s ease;
-    }
-
-    .sort-select:focus {
-        border-color: var(--gold);
-    }
 
     .results-count {
         font-size: 0.82rem;
@@ -298,12 +284,7 @@
                 <input type="text" id="shopSearch" placeholder="Search outfits..." oninput="applyFilters()">
             </div>
             <span class="results-count" id="resultCount">Showing {{ items|length }} products</span>
-            <select class="sort-select" id="sortSelect" onchange="applyFilters()">
-                <option value="default">Sort By</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Top Rated</option>
-            </select>
+
         </div>
 
         <div class="shop-grid" id="shopGrid">
@@ -313,11 +294,6 @@
                     data-price="{{ item.price_per_day }}" data-title="{{ item.title|lower }}">
                     <div class="product-img-wrap">
                         <img src="{{ item.image.url }}" alt="{{ item.title }}">
-                        {% if item.is_currently_booked %}
-                        <div class="booked-badge"
-                            style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 12px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--gold); border-radius: 20px; z-index: 2;">
-                            Booked</div>
-                        {% endif %}
                         <div class="product-overlay"
                             style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); backdrop-filter: blur(2px);">
                             <span class="btn-premium"

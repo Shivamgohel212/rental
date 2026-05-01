@@ -132,6 +132,44 @@
     border: 1px solid rgba(245, 127, 23, 0.4);
   }
 
+  .prd-badge-inuse {
+    background: rgba(30, 136, 229, 0.1);
+    color: #1e88e5;
+    border: 1px solid rgba(30, 136, 229, 0.3);
+    animation: blue-pulse 2s infinite;
+  }
+
+  @keyframes blue-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(30, 136, 229, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0); }
+  }
+
+  .prd-badge-requested {
+    background: rgba(251, 192, 45, 0.1);
+    color: #fbc02d;
+    border: 1px solid rgba(251, 192, 45, 0.3);
+  }
+
+  .prd-badge-refunded {
+    background: rgba(67, 160, 71, 0.1);
+    color: #43a047;
+    border: 1px solid rgba(67, 160, 71, 0.3);
+  }
+
+  /* Countdown & Warnings */
+  .prd-countdown-wrap {
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+  }
+  .prd-warning-near { color: #f57c00; }
+  .prd-warning-late { color: #d32f2f; }
+  .prd-warning-safe { color: #1e88e5; }
+
   /* ── Card Body ───────────────────────────────────────────────────────────── */
   .prd-card-body {
     display: grid;
@@ -543,16 +581,24 @@
           </div>
           {% if order.status == 'confirmed' %}
             <span class="prd-badge prd-badge-confirmed">✓ Confirmed</span>
+          {% elif order.status == 'out_for_delivery' %}
+            <span class="prd-badge" style="background: rgba(23, 162, 184, 0.15); color: #17a2b8; border: 1px solid #17a2b8;">🚚 Out for Delivery</span>
           {% elif order.status == 'shipped' %}
             <span class="prd-badge prd-badge-shipped" style="background: #f3e5f5; color: #7b1fa2;">📦 Shipped</span>
           {% elif order.status == 'delivered' %}
             <span class="prd-badge prd-badge-delivered" style="background: #e8f5e9; color: #2e7d32;">🏠 Delivered</span>
+          {% elif order.status == 'in_use' %}
+            <span class="prd-badge prd-badge-inuse">🕒 In Use</span>
+          {% elif order.status == 'return_requested' %}
+            <span class="prd-badge prd-badge-requested">↩ Return Requested</span>
           {% elif order.status == 'returned' %}
-            <span class="prd-badge prd-badge-returned" style="background: #fff3e0; color: #ef6c00;">↩ Returned</span>
+            <span class="prd-badge prd-badge-returned" style="background: #fff3e0; color: #ef6c00;">🔄 Returned</span>
+          {% elif order.status == 'refund_completed' %}
+            <span class="prd-badge prd-badge-refunded">💰 Refund Completed</span>
           {% elif order.status == 'cancelled' %}
             <span class="prd-badge prd-badge-cancelled">✕ Cancelled</span>
           {% else %}
-            <span class="prd-badge prd-badge-pending">⏳ Pending</span>
+            <span class="prd-badge prd-badge-pending">⏳ {{ order.get_status_display }}</span>
           {% endif %}
         </div>
 
@@ -584,6 +630,15 @@
                 <span class="prd-info-label">Size</span>
                 <span class="prd-info-value">{{ order.size|default:"—" }}</span>
               </div>
+              {% if order.status == 'in_use' %}
+              <div class="prd-info-item" style="grid-column: span 2;">
+                <span class="prd-info-label">Remaining Time</span>
+                <div class="prd-countdown-wrap" id="timer-{{ order.id }}" data-end="{{ order.end_date|date:'Y-m-d' }}">
+                    <span class="prd-timer-icon">⏳</span>
+                    <span class="prd-timer-text">Calculating...</span>
+                </div>
+              </div>
+              {% endif %}
               <div class="prd-info-item">
                 <span class="prd-info-label">Payment Method</span>
                 <span class="prd-info-value">{{ order.get_payment_method_display }}</span>
@@ -619,9 +674,15 @@
                 </div>
 
                 <!-- Step 4: Returned -->
-                <div class="prd-step {% if status == 'returned' %}active completed{% endif %}">
-                  <div class="prd-step-dot">{% if status == 'returned' %}✓{% else %}↩{% endif %}</div>
-                  <span class="prd-step-label">Returned</span>
+                <div class="prd-step {% if order.status == 'return_requested' %}active{% elif order.status == 'returned' or order.status == 'refund_completed' %}completed{% endif %}">
+                  <div class="prd-step-dot">{% if order.status == 'returned' or order.status == 'refund_completed' %}✓{% else %}↩{% endif %}</div>
+                  <span class="prd-step-label">Return Request</span>
+                </div>
+
+                <!-- Step 5: Refunded -->
+                <div class="prd-step {% if order.status == 'refund_completed' %}active completed{% endif %}">
+                  <div class="prd-step-dot">{% if order.status == 'refund_completed' %}✓{% else %}💰{% endif %}</div>
+                  <span class="prd-step-label">Refund</span>
                 </div>
                 {% endwith %}
               </div>
@@ -635,6 +696,17 @@
         <div class="prd-cancel-alert">
           <span class="prd-cancel-alert-icon">⚠️</span>
           <span>This order was cancelled. The amount has been credited back to your wallet.</span>
+        </div>
+        {% endif %}
+
+        {% if order.refund %}
+        <div class="prd-cancel-alert" style="background: #f0fdf4; border-color: #86efac; border-left-color: #22c55e; color: #15803d;">
+            <span class="prd-cancel-alert-icon">✅</span>
+            <div style="flex: 1;">
+                <strong>Refund Successful</strong><br>
+                <small>Amount: ₹{{ order.refund.amount }} | Penalty Deducted: ₹{{ order.refund.penalty_deducted }}</small>
+            </div>
+            <span style="font-size: 0.7rem; color: #166534;">ID: {{ order.refund.transaction_id }}</span>
         </div>
         {% endif %}
 
@@ -653,6 +725,14 @@
                 onclick="confirmCancel({{ order.id }})" title="Cancel Order">
                 ✕ Cancel Order
               </button>
+            {% elif order.status == 'in_use' or order.status == 'delivered' %}
+              <a href="{% url 'request_return' order.id %}" class="prd-btn" style="background: #c9a227; color: white;">
+                ↩ Return Product
+              </a>
+            {% elif order.status == 'return_requested' or order.status == 'returned' or order.status == 'refund_completed' %}
+              <a href="{% url 'return_tracking' order.id %}" class="prd-btn" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #2e7d32;">
+                📡 Track Return
+              </a>
             {% endif %}
           </div>
         </div>
@@ -674,6 +754,8 @@
 
 {% block extra_js %}
 <script>
+  }
+
   async function confirmCancel(orderId) {
     if (!confirm('Are you sure you want to cancel this order? The amount will be refunded to your wallet.')) {
       return;
@@ -705,5 +787,49 @@
       alert('An error occurred. Please try again.');
     }
   }
+
+  // --- Countdown Logic ---
+  function initCountdowns() {
+      const timers = document.querySelectorAll('.prd-countdown-wrap');
+      timers.forEach(timer => {
+          const endDateStr = timer.getAttribute('data-end');
+          const endDate = new Date(endDateStr);
+          endDate.setHours(23, 59, 59); // End of the day
+          
+          function update() {
+              const now = new Date();
+              const diff = endDate - now;
+              
+              if (diff <= 0) {
+                  timer.querySelector('.prd-timer-text').textContent = "Return Due Now";
+                  timer.className = "prd-countdown-wrap prd-warning-late";
+                  return;
+              }
+              
+              const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+              const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+              const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              
+              let text = "";
+              if (days > 0) text += `${days}d `;
+              text += `${hours}h ${mins}m`;
+              
+              timer.querySelector('.prd-timer-text').textContent = text;
+              
+              if (days < 1) {
+                  timer.className = "prd-countdown-wrap prd-warning-late";
+              } else if (days < 2) {
+                  timer.className = "prd-countdown-wrap prd-warning-near";
+              } else {
+                  timer.className = "prd-countdown-wrap prd-warning-safe";
+              }
+          }
+          
+          update();
+          setInterval(update, 60000); // Update every minute
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', initCountdowns);
 </script>
 {% endblock %}

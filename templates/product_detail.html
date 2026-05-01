@@ -178,6 +178,11 @@
         transform: translateY(-2px);
     }
 
+    .wishlist-btn.active {
+        background: #fff5f5;
+        border-color: #ffb3b3;
+    }
+
     .details-list {
         list-style: none;
         padding-top: 2rem;
@@ -243,13 +248,6 @@
                 Refundable)</p>
         </div>
 
-        {% if product.is_currently_booked %}
-        <div
-            style="background: #fff8eb; border: 1px solid #ffe8cc; color: #8a632e; padding: 1rem; border-radius: 8px; margin-bottom: 3rem; font-size: 0.85rem; display: flex; gap: 0.8rem; align-items: center;">
-            <span style="font-size: 1.2rem;">🗓️</span>
-            <span>Reserved for current dates. Book for future below.</span>
-        </div>
-        {% endif %}
 
         <label class="selection-label">Select Size</label>
         <input type="hidden" id="selectedSize" name="selected_size" value="{{ product.size }}">
@@ -273,7 +271,12 @@
                 <button type="submit" class="btn-primary" style="width: 100%; height: 100%;">Add to Cart</button>
             </form>
 
-            <button class="wishlist-btn" title="Add to Wishlist">♡</button>
+            <button class="wishlist-btn {% if is_favourited %}active{% endif %}" 
+                    id="wishlistBtn" 
+                    title="{% if is_favourited %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
+                    onclick="toggleWishlist({{ product.id }})">
+                {% if is_favourited %}❤️{% else %}♡{% endif %}
+            </button>
         </div>
 
         <div class="product-description" style="margin-bottom: 4rem;">
@@ -315,6 +318,44 @@
             const baseUrl = rentBtn.getAttribute('data-base-url');
             rentBtn.href = `${baseUrl}?size=${size}`;
         }
+    }
+
+    function toggleWishlist(productId) {
+        fetch(`/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.status === 401) {
+                showToast('Please login to add to wishlist', '🔒');
+                throw new Error('Unauthorized');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const btn = document.getElementById('wishlistBtn');
+                if (data.is_favourited) {
+                    btn.innerHTML = '❤️';
+                    btn.classList.add('active');
+                    btn.title = 'Remove from Wishlist';
+                } else {
+                    btn.innerHTML = '♡';
+                    btn.classList.remove('active');
+                    btn.title = 'Add to Wishlist';
+                }
+                showToast(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Wishlist Error:', error);
+            if (error.message !== 'Unauthorized') {
+                showToast('Something went wrong. Please try again.');
+            }
+        });
     }
 </script>
 {% endblock %}

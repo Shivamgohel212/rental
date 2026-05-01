@@ -3,7 +3,8 @@ from django.utils.html import format_html
 from .models import (
     UserProfile, Category, Clothing, Booking,
     Payment, Review, UserAddress, RentalOrder,
-    RazorpayPayment, Cart, CartItem
+    RazorpayPayment, Cart, CartItem, ReturnRequest, Refund,
+    Wallet, WalletTransaction
 )
 
 
@@ -29,8 +30,7 @@ def status_badge(value, colour_map):
 class RentalOrderAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'user', 'product_link', 'size',
-        'coloured_status', 'tracking_badge',
-        'total_amount', 'payment_method',
+        'coloured_status', 'refund_button', 'total_amount', 
         'deposit_refund_status', 'order_date',
     )
     list_filter   = ('status', 'deposit_refund_status', 'payment_method', 'order_date')
@@ -70,6 +70,16 @@ class RentalOrderAdmin(admin.ModelAdmin):
     def coloured_status(self, obj):
         colours = {'confirmed': '#28a745', 'cancelled': '#dc3545', 'pending': '#fd7e14'}
         return status_badge(obj.status, colours)
+
+    @admin.display(description='Refund Action')
+    def refund_button(self, obj):
+        from django.urls import reverse
+        if obj.status == 'returned' and obj.deposit_refund_status == 'pending':
+            url = reverse('process_refund', args=[obj.id])
+            return format_html('<a class="button" href="{}" style="background:#2e7d32; color:white; padding:5px 10px; border-radius:5px; text-decoration:none;" onclick="return confirm(\'Refund FULL deposit of ₹{}?\')">Issue Refund</a>', url, obj.deposit)
+        elif obj.status == 'refund_completed':
+            return format_html('<span style="color:#28a745; font-weight:700;">✓ Refunded</span>')
+        return "-"
 
     @admin.display(description='Tracking')
     def tracking_badge(self, obj):
@@ -183,38 +193,38 @@ class UserAddressAdmin(admin.ModelAdmin):
 # Booking
 # ─────────────────────────────────────────────────────────────────────────────
 
-@admin.register(Booking)
-class BookingAdmin(admin.ModelAdmin):
-    list_display  = ('id', 'user', 'clothing', 'start_date', 'end_date',
-                     'total_days', 'total_price', 'status', 'booked_at')
-    list_filter   = ('status', 'booked_at')
-    search_fields = ('user__username', 'clothing__title')
-    date_hierarchy = 'booked_at'
+# @admin.register(Booking)
+# class BookingAdmin(admin.ModelAdmin):
+#     list_display  = ('id', 'user', 'clothing', 'start_date', 'end_date',
+#                      'total_days', 'total_price', 'status', 'booked_at')
+#     list_filter   = ('status', 'booked_at')
+#     search_fields = ('user__username', 'clothing__title')
+#     date_hierarchy = 'booked_at'
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Payment
 # ─────────────────────────────────────────────────────────────────────────────
 
-@admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
-    list_display  = ('id', 'booking', 'payment_method', 'transaction_id',
-                     'amount', 'payment_status', 'paid_at')
-    list_filter   = ('payment_status', 'payment_method')
-    search_fields = ('transaction_id', 'booking__user__username')
-    date_hierarchy = 'paid_at'
+# @admin.register(Payment)
+# class PaymentAdmin(admin.ModelAdmin):
+#     list_display  = ('id', 'booking', 'payment_method', 'transaction_id',
+#                      'amount', 'payment_status', 'paid_at')
+#     list_filter   = ('payment_status', 'payment_method')
+#     search_fields = ('transaction_id', 'booking__user__username')
+#     date_hierarchy = 'paid_at'
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Review
 # ─────────────────────────────────────────────────────────────────────────────
 
-@admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
-    list_display  = ('id', 'user', 'clothing', 'rating', 'created_at')
-    list_filter   = ('rating',)
-    search_fields = ('user__username', 'clothing__title', 'comment')
-    date_hierarchy = 'created_at'
+# @admin.register(Review)
+# class ReviewAdmin(admin.ModelAdmin):
+#     list_display  = ('id', 'user', 'clothing', 'rating', 'created_at')
+#     list_filter   = ('rating',)
+#     search_fields = ('user__username', 'clothing__title', 'comment')
+#     date_hierarchy = 'created_at'
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -233,3 +243,33 @@ class CartAdmin(admin.ModelAdmin):
     list_display  = ('id', 'user', 'created_at')
     search_fields = ('user__username',)
     inlines       = [CartItemInline]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Return Management
+# ─────────────────────────────────────────────────────────────────────────────
+
+@admin.register(ReturnRequest)
+class ReturnRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'order', 'return_method', 'status', 'condition', 'penalty_fee', 'created_at')
+    list_filter = ('status', 'return_method', 'condition')
+    search_fields = ('order__id', 'order__user__username')
+    readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(Refund)
+class RefundAdmin(admin.ModelAdmin):
+    list_display = ('id', 'order', 'amount', 'penalty_deducted', 'method', 'status', 'created_at')
+    list_filter = ('method', 'status')
+    search_fields = ('order__id', 'transaction_id')
+    readonly_fields = ('created_at',)
+
+@admin.register(Wallet)
+class WalletAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'balance', 'created_at')
+    search_fields = ('user__username', 'user__email')
+
+@admin.register(WalletTransaction)
+class WalletTransactionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'wallet', 'transaction_type', 'amount', 'status', 'created_at')
+    list_filter = ('transaction_type', 'status', 'created_at')
+    search_fields = ('wallet__user__username', 'razorpay_order_id', 'razorpay_payment_id')
